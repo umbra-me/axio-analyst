@@ -133,12 +133,18 @@ the request cancelled.
 
 ## Markdown appears unsafe or incorrectly formatted
 
-Raw provider HTML must remain escaped. HTML-looking model output should appear
-as text rather than active markup. Generic links are not opened by the
-transcript. Only address anchors constructed and validated by Axio Analyst may
-navigate inside Binary Ninja. If a formatting change bypasses this behavior,
-stop using that build and report it
+The transcript imports Markdown with `QTextDocument.MarkdownNoHTML`, so
+HTML-looking model output must appear as literal text rather than active
+markup. Generic links are not opened by the transcript. Only address anchors
+constructed and validated by Axio Analyst may navigate inside Binary Ninja. If
+a formatting change bypasses this behavior, stop using that build and report it
 as a security issue.
+
+Fenced code blocks wrap instead of scrolling the transcript sideways, and they
+render `<`, `>`, and `&` literally. Seeing `&lt;`, `&gt;`, or `&amp;` inside a
+code block means the source string is being escaped before the Markdown import
+again; CommonMark does not decode entities inside code, so that escaping must
+not be reintroduced.
 
 ## Context preview is empty or missing expected items
 

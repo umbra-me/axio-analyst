@@ -49,9 +49,12 @@ Implemented through `0.9.0`:
 - Provider-neutral Claude Code, Codex, and Ollama Cloud CLI adapters.
 - Background execution, timeout, cancellation, safety flags, and no BNDB
   modification.
-- Native Chat and Settings surfaces with streamed sanitized Markdown,
-  progress, elapsed time, and optional bounded local transcript restoration,
-  deletion, and Markdown export.
+- A native sidebar built around a dominant transcript, one action row, and a
+  progressively disclosed Settings surface, with an original painted product
+  mark and a shared action-glyph set.
+- Streamed Markdown with provider HTML disabled at the parser, wrapped code
+  blocks, progress, elapsed time, and optional bounded local transcript
+  restoration, deletion, and Markdown export.
 - Validated internal navigation for address citations, with unresolved-address
   disclosure and no generic external-link opening.
 - Optional two-provider comparison using one frozen context snapshot.

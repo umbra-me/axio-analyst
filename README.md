@@ -13,8 +13,9 @@ types, add comments, or otherwise modify the Binary Ninja database (BNDB).
 
 ## Highlights
 
-- Native **Axio Analyst** sidebar with compact Chat and Settings pages plus a
-  dedicated request-context workspace that does not cover the transcript.
+- Native **Axio Analyst** sidebar built around a frameless, dominant transcript,
+  a one-row action strip, and a dedicated request-context workspace, with an
+  original painted mark and a matching glyph set for every action.
 - **Explain** for a structured current-function summary and **Ask** for custom
   questions (`Ctrl+Enter` submits from the prompt editor).
 - Exact context preview plus opt-in selection, direct caller/callee, referenced
@@ -32,7 +33,8 @@ types, add comments, or otherwise modify the Binary Ninja database (BNDB).
 - Editable model selection and provider-specific reasoning effort.
 - Dynamic Ollama Cloud catalog discovery with `ollama list` as an offline
   fallback.
-- Streamed, sanitized Markdown responses with stable manual scroll position.
+- Streamed Markdown responses with provider HTML disabled at the parser,
+  wrapped code blocks, and a stable manual scroll position.
 - Background process execution, concurrent stdout/stderr draining, elapsed
   time, phase progress, timeout enforcement, and cancellation.
 - Explicit context disclosure and a bounded read-only data boundary.
@@ -118,17 +120,20 @@ python tools/plugin_dev.py status `
 5. Place the cursor inside a function.
 6. Choose **Explain**, or enter a question and choose **Ask**.
 
-The compact context card shows the function name, start address, architecture,
-item count, character count, and truncation state. Open **Context** to use the
-dedicated context workspace, opt into additional packs, and choose **Build
-preview** to inspect the exact snapshot without reducing conversation space.
-Every request rebuilds and freezes that snapshot before provider dispatch, so
-later cursor movement cannot silently change it. The provider/model line shows
-the persisted configuration that will be used. While a request runs, the
-sidebar displays the current phase, elapsed time, streamed primary output, and
-a **Stop request** action in place of **Ask**. **Compare** reveals the optional
-second-provider selector only when it is needed. A completed response opens at
-its beginning so the first result is immediately readable.
+The sidebar header shows the current function, its start address, and the
+architecture. Choose **Context** to open the dedicated context workspace, opt
+into additional packs, and choose **Build preview** to inspect the exact
+snapshot without reducing conversation space. The **Context** button itself
+reports the scope: it reads `Context +N` once N opt-in packs are enabled, and
+keeps that count even when a narrow dock hides the label. Every request
+rebuilds and freezes the snapshot before provider dispatch, so later cursor
+movement cannot silently change it. The status strip below the composer shows
+request state on the left and the persisted provider and model on the right.
+While a request runs, the sidebar displays the current phase, elapsed time,
+streamed primary output, and a **Stop** action in place of **Ask**. The
+optional second provider lives in the **Ask** menu under **Compare with**, so
+it costs no space until it is wanted. A completed response opens at its
+beginning so the first result is immediately readable.
 
 The plugin also registers these menu commands:
 
@@ -139,9 +144,11 @@ The plugin also registers these menu commands:
 
 The Explain and Ask commands use Binary Ninja's plain-text report surface. The
 sidebar keeps its conversation in memory by default. Enable **Restore
-conversations for this binary** to store a bounded transcript under Binary
-Ninja's user directory. **Clear** deletes that binary's stored transcript;
-**Export** writes the visible conversation as Markdown to a user-selected path.
+conversations for this binary** in Settings to store a bounded transcript under
+Binary Ninja's user directory. The header's overflow menu holds **Clear
+conversation**, which deletes that binary's stored transcript, and **Export
+conversation**, which writes the visible conversation as Markdown to a
+user-selected path.
 
 ## Provider behavior
 

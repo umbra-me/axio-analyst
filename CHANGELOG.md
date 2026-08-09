@@ -6,6 +6,51 @@ breaking changes must still be documented with migration instructions.
 
 ## Unreleased
 
+### Added
+
+- Add `ui/branding.py`: an original painted Axio Analyst mark - a split diamond
+  standing for one bounded context read more than one way - plus a thirteen
+  glyph action set drawn in one stroke language on a shared 24-unit grid. The
+  artwork is painted from the active Qt palette rather than shipped as an
+  asset, so it stays crisp at any dock scale, follows light and dark Binary
+  Ninja themes, and adds no file for the development installer to package.
+
+### Changed
+
+- Replace the programmatically drawn `AX` text monogram used as the sidebar
+  icon with the painted mark.
+- Flatten the chat surface to a single framed element. The context card,
+  transcript frame, and composer frame are gone; the header is a scope line
+  over a detail line, the transcript is frameless and dominant, and the
+  composer is a prompt above one action row and one status strip.
+- Move Export and Clear into a header overflow menu and the comparison provider
+  into the **Ask** button menu, removing two always-visible label bands.
+- Make the **Context** button carry the scope disclosure as `Context +N`, and
+  keep the count visible when a dock narrower than 300 pixels drops button
+  text.
+- Replace the four Settings group boxes with flat sections; Executables,
+  Request limits, and Local history collapse behind one-line summaries of their
+  staged values.
+- Stack Settings form labels above their fields on a narrow dock and reserve
+  height for wrapped label text so guidance is no longer clipped.
+
+### Fixed
+
+- Render fenced code blocks correctly. Escaping the provider string before the
+  Markdown import leaked `&gt;`, `&lt;`, and `&amp;` into every code block,
+  because CommonMark does not decode entities inside code.
+- Stop long code blocks from scrolling the whole transcript sideways at
+  realistic dock widths by letting imported code blocks wrap; they now also
+  render on a background card.
+
+### Security
+
+- Neutralise raw provider HTML at the parser instead of in the source string:
+  the transcript imports with `QTextDocument.MarkdownNoHTML`, so md4c never
+  emits an HTML block or span and a provider tag can only appear as inert
+  literal text. This is a strictly stronger control than escaping and is
+  covered by a distribution contract test.
+
 ## 0.9.0 - 2026-08-10
 
 ### Added

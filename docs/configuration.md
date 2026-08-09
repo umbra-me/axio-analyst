@@ -65,10 +65,16 @@ truncation before dispatch. Every Ask/Explain action rebuilds and freezes a new
 snapshot from the captured selection and options. Increasing the limit or
 enabling packs sends more binary-derived text and may increase latency or usage.
 
-The compact composer keeps comparison off by default. Choose **Compare** to
-reveal the second-provider selector. While an analysis request is active,
-**Stop request** occupies the submit position; it is not shown as a permanently
-disabled third action.
+Comparison is off by default and lives in the **Ask** button's menu under
+**Compare with**, so the resting composer carries no comparison controls.
+While an analysis request is active, **Stop** occupies the submit position; it
+is not shown as a permanently disabled third action.
+
+The **Context** button carries the scope disclosure. It reads `Context` when
+only the current function will be sent and `Context +N` once N opt-in packs are
+enabled. Below a 300-pixel dock width the word is dropped but the `+N` count is
+not, so an enlarged request scope stays visible at every width. Its tooltip
+names the enabled packs.
 
 The timeout covers process startup, stdin submission, streaming, and process
 completion. Cancellation terminates the child process, waits briefly, and

@@ -33,9 +33,11 @@ sensitive, untrusted data crossing distinct boundaries:
    configured executable.
 3. **Harness to provider service:** authentication, transport, retention, and
    account policy are controlled by the external CLI/provider.
-4. **Provider output to Qt:** raw HTML is escaped before Markdown presentation.
-   Generic links are not opened; validated address citations become internal
-   Binary Ninja navigation actions and unresolved addresses remain inert.
+4. **Provider output to Qt:** Markdown is imported with
+   `QTextDocument.MarkdownNoHTML`, so the parser never produces an HTML block
+   or span and a provider tag can only render as inert literal text. Generic
+   links are not opened; validated address citations become internal Binary
+   Ninja navigation actions and unresolved addresses remain inert.
 5. **Transcript to local storage:** persistence is off by default. When enabled,
    a bounded JSON record is stored under Binary Ninja's user directory using a
    path-free content fingerprint, never a provider credential or source path.

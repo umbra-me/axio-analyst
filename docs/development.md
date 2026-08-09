@@ -30,7 +30,8 @@ packages grouped by dependency boundary.
   `application/` must also remain free of Qt, subprocess, and network imports.
 - Run provider work in `BackgroundTaskThread` and pipe readers. Return UI
   updates through `execute_on_main_thread`.
-- Treat provider Markdown as untrusted and preserve raw-HTML escaping.
+- Treat provider Markdown as untrusted and keep importing it with
+  `QTextDocument.MarkdownNoHTML` rather than escaping the source string.
 - Do not add provider credential access. Harness adapters delegate auth to the
   installed CLI.
 - Preserve the read-only boundary introduced in `0.7.0`. Any future BNDB
@@ -91,7 +92,9 @@ The current suite covers:
 - Ollama local/cloud catalog parsing and cloud-tag normalization;
 - executable validation, nonzero exits, timeout, cancellation, output limits,
   concurrent stdout/stderr draining, and streamed chunk delivery;
-- raw-HTML escaping and transcript scroll restoration;
+- control-character sanitization, code-punctuation preservation, and transcript
+  scroll restoration;
+- the painted sidebar mark and the HTML-free Markdown import contract;
 - injected application orchestration without a concrete provider dependency;
 - runtime-manifest completeness and core/application dependency boundaries;
 - semantic-version validation and all intended Binary Ninja version surfaces;
@@ -107,27 +110,40 @@ release.
 1. Start a supported Binary Ninja build with user plugins enabled.
 2. Confirm the log contains the versioned Axio Analyst registration message and
    no import or registration error.
-3. Confirm the sidebar icon shows `AX`, opens the **Axio Analyst** widget, and
-   displays the same version as `plugin.json`.
-4. Move between functions and confirm the context card follows the cursor and
-   invalidates the old preview.
-5. Verify Chat and Settings keyboard navigation at narrow sidebar widths.
-6. Apply and revert provider, model, effort, executable, timeout, and context
+3. Confirm the sidebar rail shows the split-diamond Axio Analyst mark in both
+   its active and inactive tints, that it opens the **Axio Analyst** widget,
+   and that the header displays the same version as `plugin.json`.
+4. Move between functions and confirm the header scope line follows the cursor
+   and invalidates the old preview.
+5. Verify keyboard navigation at narrow sidebar widths: tab from the header
+   glyphs through the transcript, prompt, **Context**, **Explain**, and
+   **Ask**; confirm `Ctrl+Enter` submits and the `Ask` menu is reachable.
+6. Drag the dock below and above 300 px. Confirm the action row drops button
+   text but never the enabled-pack count, and that Settings switches between
+   inline and stacked form rows without clipping wrapped text.
+7. Expand and collapse each Settings section and confirm its collapsed summary
+   matches the staged values.
+8. Apply and revert provider, model, effort, executable, timeout, and context
    settings.
-7. Build primary-only and all-pack previews on the demo binary. Confirm exact
+9. Build primary-only and all-pack previews on the demo binary. Confirm exact
    item text, counts, truncation, selection capture, and absence of source paths.
-8. Send one request through every provider available to the tester, then run a
-   two-provider comparison and confirm one frozen context plus separate usage.
-9. Confirm streaming behavior, manual-scroll preservation, progress, elapsed
+10. Send one request through every provider available to the tester, then use
+   the **Ask** menu to run a two-provider comparison and confirm one frozen
+   context plus separate usage.
+11. Confirm streaming behavior, manual-scroll preservation, progress, elapsed
    time, cancellation, contained comparison errors, and transcript clearing.
-10. Confirm valid evidence addresses navigate, invalid citations remain inert,
+12. Confirm a fenced code block wraps instead of scrolling the transcript
+   sideways and renders literal `<`, `>`, and `&`, while a provider HTML tag
+   appears as inert text rather than formatting.
+13. Confirm valid evidence addresses navigate, invalid citations remain inert,
    and generic provider Markdown links do not open.
-11. Enable persistence for the demo, restart/reopen the sidebar, verify restore
-   and Markdown export, then Clear and verify the exact record is deleted.
-12. Confirm the Settings introduction and About command display the same
+14. Enable persistence for the demo, restart/reopen the sidebar, verify restore
+   and Markdown export from the overflow menu, then Clear and verify the exact
+   record is deleted.
+15. Confirm the Settings introduction and About command display the same
    version as the sidebar.
-13. Restart Binary Ninja and confirm persisted settings survive.
-14. Confirm no symbol, type, comment, analysis, or BNDB state changed.
+16. Restart Binary Ninja and confirm persisted settings survive.
+17. Confirm no symbol, type, comment, analysis, or BNDB state changed.
 
 ## Change workflow
 

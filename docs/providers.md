@@ -129,8 +129,10 @@ is omitted.
 
 ## Provider comparison
 
-The Chat page can compare the active provider with one other configured
-backend. Axio Analyst builds the `ContextBundle` once, then invokes the primary
+The **Ask** button menu, under **Compare with**, selects one other configured
+backend to run beside the active provider. Comparison is off by default and
+costs no resting layout space. Axio Analyst builds the `ContextBundle` once,
+then invokes the primary
 and comparison adapters sequentially with the exact same normalized prompt.
 Primary-provider streaming remains visible; the completed transcript replaces
 it with labelled provider sections and separate usage summaries. A comparison

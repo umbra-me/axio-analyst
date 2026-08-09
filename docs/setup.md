@@ -191,18 +191,20 @@ After restarting Binary Ninja:
    registration log show the version from `plugin.json`.
 3. Open Settings and confirm the configured executable path.
 4. Apply a provider, model, and reasoning selection.
-5. Select a function with HLIL, expand **Context**, enable one safe pack, and
-   confirm **Build preview** shows exact bounded text without a full path.
+5. Select a function with HLIL, choose **Context**, enable one safe pack,
+   confirm the button reports `Context +1`, and confirm **Build preview** shows
+   exact bounded text without a full path.
 6. Send a simple explanation request and confirm the context summary matches
    the dispatched snapshot.
 7. Confirm progress appears, output renders as Markdown, address citations can
    navigate internally, unresolved addresses remain inert, and **Stop** is
    enabled during the request.
-8. Optionally compare with a second configured provider and confirm both
-   labelled outputs show separate usage metadata.
+8. Optionally choose **Compare with** in the **Ask** menu to add a second
+   configured provider, and confirm both labelled outputs show separate usage
+   metadata.
 9. Enable persistence only for a non-sensitive fixture, restart the sidebar,
-   confirm restoration, export Markdown, then use **Clear** and confirm the
-   record no longer restores.
+   confirm restoration, use the header overflow menu to export Markdown, then
+   use **Clear conversation** and confirm the record no longer restores.
 10. Check the Binary Ninja log if the sidebar or request fails.
 
 Use the C++ fixture in `samples/demo` when a harmless known binary is needed.

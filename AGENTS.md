@@ -25,7 +25,9 @@
 - Binary Ninja 5.x hosts Qt6. Do not introduce a PySide2-only import path.
 - Stock Python tests cannot import `binaryninja`; `__init__.py` must keep pure modules importable without the host.
 - The plugin delegates authentication to installed CLIs and must never read or persist their credentials.
-- Raw provider Markdown is untrusted. Keep HTML escaping before Qt rendering.
+- Raw provider Markdown is untrusted. The transcript must keep importing with
+  `QTextDocument.MarkdownNoHTML`; do not escape the source string instead,
+  because CommonMark leaves entities undecoded inside fenced code.
 - Version 0.9 is read-only and must not mutate the BNDB.
 - Extra context packs are opt-in; generic provider links stay inert and transcript persistence stays off by default.
 - A real Binary Ninja GUI launch is required to prove sidebar registration.

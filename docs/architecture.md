@@ -53,12 +53,13 @@ import the provider-neutral packages without a Binary Ninja installation.
 | `host/storage.py` | Path-free sampled content fingerprint and Binary Ninja user-directory store location. |
 | `host/task.py` | Context-preview and analysis `BackgroundTaskThread` lifecycles plus main-thread dispatch. |
 | `host/registration.py` | Plugin commands and best-effort sidebar registration. |
-| `ui/sidebar_view.py` | Compact chat/composer layout, dedicated context workspace, staged settings navigation, and direct UI signals. |
+| `ui/branding.py` | Painted Axio Analyst mark and the shared sidebar glyph set. |
+| `ui/sidebar_view.py` | Flat chat/composer layout, dedicated context workspace, width-responsive action row, staged settings navigation, and direct UI signals. |
 | `ui/sidebar.py` | Context, request/comparison, evidence navigation, persistence, export, and discovery coordination. |
-| `ui/settings_page.py` | Staged provider, harness, and request-limit settings. |
-| `ui/transcript.py` | Conversation state, completion-focused scrolling, sanitized Markdown, and internal evidence anchors. |
+| `ui/settings_page.py` | Staged provider, harness, and request-limit settings in flat, progressively disclosed sections. |
+| `ui/transcript.py` | Conversation state, completion-focused scrolling, HTML-free Markdown import, wrapped code blocks, and internal evidence anchors. |
 | `ui/progress.py` | Elapsed time and request-progress presentation. |
-| `ui/markdown.py` | Raw-HTML escaping and scroll restoration. |
+| `ui/markdown.py` | Control-character sanitization and scroll restoration. |
 
 `tools/runtime_manifest.py` is the authoritative explicit allowlist used by
 the development installer. A contract test ensures it covers every runtime
@@ -119,9 +120,12 @@ destroyed while a request finishes.
   displayed nonzero-exit diagnostics to 2,000 characters.
 - Sidebar destruction stops elapsed-time tracking and cancels an active task.
   Late callbacks check widget liveness.
-- Raw provider HTML is escaped before Qt's Markdown renderer sees it. Generic
-  links are not opened. Only `axio://address/<hex>` anchors created by the UI
-  after BinaryView validation can trigger navigation.
+- The transcript imports Markdown with `QTextDocument.MarkdownNoHTML`, so the
+  parser never emits an HTML block or span and a provider tag can only appear
+  as inert literal text. This replaces source-string escaping, which leaked
+  `&gt;` and `&lt;` into fenced code blocks because CommonMark does not decode
+  entities there. Generic links are not opened. Only `axio://address/<hex>`
+  anchors created by the UI after BinaryView validation can trigger navigation.
 - Conversation filenames are validated SHA-256 hex identifiers, records are
   capped at 200 messages and 8 MB, and saves use an atomic same-directory
   replacement with restrictive permissions where the OS supports them.
