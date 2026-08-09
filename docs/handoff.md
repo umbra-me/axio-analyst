@@ -183,9 +183,13 @@ plugins.
 ## Published state and next steps
 
 The `0.9.0` implementation and its documentation were published as separate
-logical commits. The redesign that follows it is **uncommitted** in the working
-tree and has not been pushed. The Sidekick inventory is reference research; it
-does not imply code reuse or a compatibility commitment.
+logical commits. The redesign that follows it was published on `main` as four
+more: the mark and glyph set, the Markdown rendering fixes, the sidebar
+rebuild, and this documentation pass. Each was verified to pass the suite
+independently in a throwaway worktree, so the history stays bisectable. The
+changes sit under `Unreleased` in the changelog; the source version is still
+`0.9.0` and no tag was created. The Sidekick inventory is reference research;
+it does not imply code reuse or a compatibility commitment.
 
 Next product and verification steps:
 
@@ -194,9 +198,9 @@ Next product and verification steps:
 2. Complete the remaining expanded GUI checklist with `samples/demo` and test
    only providers the user authorizes.
 3. Fix any host-only issues, rerun all verification, and refresh this handoff.
-4. Commit the redesign once it is accepted, then decide the tagged-release and
-   Binary Ninja plugin-manager publication path; keep hosted CI disabled unless
-   it is explicitly approved.
+4. Decide whether the redesign warrants a version bump, then decide the
+   tagged-release and Binary Ninja plugin-manager publication path; keep hosted
+   CI disabled unless it is explicitly approved.
 
 Remaining product phases are direct HTTP/credential brokerage, structured
 claim provenance, portable workspaces, indexing/tool brokerage, and reviewable
