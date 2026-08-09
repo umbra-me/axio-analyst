@@ -95,9 +95,10 @@ The timeout covers the entire provider process. Increase
 waiting for an interactive login, permission prompt, model download, or other
 input that the supervised process cannot answer.
 
-Long HLIL can also increase latency. Reduce `maxContextChars` or ask about a
-smaller function. A truncated request is labelled in the prompt and transcript
-context remains limited to the current function.
+Long HLIL and enabled relationship packs can increase latency. Reduce
+`maxContextChars`, disable unnecessary packs, or ask about a smaller function.
+Every truncated item and the overall context summary are labelled in the exact
+preview and prompt.
 
 ## A request produces malformed or empty output
 
@@ -118,8 +119,10 @@ usually exposes partial-message deltas, Ollama exposes pipe chunks, and Codex
 currently exposes lifecycle events followed by its completed agent message.
 These differences are provider behavior, not three identical token streams.
 
-When the transcript is manually scrolled away from the bottom, new output does
-not force it back to the live tail. Scroll near the bottom to resume following.
+While output streams, the transcript follows the live tail only when it was
+already near the bottom. Manually scrolling upward keeps the reading position.
+When the request completes, the transcript moves to the beginning of the new
+provider response so a long answer does not leave only its final lines visible.
 
 ## Stop does not return immediately
 
@@ -131,9 +134,55 @@ the request cancelled.
 ## Markdown appears unsafe or incorrectly formatted
 
 Raw provider HTML must remain escaped. HTML-looking model output should appear
-as text rather than active markup. Links are not opened by the transcript. If a
-formatting change bypasses this behavior, stop using that build and report it
+as text rather than active markup. Generic links are not opened by the
+transcript. Only address anchors constructed and validated by Axio Analyst may
+navigate inside Binary Ninja. If a formatting change bypasses this behavior,
+stop using that build and report it
 as a security issue.
+
+## Context preview is empty or missing expected items
+
+The primary function requires HLIL. Selection context also requires a non-empty
+address selection whose HLIL instruction addresses fall inside the selected
+range. Caller/callee discovery is direct and bounded; indirect calls or
+unresolved targets may produce no item. Strings and imports are derived from
+data references emitted by instructions in the primary function, so values
+without a resolvable Binary Ninja string/import symbol are omitted.
+
+The configured limit is shared by all items. If a later item is absent, inspect
+the character total and truncation marker, then reduce other packs or increase
+the limit deliberately. The preview is a snapshot, not a live editor; choose
+**Build preview** again after changing the selection or pack checkboxes.
+
+## An address citation does not navigate
+
+Only `0x` hexadecimal citations that Binary Ninja reports as valid offsets are
+made clickable. Citations outside the current BinaryView are listed as
+unresolved and remain inert. If a valid-looking address does not navigate,
+confirm the binary/view has not changed and include the view type and sanitized
+address behavior in a report; do not include proprietary surrounding text.
+
+## A conversation does not restore
+
+Persistence is off by default. Enable **Restore conversations for this binary**
+and choose **Apply settings** before completing a request. Records are keyed by
+a sampled content fingerprint, so materially changed/rebased contents can map
+to a different record. Disabling the setting stops loading and saving but does
+not delete existing data; re-enable it or use **Clear** while the matching
+binary is open.
+
+Malformed, unknown-schema, or oversized records are rejected rather than
+partially loaded. The status line reports the local error. Do not hand-edit a
+record containing sensitive transcript text for a bug report; reproduce with
+the demo binary instead.
+
+## Provider comparison shows one failure
+
+Comparison invokes the primary provider first, then the selected alternative,
+using one frozen prompt. A missing executable, unavailable model, auth failure,
+or timeout is contained to that provider and displayed beside a successful
+result. Verify the failing backend's saved executable/model independently.
+Choosing the active backend as the comparison intentionally runs only once.
 
 ## Diagnose a plugin-related Binary Ninja startup problem
 

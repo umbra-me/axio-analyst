@@ -1,20 +1,32 @@
 # Axio Analyst
 
 Axio Analyst is a provider-neutral analysis workspace for Binary Ninja. It
-sends bounded, address-labelled High Level IL (HLIL) for the function under the
-cursor to a supervised Claude Code, Codex, or Ollama Cloud command-line
-harness, then streams the response into a native Binary Ninja sidebar.
+builds an inspectable, bounded context snapshot around the function under the
+cursor, sends that snapshot to a supervised Claude Code, Codex, or Ollama Cloud
+command-line harness, and renders the response in a native Binary Ninja
+sidebar.
 
-The current `0.8.0` release is a read-only vertical slice. It is useful for
+The current `0.9.0` release remains read-only. It is useful for
 explaining functions, tracing values, recovering algorithms, and identifying
 areas that need deeper investigation. It does not rename symbols, change
 types, add comments, or otherwise modify the Binary Ninja database (BNDB).
 
 ## Highlights
 
-- Native **Axio Analyst** sidebar with separate Chat and Settings pages.
+- Native **Axio Analyst** sidebar with compact Chat and Settings pages plus a
+  dedicated request-context workspace that does not cover the transcript.
 - **Explain** for a structured current-function summary and **Ask** for custom
   questions (`Ctrl+Enter` submits from the prompt editor).
+- Exact context preview plus opt-in selection, direct caller/callee, referenced
+  string/import, and relevant-type packs under one deterministic total cap.
+- Address citations become validated internal navigation targets; unknown
+  addresses remain inert and are labelled unresolved.
+- Optional, off-by-default local conversation restoration keyed by a path-free
+  content fingerprint, with explicit deletion and Markdown export.
+- Optional comparison of the active provider with one other configured
+  provider using the same frozen context snapshot.
+- Per-result latency and character accounting, plus token/cache/cost metadata
+  when a provider exposes it.
 - Claude Code (`claude -p`), Codex (`codex exec`), and Ollama Cloud
   (`ollama run`) behind one provider-neutral interface.
 - Editable model selection and provider-specific reasoning effort.
@@ -106,11 +118,17 @@ python tools/plugin_dev.py status `
 5. Place the cursor inside a function.
 6. Choose **Explain**, or enter a question and choose **Ask**.
 
-The context card shows the function name, start address, architecture, and the
-fact that current-function HLIL is the active context. The provider/model line
-shows the persisted configuration that will be used. While a request runs, the
-sidebar displays the current phase, elapsed time, streamed output where the
-provider supports it, and a **Stop** action.
+The compact context card shows the function name, start address, architecture,
+item count, character count, and truncation state. Open **Context** to use the
+dedicated context workspace, opt into additional packs, and choose **Build
+preview** to inspect the exact snapshot without reducing conversation space.
+Every request rebuilds and freezes that snapshot before provider dispatch, so
+later cursor movement cannot silently change it. The provider/model line shows
+the persisted configuration that will be used. While a request runs, the
+sidebar displays the current phase, elapsed time, streamed primary output, and
+a **Stop request** action in place of **Ask**. **Compare** reveals the optional
+second-provider selector only when it is needed. A completed response opens at
+its beginning so the first result is immediately readable.
 
 The plugin also registers these menu commands:
 
@@ -120,8 +138,10 @@ The plugin also registers these menu commands:
 - **Plugins > Axio Analyst > About Axio Analyst**
 
 The Explain and Ask commands use Binary Ninja's plain-text report surface. The
-sidebar keeps its own conversation transcript in memory for the lifetime of
-that widget.
+sidebar keeps its conversation in memory by default. Enable **Restore
+conversations for this binary** to store a bounded transcript under Binary
+Ninja's user directory. **Clear** deletes that binary's stored transcript;
+**Export** writes the visible conversation as Markdown to a user-selected path.
 
 ## Provider behavior
 
@@ -139,13 +159,25 @@ arguments, parsing rules, limits, and failure behavior.
 
 ## What is sent
 
-A request contains only:
+A request always contains:
 
 - the binary's base filename, not its full path;
 - architecture and platform names;
-- the selected function's name, start address, and rendered type;
-- address-labelled HLIL, truncated to the configured character limit;
+- the primary function's name, start address, rendered type, and
+  address-labelled HLIL;
 - the question and a fixed reverse-engineering instruction.
+
+When explicitly selected in the Context panel, the same bounded snapshot can
+also contain:
+
+- address-labelled HLIL inside the current selection;
+- up to three direct callers and five direct callees;
+- up to twenty referenced strings and twenty referenced imports;
+- relevant function type declarations.
+
+The configured character limit applies to the combined context. Per-function
+caps keep one neighbour from consuming the entire request. The exact item list,
+content, size, and truncation state are visible before dispatch.
 
 No request is sent until the user chooses **Ask** or **Explain**. Prompts are
 written through stdin rather than included in the process command line.
@@ -160,6 +192,7 @@ cited IL addresses before relying on them.
 - [Provider contracts](docs/providers.md)
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
+- [Sidekick capability inventory](docs/sidekick-capability-inventory.md)
 - [Development and release guide](docs/development.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Current handoff](docs/handoff.md)
@@ -195,11 +228,11 @@ Pop-Location
 
 ## Project status
 
-Version `0.8.0` implements the initial read-only vertical slice. Conversation
-persistence, richer context packs, direct HTTP providers, credential-store and
-OAuth brokerage, structured evidence, reviewable BNDB changes, indexing, and
-agent tools remain roadmap work. Current boundaries are documented in
-[Architecture](docs/architecture.md), with delivery phases in
+Version `0.9.0` implements the bounded context, evidence navigation, optional
+local transcript, provider comparison, and usage-accounting milestone. Direct
+HTTP providers, credential-store and OAuth brokerage, reviewable BNDB changes,
+indexing, and agent tools remain roadmap work. Current boundaries are
+documented in [Architecture](docs/architecture.md), with delivery phases in
 [Roadmap](docs/roadmap.md).
 
 Axio Analyst is independently implemented and is not affiliated with or based

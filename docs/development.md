@@ -79,9 +79,15 @@ The current suite covers:
 
 - required repository/runtime files and plugin metadata;
 - address preservation, default questions, and deterministic truncation;
+- context ordering, deduplication, combined budgeting, exact rendering, and
+  evidence-address classification;
+- schema validation, bounded atomic conversation round trips, deletion,
+  traversal rejection, and Markdown export;
+- provider-neutral duration/character accounting and usage presentation;
 - Claude Code, Codex, and Ollama command construction;
 - supported Claude event-document/array/JSONL shapes;
-- Codex event parsing and final-message extraction;
+- Codex event parsing, final-message extraction, and token/cache usage;
+- Claude token/cache/cost/duration usage extraction;
 - Ollama local/cloud catalog parsing and cloud-tag normalization;
 - executable validation, nonzero exits, timeout, cancellation, output limits,
   concurrent stdout/stderr draining, and streamed chunk delivery;
@@ -103,17 +109,25 @@ release.
    no import or registration error.
 3. Confirm the sidebar icon shows `AX`, opens the **Axio Analyst** widget, and
    displays the same version as `plugin.json`.
-4. Move between functions and confirm the context card follows the cursor.
+4. Move between functions and confirm the context card follows the cursor and
+   invalidates the old preview.
 5. Verify Chat and Settings keyboard navigation at narrow sidebar widths.
 6. Apply and revert provider, model, effort, executable, timeout, and context
    settings.
-7. Send one request through every provider available to the tester.
-8. Confirm streaming behavior, manual-scroll preservation, progress, elapsed
-   time, cancellation, error presentation, and transcript clearing.
-9. Confirm the Settings introduction and About command display the same
+7. Build primary-only and all-pack previews on the demo binary. Confirm exact
+   item text, counts, truncation, selection capture, and absence of source paths.
+8. Send one request through every provider available to the tester, then run a
+   two-provider comparison and confirm one frozen context plus separate usage.
+9. Confirm streaming behavior, manual-scroll preservation, progress, elapsed
+   time, cancellation, contained comparison errors, and transcript clearing.
+10. Confirm valid evidence addresses navigate, invalid citations remain inert,
+   and generic provider Markdown links do not open.
+11. Enable persistence for the demo, restart/reopen the sidebar, verify restore
+   and Markdown export, then Clear and verify the exact record is deleted.
+12. Confirm the Settings introduction and About command display the same
    version as the sidebar.
-10. Restart Binary Ninja and confirm persisted settings survive.
-11. Confirm no symbol, type, comment, analysis, or BNDB state changed.
+13. Restart Binary Ninja and confirm persisted settings survive.
+14. Confirm no symbol, type, comment, analysis, or BNDB state changed.
 
 ## Change workflow
 

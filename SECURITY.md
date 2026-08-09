@@ -3,8 +3,8 @@
 ## Supported version
 
 Axio Analyst is pre-release. Only the latest development version on `main` is
-currently supported. The current source and development-install version is
-`0.8.0`. A versioned support table will be added when tagged releases begin.
+currently supported. The current source version is `0.9.0`. A versioned
+support table will be added when tagged releases begin.
 
 ## Reporting a vulnerability
 
@@ -27,17 +27,21 @@ impact, reproduction steps, and a non-proprietary fixture where possible. The
 Axio Analyst treats Binary Ninja analysis context and provider responses as
 sensitive, untrusted data crossing distinct boundaries:
 
-1. **Binary Ninja to plugin:** the plugin reads the selected function's typed
-   metadata and HLIL after explicit user action.
+1. **Binary Ninja to plugin:** the plugin reads the primary function and only
+   the selection/relationship/reference packs explicitly enabled by the user.
 2. **Plugin to local harness:** the prompt is sent through stdin to the exact
    configured executable.
 3. **Harness to provider service:** authentication, transport, retention, and
    account policy are controlled by the external CLI/provider.
-4. **Provider output to Qt:** raw HTML is escaped before Markdown presentation;
-   transcript links are not opened.
+4. **Provider output to Qt:** raw HTML is escaped before Markdown presentation.
+   Generic links are not opened; validated address citations become internal
+   Binary Ninja navigation actions and unresolved addresses remain inert.
+5. **Transcript to local storage:** persistence is off by default. When enabled,
+   a bounded JSON record is stored under Binary Ninja's user directory using a
+   path-free content fingerprint, never a provider credential or source path.
 
-Version `0.8.0` does not write to the BNDB and does not persist conversations.
-Its package split is also a trust boundary: `core/` and `application/` cannot
+Version `0.9.0` does not write to the BNDB. Its package split is also a trust
+boundary: `core/` and `application/` cannot
 import Binary Ninja, Qt, subprocess, or network modules, and `providers/`
 cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
 
@@ -45,7 +49,9 @@ cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
 
 - Explicit Ask or Explain action before dispatch.
 - Binary base filename only; the full path is omitted.
-- Current-function context only, with configurable deterministic truncation.
+- Exact pre-dispatch context preview and a deterministic combined character cap.
+- Current-function context by default; every additional pack is opt-in and has
+  explicit item-count/per-function limits.
 - Prompts on stdin rather than process command lines.
 - No direct access to provider credential stores.
 - Claude Code tools, Chrome integration, slash commands, and session
@@ -56,6 +62,9 @@ cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
 - Concurrent pipe draining, timeout, cancellation, and an 8 MB combined output
   ceiling.
 - Main-thread-only UI updates and liveness checks for late callbacks.
+- Optional transcript persistence is schema-versioned, limited to 200 messages
+  and 8 MB, atomically replaced, and deleted through **Clear**.
+- Provider comparison reuses one frozen context snapshot for both adapters.
 - No symbol, type, comment, analysis, or database mutation.
 - One validated semantic version sourced from `plugin.json`; invalid version
   metadata fails plugin import instead of silently reporting a different build.
@@ -67,8 +76,9 @@ cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
   their own policies.
 - A model suggestion or catalog entry does not guarantee account access.
 - The plugin cannot protect data after it is submitted to the chosen provider.
-- The current version has no per-request redaction preview beyond the visible
-  disclosure and context limit.
+- Context preview shows exactly what the provider receives, but Axio Analyst
+  does not automatically identify or redact secrets embedded in decompilation,
+  strings, symbols, or user questions.
 
 Use only providers approved for the binary being analyzed. Verify important
 claims against IL addresses and independent evidence.
@@ -77,6 +87,7 @@ claims against IL addresses and independent evidence.
 
 Direct HTTP/API-key/OAuth support requires an OS credential-store broker,
 redacted diagnostics, in-memory access tokens, and explicit endpoint trust.
-Persistent workspaces require encryption/retention/export decisions. BNDB write
-features require validated proposed operations, review, one undoable
+Portable/collaborative workspaces still require encryption, migration, and
+retention decisions beyond the bounded local transcript. BNDB write features
+require validated proposed operations, review, one undoable
 transaction, and an audit record. These are design gates, not optional cleanup.

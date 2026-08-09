@@ -160,8 +160,10 @@ For a separate development checkout, update the checkout and rerun
 the known flat-layout modules. Restart Binary Ninja after either method.
 
 Before upgrading across a settings-namespace or storage migration, read
-`CHANGELOG.md`. Version `0.8.0` stores only user settings under
-`axioAnalyst.*`; there is no conversation database to migrate.
+`CHANGELOG.md`. Version `0.9.0` adds the off-by-default
+`axioAnalyst.persistConversations` setting and schema-version-1 JSON records
+under `<Binary Ninja user directory>/axio-analyst/conversations/`. There is no
+automatic migration from another product or location.
 
 ## Remove
 
@@ -171,7 +173,14 @@ no uninstall action because deletion must remain explicit.
 
 Removing the plugin directory does not remove `axioAnalyst.*` values from
 Binary Ninja's user settings. Those values contain executable paths, model
-names, effort choices, and request limits, not provider credentials.
+names, effort choices, request limits, and the persistence preference, not
+provider credentials.
+
+If local conversation persistence was enabled, remove its data separately only
+after resolving the exact user directory. Prefer opening each binary and using
+**Clear**, which deletes only that fingerprint's record. Do not recursively
+remove the Binary Ninja user directory; it may contain licences, symbols,
+settings, and unrelated plugins.
 
 ## First-run validation
 
@@ -182,9 +191,18 @@ After restarting Binary Ninja:
    registration log show the version from `plugin.json`.
 3. Open Settings and confirm the configured executable path.
 4. Apply a provider, model, and reasoning selection.
-5. Select a function with HLIL and send a simple explanation request.
-6. Confirm progress appears, output renders as Markdown, and **Stop** is enabled
-   during the request.
-7. Check the Binary Ninja log if the sidebar or request fails.
+5. Select a function with HLIL, expand **Context**, enable one safe pack, and
+   confirm **Build preview** shows exact bounded text without a full path.
+6. Send a simple explanation request and confirm the context summary matches
+   the dispatched snapshot.
+7. Confirm progress appears, output renders as Markdown, address citations can
+   navigate internally, unresolved addresses remain inert, and **Stop** is
+   enabled during the request.
+8. Optionally compare with a second configured provider and confirm both
+   labelled outputs show separate usage metadata.
+9. Enable persistence only for a non-sensitive fixture, restart the sidebar,
+   confirm restoration, export Markdown, then use **Clear** and confirm the
+   record no longer restores.
+10. Check the Binary Ninja log if the sidebar or request fails.
 
 Use the C++ fixture in `samples/demo` when a harmless known binary is needed.

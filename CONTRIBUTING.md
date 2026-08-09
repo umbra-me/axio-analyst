@@ -24,7 +24,12 @@ outside Binary Ninja, and the current read-only security boundary.
 - Keep provider work off the GUI thread and Qt updates on the main thread.
 - Do not read CLI credential files or persist tokens in settings, logs, tests,
   fixtures, or documentation.
-- Preserve raw-HTML escaping and the current-function context cap.
+- Preserve raw-HTML escaping, explicit opt-in context packs, exact preview, and
+  deterministic combined context cap.
+- Keep conversation records versioned, bounded, path-free, credential-free,
+  atomically written, and off by default.
+- Validate address citations before constructing internal navigation anchors;
+  never make provider-supplied generic links active.
 - Add direct tests for provider command construction, output parsing, error
   behavior, cancellation, and streaming changes.
 - Update `tools/runtime_manifest.py` whenever a runtime module is added,

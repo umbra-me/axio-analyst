@@ -13,6 +13,7 @@ quick start; these documents are the source of truth for detailed behavior.
 | [Provider contracts](providers.md) | Child-process commands, authentication boundary, input/output parsing, discovery, limits, and errors. |
 | [Architecture](architecture.md) | Current dependency boundaries, module responsibilities, threading, data flow, and security model. |
 | [Roadmap](roadmap.md) | Product end state, current limitations, and future delivery phases. |
+| [Sidekick capability inventory](sidekick-capability-inventory.md) | Dated, source-backed inventory of the Sidekick reference product, including analysis, UI, storage, permissions, automation, privacy, and implications for Axio. |
 | [Development and release guide](development.md) | Repository workflow, tests, extension points, manual GUI checks, and release procedure. |
 | [Troubleshooting](troubleshooting.md) | Startup, sidebar, provider, model discovery, timeout, rendering, and recovery diagnostics. |
 | [Current handoff](handoff.md) | Dated implementation, live-install state, verification evidence, protected boundaries, and next work. |
