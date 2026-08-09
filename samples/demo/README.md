@@ -45,10 +45,11 @@ argument:
   -n -d .\build\Release\axio_analyst_demo.exe
 ```
 
-Do not put the fixture immediately after Binary Ninja's `-l` option. That
-option treats the next argument as the debug-log destination and can overwrite
-this disposable executable. If that occurs, close the test instance and force
-a clean generated build before rerunning `build.ps1`:
+Binary Ninja's built-in command-line help lists `files` as optional positional
+arguments and defines `-l, --debug-log <file>` as **Log output to <file>**.
+Do not put the fixture immediately after that option: it can overwrite this
+disposable executable with log output. If that occurs, close the test instance
+and force a clean generated build before rerunning `build.ps1`:
 
 ```powershell
 cmake --build build --config Release --target clean

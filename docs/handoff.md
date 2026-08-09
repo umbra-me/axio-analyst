@@ -159,7 +159,9 @@ Python traceback. The live non-network check confirmed:
 The exact evidence and remaining checks are maintained in
 [`gui-verification.md`](gui-verification.md). Binary Ninja does not hot-reload
 Python plugins, so the check used a separate `-n` instance and closed only that
-instance afterward.
+instance afterward. Binary Ninja's own command-line help separately confirmed
+that `files` are positional arguments and `-l, --debug-log <file>` selects a
+log destination rather than a binary to open.
 
 Layout at other dock widths was reviewed separately with a Qt harness that
 loads the real `ui/sidebar_view.py` under Binary Ninja's own Python 3.13 and

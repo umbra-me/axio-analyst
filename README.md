@@ -250,6 +250,12 @@ Push-Location samples/demo
 Pop-Location
 ```
 
+When launching the fixture through `binaryninja.exe`, pass it as a positional
+file argument. Binary Ninja's built-in help defines
+`-l, --debug-log <file>` as the log destination; it is not the option for
+opening the fixture. The exact safe command and recovery note are in the
+[demo guide](samples/demo/README.md).
+
 ## Project status
 
 Version `0.9.0` implements the bounded context, evidence navigation, optional

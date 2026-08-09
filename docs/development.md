@@ -162,8 +162,9 @@ restart item that remains unverified rather than treating a rendered control as
 proof of its behavior.
 
 When launching the fixture from a command line, pass the executable as a
-positional argument. Binary Ninja's `-l` option consumes the next argument as a
-debug-log destination; it is not the load-file switch.
+positional argument. Binary Ninja's built-in command-line help lists files
+under **Arguments** and defines `-l, --debug-log <file>` as **Log output to
+<file>**. It is not the load-file switch.
 
 ## Change workflow
 

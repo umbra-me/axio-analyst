@@ -73,9 +73,10 @@ pass the binary as a positional argument:
   -n -d .\samples\demo\build\Release\axio_analyst_demo.exe
 ```
 
-Binary Ninja's `-l` option consumes the following argument as a debug-log
-destination. Do not place the fixture immediately after `-l`; doing so replaces
-the generated fixture with log output. If that happens, close only the test
+Binary Ninja's built-in command-line help lists `files` as optional positional
+arguments and defines `-l, --debug-log <file>` as **Log output to <file>**.
+Do not place the fixture immediately after that option; doing so replaces the
+generated fixture with log output. If that happens, close only the test
 instance and perform the clean rebuild documented in
 [`samples/demo/README.md`](../samples/demo/README.md).
 
