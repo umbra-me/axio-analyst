@@ -59,6 +59,9 @@ class SettingsPage(QtWidgets.QWidget):
         provider_layout.setFieldGrowthPolicy(
             QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
         )
+        provider_layout.setRowWrapPolicy(
+            QtWidgets.QFormLayout.RowWrapPolicy.WrapLongRows
+        )
 
         self.provider_combo = QtWidgets.QComboBox()
         self.provider_combo.setAccessibleName("Analysis provider")
@@ -96,6 +99,9 @@ class SettingsPage(QtWidgets.QWidget):
         harness_layout.setFieldGrowthPolicy(
             QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
         )
+        harness_layout.setRowWrapPolicy(
+            QtWidgets.QFormLayout.RowWrapPolicy.WrapLongRows
+        )
         self.claude_executable = self._executable_edit(
             "Claude Code executable", "claude"
         )
@@ -113,6 +119,9 @@ class SettingsPage(QtWidgets.QWidget):
         limits_layout.setFieldGrowthPolicy(
             QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
         )
+        limits_layout.setRowWrapPolicy(
+            QtWidgets.QFormLayout.RowWrapPolicy.WrapLongRows
+        )
         self.timeout_seconds = QtWidgets.QSpinBox()
         self.timeout_seconds.setRange(10, 3600)
         self.timeout_seconds.setSingleStep(30)
@@ -124,8 +133,28 @@ class SettingsPage(QtWidgets.QWidget):
         self.max_context_chars.setSuffix(" chars")
         self.max_context_chars.setAccessibleName("Maximum context characters")
         limits_layout.addRow("Timeout", self.timeout_seconds)
-        limits_layout.addRow("HLIL context", self.max_context_chars)
+        limits_layout.addRow("Total context", self.max_context_chars)
         content_layout.addWidget(limits_group)
+
+        privacy_group = QtWidgets.QGroupBox("Local conversation history")
+        privacy_layout = QtWidgets.QVBoxLayout(privacy_group)
+        self.persist_conversations = QtWidgets.QCheckBox(
+            "Restore conversations for this binary"
+        )
+        self.persist_conversations.setToolTip(
+            "Store bounded transcripts under the Binary Ninja user directory"
+        )
+        self.persist_conversations.setAccessibleName(
+            "Persist Axio Analyst conversations locally"
+        )
+        privacy_layout.addWidget(self.persist_conversations)
+        privacy_note = QtWidgets.QLabel(
+            "Off by default. Storage uses a path-free content fingerprint; "
+            "Clear deletes the saved transcript and Export writes Markdown."
+        )
+        privacy_note.setWordWrap(True)
+        privacy_layout.addWidget(privacy_note)
+        content_layout.addWidget(privacy_group)
         content_layout.addStretch(1)
         scroll.setWidget(content)
         root.addWidget(scroll, 1)
@@ -163,6 +192,7 @@ class SettingsPage(QtWidgets.QWidget):
             edit.textChanged.connect(self._mark_dirty)
         self.timeout_seconds.valueChanged.connect(self._mark_dirty)
         self.max_context_chars.valueChanged.connect(self._mark_dirty)
+        self.persist_conversations.toggled.connect(self._mark_dirty)
 
     @staticmethod
     def _executable_edit(accessible_name: str, placeholder: str) -> QtWidgets.QLineEdit:
@@ -192,6 +222,7 @@ class SettingsPage(QtWidgets.QWidget):
         self.ollama_executable.setText(preferences.ollama_executable)
         self.timeout_seconds.setValue(preferences.timeout_seconds)
         self.max_context_chars.setValue(preferences.max_context_chars)
+        self.persist_conversations.setChecked(preferences.persist_conversations)
         self.status_label.setText("Settings are stored locally in Binary Ninja.")
 
     def apply(self) -> None:
@@ -206,6 +237,7 @@ class SettingsPage(QtWidgets.QWidget):
                 ollama_executable=self.ollama_executable.text(),
                 timeout_seconds=self.timeout_seconds.value(),
                 max_context_chars=self.max_context_chars.value(),
+                persist_conversations=self.persist_conversations.isChecked(),
             )
         )
         self.status_label.setText("Settings saved.")
@@ -286,6 +318,7 @@ class SettingsPage(QtWidgets.QWidget):
         self.ollama_executable.setEnabled(enabled)
         self.timeout_seconds.setEnabled(enabled)
         self.max_context_chars.setEnabled(enabled)
+        self.persist_conversations.setEnabled(enabled)
         self.apply_button.setEnabled(enabled)
         self.revert_button.setEnabled(enabled)
         self.refresh_models_button.setEnabled(enabled and not discovering)

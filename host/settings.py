@@ -43,6 +43,7 @@ _PROVIDER_PREFIXES = {
 class RuntimeConfig:
     provider: ProviderConfig
     max_context_chars: int
+    persist_conversations: bool
 
 
 @dataclass(frozen=True)
@@ -52,6 +53,7 @@ class SidebarPreferences:
     ollama_executable: str
     timeout_seconds: int
     max_context_chars: int
+    persist_conversations: bool
 
 
 def _register(key: str, **properties: object) -> None:
@@ -157,6 +159,16 @@ def register_settings() -> None:
         minValue=1000,
         maxValue=500000,
     )
+    _register(
+        "persistConversations",
+        title="Persist Conversations",
+        description=(
+            "Store bounded transcripts in the Binary Ninja user directory, "
+            "keyed by a path-free binary fingerprint."
+        ),
+        type="boolean",
+        default=False,
+    )
 
 
 def get_provider_selection(backend: str) -> tuple[str, str]:
@@ -190,6 +202,9 @@ def get_sidebar_preferences() -> SidebarPreferences:
         ollama_executable=settings.get_string(f"{GROUP}.ollamaCloud.executable"),
         timeout_seconds=settings.get_integer(f"{GROUP}.timeoutSeconds"),
         max_context_chars=settings.get_integer(f"{GROUP}.maxContextChars"),
+        persist_conversations=settings.get_bool(
+            f"{GROUP}.persistConversations"
+        ),
     )
 
 
@@ -215,21 +230,33 @@ def set_sidebar_preferences(preferences: SidebarPreferences) -> None:
         f"{GROUP}.maxContextChars",
         max(1000, min(500000, preferences.max_context_chars)),
     )
+    settings.set_bool(
+        f"{GROUP}.persistConversations",
+        preferences.persist_conversations,
+    )
+
+
+def get_provider_config(backend: str) -> ProviderConfig:
+    settings = Settings()
+    prefix = _PROVIDER_PREFIXES.get(backend)
+    if prefix is None:
+        raise ValueError(f"Unsupported provider backend: {backend}")
+    return ProviderConfig(
+        backend=backend,
+        executable=settings.get_string(f"{GROUP}.{prefix}.executable"),
+        model=settings.get_string(f"{GROUP}.{prefix}.model"),
+        timeout_seconds=settings.get_integer(f"{GROUP}.timeoutSeconds"),
+        reasoning_effort=settings.get_string(f"{GROUP}.{prefix}.reasoningEffort"),
+    )
 
 
 def get_runtime_config() -> RuntimeConfig:
     settings = Settings()
     backend = settings.get_string(f"{GROUP}.backend")
-    prefix = _PROVIDER_PREFIXES.get(backend, "claudeCode")
     return RuntimeConfig(
-        provider=ProviderConfig(
-            backend=backend,
-            executable=settings.get_string(f"{GROUP}.{prefix}.executable"),
-            model=settings.get_string(f"{GROUP}.{prefix}.model"),
-            timeout_seconds=settings.get_integer(f"{GROUP}.timeoutSeconds"),
-            reasoning_effort=settings.get_string(
-                f"{GROUP}.{prefix}.reasoningEffort"
-            ),
-        ),
+        provider=get_provider_config(backend),
         max_context_chars=settings.get_integer(f"{GROUP}.maxContextChars"),
+        persist_conversations=settings.get_bool(
+            f"{GROUP}.persistConversations"
+        ),
     )

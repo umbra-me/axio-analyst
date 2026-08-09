@@ -43,3 +43,6 @@ class TestAnalyze(unittest.TestCase):
         self.assertEqual(starts, [True])
         self.assertIn("What is returned?", provider.prompt)
         self.assertIn("0x1000: return 0", provider.prompt)
+        self.assertEqual(result.usage.input_chars, len(provider.prompt))
+        self.assertEqual(result.usage.output_chars, len("done"))
+        self.assertGreaterEqual(result.usage.duration_seconds, 0)

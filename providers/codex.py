@@ -3,7 +3,7 @@
 import json
 from typing import Any
 
-from ..core.models import ProviderError, ProviderResult
+from ..core.models import ProviderError, ProviderResult, ProviderUsage
 from ..core.provider import CancelCheck, StreamCallback
 from .process import CliProvider
 from .streaming import JsonLineStream, strip_terminal_sequences
@@ -19,9 +19,10 @@ def codex_stream_delta(event: Any) -> str:
     return text if isinstance(text, str) else ""
 
 
-def parse_codex_output(stdout: str) -> str:
+def parse_codex_response(stdout: str) -> tuple[str, ProviderUsage]:
     messages: list[str] = []
     errors: list[str] = []
+    final_usage = ProviderUsage()
     for line in stdout.splitlines():
         if not line.strip():
             continue
@@ -42,12 +43,40 @@ def parse_codex_output(stdout: str) -> str:
             detail = event.get("message") or event.get("error")
             if isinstance(detail, str) and detail.strip():
                 errors.append(detail.strip())
+        elif event.get("type") == "turn.completed":
+            usage_value = event.get("usage")
+            if isinstance(usage_value, dict):
+                input_tokens = usage_value.get("input_tokens")
+                output_tokens = usage_value.get("output_tokens")
+                cached_tokens = usage_value.get("cached_input_tokens")
+                final_usage = ProviderUsage(
+                    input_tokens=(
+                        input_tokens
+                        if isinstance(input_tokens, int) and input_tokens >= 0
+                        else None
+                    ),
+                    output_tokens=(
+                        output_tokens
+                        if isinstance(output_tokens, int) and output_tokens >= 0
+                        else None
+                    ),
+                    cached_input_tokens=(
+                        cached_tokens
+                        if isinstance(cached_tokens, int) and cached_tokens >= 0
+                        else None
+                    ),
+                )
 
     if messages:
-        return strip_terminal_sequences(messages[-1]).strip()
+        return strip_terminal_sequences(messages[-1]).strip(), final_usage
     if errors:
         raise ProviderError(f"Codex failed: {errors[-1]}")
     raise ProviderError("Codex returned no final agent message.")
+
+
+def parse_codex_output(stdout: str) -> str:
+    text, _usage = parse_codex_response(stdout)
+    return text
 
 
 class CodexCliProvider(CliProvider):
@@ -94,9 +123,11 @@ class CodexCliProvider(CliProvider):
         stream = JsonLineStream(codex_stream_delta, on_stream)
         stdout = self.run_cli(prompt, is_cancelled, on_stdout=stream.feed)
         stream.finish()
+        text, usage = parse_codex_response(stdout)
         return ProviderResult(
-            text=parse_codex_output(stdout),
+            text=text,
             backend=self.config.backend,
             model=self.config.model,
             reasoning_effort=self.config.reasoning_effort,
+            usage=usage,
         )

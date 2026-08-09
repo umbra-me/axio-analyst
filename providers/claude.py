@@ -3,13 +3,13 @@
 import json
 from typing import Any
 
-from ..core.models import ProviderError, ProviderResult
+from ..core.models import ProviderError, ProviderResult, ProviderUsage
 from ..core.provider import CancelCheck, StreamCallback
 from .process import CliProvider
 from .streaming import JsonLineStream, strip_terminal_sequences
 
 
-def parse_claude_output(stdout: str) -> tuple[str, str]:
+def parse_claude_response(stdout: str) -> tuple[str, str, ProviderUsage]:
     try:
         payload: Any = json.loads(stdout)
     except json.JSONDecodeError:
@@ -59,7 +59,35 @@ def parse_claude_output(stdout: str) -> tuple[str, str]:
     clean_model = (
         strip_terminal_sequences(model).strip() if isinstance(model, str) else ""
     )
-    return strip_terminal_sequences(result).strip(), clean_model
+    usage_value = payload.get("usage")
+    usage = usage_value if isinstance(usage_value, dict) else {}
+
+    def integer(key: str) -> int | None:
+        value = usage.get(key)
+        return value if isinstance(value, int) and value >= 0 else None
+
+    cost = payload.get("total_cost_usd")
+    duration_ms = payload.get("duration_ms")
+    return (
+        strip_terminal_sequences(result).strip(),
+        clean_model,
+        ProviderUsage(
+            input_tokens=integer("input_tokens"),
+            output_tokens=integer("output_tokens"),
+            cached_input_tokens=integer("cache_read_input_tokens"),
+            cost_usd=float(cost) if isinstance(cost, (int, float)) else None,
+            duration_seconds=(
+                float(duration_ms) / 1000
+                if isinstance(duration_ms, (int, float)) and duration_ms >= 0
+                else 0.0
+            ),
+        ),
+    )
+
+
+def parse_claude_output(stdout: str) -> tuple[str, str]:
+    text, model, _usage = parse_claude_response(stdout)
+    return text, model
 
 
 def claude_stream_delta(event: Any) -> str:
@@ -118,10 +146,11 @@ class ClaudeCodeProvider(CliProvider):
         stream = JsonLineStream(claude_stream_delta, on_stream)
         stdout = self.run_cli(prompt, is_cancelled, on_stdout=stream.feed)
         stream.finish()
-        text, reported_model = parse_claude_output(stdout)
+        text, reported_model, usage = parse_claude_response(stdout)
         return ProviderResult(
             text=text,
             backend=self.config.backend,
             model=reported_model or self.config.model,
             reasoning_effort=self.config.reasoning_effort,
+            usage=usage,
         )

@@ -6,7 +6,11 @@ from tests import package_loader  # noqa: F401
 
 from axio_analyst.core.models import ProviderConfig, ProviderError
 from axio_analyst.providers import CodexCliProvider
-from axio_analyst.providers.codex import codex_stream_delta, parse_codex_output
+from axio_analyst.providers.codex import (
+    codex_stream_delta,
+    parse_codex_output,
+    parse_codex_response,
+)
 from axio_analyst.providers.streaming import JsonLineStream
 
 
@@ -58,3 +62,16 @@ class TestCodexCliProvider(unittest.TestCase):
         )
 
         self.assertEqual(chunks, ["Final **analysis**"])
+
+    def test_parse_codex_usage(self):
+        text, usage = parse_codex_response(
+            '{"type":"item.completed","item":{"type":"agent_message",'
+            '"text":"done"}}\n'
+            '{"type":"turn.completed","usage":{"input_tokens":20,'
+            '"cached_input_tokens":8,"output_tokens":6}}\n'
+        )
+
+        self.assertEqual(text, "done")
+        self.assertEqual(usage.input_tokens, 20)
+        self.assertEqual(usage.cached_input_tokens, 8)
+        self.assertEqual(usage.output_tokens, 6)

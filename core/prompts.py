@@ -1,6 +1,6 @@
 """Prompt construction with no Binary Ninja dependency."""
 
-from .models import FunctionContext
+from .models import ContextBundle, ContextItem, FunctionContext
 
 
 DEFAULT_QUESTION = (
@@ -9,9 +9,44 @@ DEFAULT_QUESTION = (
 )
 
 
-def build_prompt(context: FunctionContext, question: str = "") -> str:
+def _legacy_bundle(context: FunctionContext) -> ContextBundle:
+    return ContextBundle(
+        primary=context,
+        items=(
+            ContextItem(
+                kind="current-function",
+                label=f"Current function {context.function_name}",
+                text=context.hlil,
+                start_address=context.function_start,
+                truncated=context.truncated,
+            ),
+        ),
+        max_chars=len(context.hlil),
+        truncated=context.truncated,
+    )
+
+
+def render_context(bundle: ContextBundle) -> str:
+    sections: list[str] = []
+    for item in bundle.items:
+        address = (
+            f" at 0x{item.start_address:x}" if item.start_address is not None else ""
+        )
+        truncated = " (truncated)" if item.truncated else ""
+        sections.append(
+            f"## {item.label}{address}{truncated}\n"
+            f"Kind: {item.kind}\n"
+            f"Characters: {item.char_count}\n\n"
+            f"{item.text}"
+        )
+    return "\n\n".join(sections)
+
+
+def build_prompt(context: FunctionContext | ContextBundle, question: str = "") -> str:
+    bundle = context if isinstance(context, ContextBundle) else _legacy_bundle(context)
+    primary = bundle.primary
     user_question = question.strip() or DEFAULT_QUESTION
-    truncation = "yes" if context.truncated else "no"
+    truncation = "yes" if bundle.truncated else "no"
 
     return f"""You are assisting with reverse engineering in Binary Ninja.
 
@@ -23,15 +58,15 @@ behavior. Do not provide edits or renames unless the question asks for them.
 Question:
 {user_question}
 
-Binary: {context.binary_name}
-Architecture: {context.architecture}
-Platform: {context.platform}
-Function: {context.function_name} at 0x{context.function_start:x}
-Type: {context.function_type}
-HLIL truncated: {truncation}
+Binary: {primary.binary_name}
+Architecture: {primary.architecture}
+Platform: {primary.platform}
+Primary function: {primary.function_name} at 0x{primary.function_start:x}
+Type: {primary.function_type}
+Context items: {len(bundle.items)}
+Context characters: {bundle.total_chars}
+Context truncated: {truncation}
 
-High Level IL:
-```c
-{context.hlil}
-```
+Context snapshot:
+{render_context(bundle)}
 """

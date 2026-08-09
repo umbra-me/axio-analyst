@@ -9,6 +9,7 @@ from axio_analyst.providers import ClaudeCodeProvider
 from axio_analyst.providers.claude import (
     claude_stream_delta,
     parse_claude_output,
+    parse_claude_response,
 )
 from axio_analyst.providers.streaming import JsonLineStream
 
@@ -99,3 +100,16 @@ class TestClaudeCodeProvider(unittest.TestCase):
     def test_parse_claude_json_requires_result(self):
         with self.assertRaises(ProviderError):
             parse_claude_output('{"result":""}')
+
+    def test_parse_claude_usage_and_cost(self):
+        _text, _model, usage = parse_claude_response(
+            '{"result":"done","usage":{"input_tokens":12,'
+            '"output_tokens":3,"cache_read_input_tokens":4},'
+            '"total_cost_usd":0.0025,"duration_ms":1500}'
+        )
+
+        self.assertEqual(usage.input_tokens, 12)
+        self.assertEqual(usage.output_tokens, 3)
+        self.assertEqual(usage.cached_input_tokens, 4)
+        self.assertEqual(usage.cost_usd, 0.0025)
+        self.assertEqual(usage.duration_seconds, 1.5)
