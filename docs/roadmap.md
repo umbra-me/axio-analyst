@@ -49,9 +49,10 @@ Implemented through `0.9.0`:
 - Provider-neutral Claude Code, Codex, and Ollama Cloud CLI adapters.
 - Background execution, timeout, cancellation, safety flags, and no BNDB
   modification.
-- A native sidebar built around a dominant transcript, one action row, and a
-  progressively disclosed Settings surface, with an original painted product
-  mark and a shared action-glyph set.
+- A native sidebar whose resting layout is one header row and one composer,
+  with a suggestion-led empty state, a self-hiding status line, a
+  progressively disclosed Settings surface, an original painted product mark,
+  and a shared action-glyph set.
 - Streamed Markdown with provider HTML disabled at the parser, wrapped code
   blocks, progress, elapsed time, and optional bounded local transcript
   restoration, deletion, and Markdown export.

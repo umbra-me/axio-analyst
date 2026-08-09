@@ -51,10 +51,15 @@ version is unchanged; these entries sit under `Unreleased` in the changelog.
   context read more than one way) and a thirteen-glyph action set on a shared
   24-unit grid. Nothing is shipped as an asset, so the runtime manifest gained
   one Python module and the installer gained no binary file.
-- The chat surface dropped from four framed boxes to one. Export and Clear
-  moved to a header overflow menu; the comparison provider moved into the
-  **Ask** menu. The **Context** button carries the scope disclosure as
-  `Context +N` and keeps the count below a 300-pixel dock width.
+- The chat surface went through two passes. The first dropped four framed boxes
+  to one; the second reduced the resting layout to two bands, one header row
+  and one composer. Explain, Compare, Export, Clear, and the version live in
+  the header overflow menu. The composer's scope chip carries the disclosure,
+  naming the function and appending `+N` for opt-in packs. An empty state names
+  the function, architecture, and configured provider above four suggested
+  questions. The status line is hidden until it has something to report, and
+  each answer's metadata, evidence, and unresolved citations share one footer
+  line.
 - Settings replaced four group boxes with flat sections that collapse behind
   summaries of their staged values, stack labels above fields when narrow, and
   reserve height for wrapped guidance text.
@@ -140,22 +145,25 @@ registration error and no Python traceback, and a window capture confirmed:
 
 - the split-diamond mark rendering in Binary Ninja's own right rail under its
   active blue tint, legible beside the stock rail glyphs;
-- the flat header scope line, dim detail line, and right-aligned version;
-- the frameless transcript, prompt, single action row (`Context`, `Explain`,
-  `Ask`), and the merged status strip reading
-  `Ready` / `Codex - gpt-5.6-sol - medium`;
-- `Ask` correctly disabled while the prompt is empty.
+- the flat header scope line and the frameless transcript;
+- the composer and its action glyphs;
+- send correctly disabled while the prompt is empty.
+
+That capture predates the second layout pass, which has been reviewed only
+through the Qt harness so far.
 
 Layout at other dock widths was reviewed separately with a Qt harness that
 loads the real `ui/sidebar_view.py` under Binary Ninja's own Python 3.13 and
 PySide6 6.11.1, stubs `binaryninja.Settings`, and captures unmapped widgets
 with `QWidget.grab()`. Binary Ninja's Qt bundle ships only `qwindows.dll`, so
 `QT_QPA_PLATFORM=offscreen` is unavailable and the harness must grab rather
-than run headless. It covers 260-560 pixels including the narrow action row,
-the `Context +N` disclosure, and expanded/collapsed Settings sections.
+than run headless. It covers 260-560 pixels including the suggestion empty
+state, the composer scope chip and its `+N` disclosure, the one-line answer
+footer, and expanded/collapsed Settings sections.
 
-Still unverified by hand: menu popups (overflow, `Compare with`), tab focus
-order, live theme switching, and the standing checklist items in
+Still unverified by hand: menu popups (overflow, `Compare with`), suggestion
+dispatch, status-line reveal and auto-hide, tab focus order, live theme
+switching, and the standing checklist items in
 `development.md` for context-preview contents, evidence navigation,
 comparison, persistence, export, Clear deletion, cancellation, and
 Ollama/Claude requests.

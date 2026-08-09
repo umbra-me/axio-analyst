@@ -65,16 +65,23 @@ truncation before dispatch. Every Ask/Explain action rebuilds and freezes a new
 snapshot from the captured selection and options. Increasing the limit or
 enabling packs sends more binary-derived text and may increase latency or usage.
 
-Comparison is off by default and lives in the **Ask** button's menu under
-**Compare with**, so the resting composer carries no comparison controls.
-While an analysis request is active, **Stop** occupies the submit position; it
-is not shown as a permanently disabled third action.
+Comparison is off by default and lives in the header overflow menu under
+**Compare with**, alongside **Explain this function**, **Export conversation**,
+**Clear conversation**, and the installed version. The resting composer
+therefore carries no secondary controls. While an analysis request is active,
+**Stop** occupies the send position; it is not shown as a permanently disabled
+extra action.
 
-The **Context** button carries the scope disclosure. It reads `Context` when
-only the current function will be sent and `Context +N` once N opt-in packs are
-enabled. Below a 300-pixel dock width the word is dropped but the `+N` count is
-not, so an enlarged request scope stays visible at every width. Its tooltip
-names the enabled packs.
+The composer's scope chip carries the disclosure. It names the function that
+will be sent and appends `+N` once N opt-in packs are enabled. When the dock is
+too narrow for both, the function name elides but the `+N` count does not, so
+an enlarged request scope stays visible at every width. Its tooltip names the
+enabled packs.
+
+There is no permanent status band. Progress is a two-pixel line above the
+composer, and the status line below it reveals itself only while a request runs
+or immediately after a notice — an export, an evidence navigation, a restore,
+or a failure — then hides again after a few seconds.
 
 The timeout covers process startup, stdin submission, streaming, and process
 completion. Cancellation terminates the child process, waits briefly, and

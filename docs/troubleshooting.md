@@ -39,7 +39,7 @@ sidebar-registration errors rather than provider configuration.
 ## The displayed version is unexpected
 
 The authoritative version is the string in the installed `plugin.json`.
-Axio Analyst reads the same value for the sidebar header, Settings page, About
+Axio Analyst reads the same value for the sidebar overflow menu, Settings page, About
 command, and registration log. If those surfaces disagree with the checkout:
 
 1. Close Binary Ninja so imported Python modules are not reused.

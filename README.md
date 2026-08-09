@@ -13,9 +13,9 @@ types, add comments, or otherwise modify the Binary Ninja database (BNDB).
 
 ## Highlights
 
-- Native **Axio Analyst** sidebar built around a frameless, dominant transcript,
-  a one-row action strip, and a dedicated request-context workspace, with an
-  original painted mark and a matching glyph set for every action.
+- Native **Axio Analyst** sidebar whose resting layout is one header row and one
+  composer, with a suggestion-led empty state, a dedicated request-context
+  workspace, an original painted mark, and a matching glyph set.
 - **Explain** for a structured current-function summary and **Ask** for custom
   questions (`Ctrl+Enter` submits from the prompt editor).
 - Exact context preview plus opt-in selection, direct caller/callee, referenced
@@ -38,7 +38,7 @@ types, add comments, or otherwise modify the Binary Ninja database (BNDB).
 - Background process execution, concurrent stdout/stderr draining, elapsed
   time, phase progress, timeout enforcement, and cancellation.
 - Explicit context disclosure and a bounded read-only data boundary.
-- Installed version visibility in the sidebar header, Settings page, log, and
+- Installed version visibility in the sidebar overflow menu, Settings page, log, and
   **Plugins > Axio Analyst > About Axio Analyst**.
 
 ## Requirements
@@ -98,7 +98,7 @@ destination-only files are never removed.
 `plugin.json` is the single source of truth for the semantic version. The
 runtime validates and reads that value through `core/version.py`; there is no
 second hard-coded Python version to synchronize. The installed version appears
-in Binary Ninja's plugin metadata, the sidebar header, Settings page, About
+in Binary Ninja's plugin metadata, the sidebar overflow menu, Settings page, About
 command, and registration log.
 
 For a development copy, verify that every manifest-owned installed file and
@@ -120,20 +120,28 @@ python tools/plugin_dev.py status `
 5. Place the cursor inside a function.
 6. Choose **Explain**, or enter a question and choose **Ask**.
 
-The sidebar header shows the current function, its start address, and the
-architecture. Choose **Context** to open the dedicated context workspace, opt
-into additional packs, and choose **Build preview** to inspect the exact
-snapshot without reducing conversation space. The **Context** button itself
-reports the scope: it reads `Context +N` once N opt-in packs are enabled, and
-keeps that count even when a narrow dock hides the label. Every request
-rebuilds and freezes the snapshot before provider dispatch, so later cursor
-movement cannot silently change it. The status strip below the composer shows
-request state on the left and the persisted provider and model on the right.
-While a request runs, the sidebar displays the current phase, elapsed time,
-streamed primary output, and a **Stop** action in place of **Ask**. The
-optional second provider lives in the **Ask** menu under **Compare with**, so
-it costs no space until it is wanted. A completed response opens at its
-beginning so the first result is immediately readable.
+The sidebar header names the current function and its start address. Until the
+conversation starts, the space below shows the function, its architecture, the
+provider and model that will run, and four suggested questions — so what will
+happen is visible before anything is sent.
+
+The composer is one control. The scope chip at its lower left names the request
+scope and always shows the pack count: it reads `parse_record` when only the
+current function will be sent and `parse_record +N` once N opt-in packs are
+enabled, eliding the function name rather than the count when the dock is
+narrow. Choosing it opens the dedicated context workspace, where packs are
+enabled and **Build preview** inspects the exact snapshot. Every request
+rebuilds and freezes that snapshot before provider dispatch, so later cursor
+movement cannot silently change it.
+
+The send glyph submits and becomes **Stop** while a request runs. Progress is a
+thin line above the composer, and a status line appears beneath it only while
+there is something to report — request phase, elapsed time, or the result of an
+export, navigation, or restore — then hides itself again. **Explain this
+function**, **Compare with**, **Export conversation**, and **Clear
+conversation** live in the header's overflow menu, which also reports the
+installed version. A completed response opens at its beginning so the first
+result is immediately readable.
 
 The plugin also registers these menu commands:
 

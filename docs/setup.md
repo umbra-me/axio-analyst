@@ -187,19 +187,19 @@ settings, and unrelated plugins.
 After restarting Binary Ninja:
 
 1. Confirm **Axio Analyst** appears in the right sidebar and Plugins menu.
-2. Confirm the sidebar header, Settings introduction, About command, and
+2. Confirm the sidebar overflow menu, Settings introduction, About command, and
    registration log show the version from `plugin.json`.
 3. Open Settings and confirm the configured executable path.
 4. Apply a provider, model, and reasoning selection.
-5. Select a function with HLIL, choose **Context**, enable one safe pack,
-   confirm the button reports `Context +1`, and confirm **Build preview** shows
+5. Select a function with HLIL, choose the composer's scope chip, enable one
+   safe pack, confirm the chip reports `+1`, and confirm **Build preview** shows
    exact bounded text without a full path.
 6. Send a simple explanation request and confirm the context summary matches
    the dispatched snapshot.
 7. Confirm progress appears, output renders as Markdown, address citations can
    navigate internally, unresolved addresses remain inert, and **Stop** is
    enabled during the request.
-8. Optionally choose **Compare with** in the **Ask** menu to add a second
+8. Optionally choose **Compare with** in the overflow menu to add a second
    configured provider, and confirm both labelled outputs show separate usage
    metadata.
 9. Enable persistence only for a non-sensitive fixture, restart the sidebar,

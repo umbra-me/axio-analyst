@@ -54,7 +54,7 @@ import the provider-neutral packages without a Binary Ninja installation.
 | `host/task.py` | Context-preview and analysis `BackgroundTaskThread` lifecycles plus main-thread dispatch. |
 | `host/registration.py` | Plugin commands and best-effort sidebar registration. |
 | `ui/branding.py` | Painted Axio Analyst mark and the shared sidebar glyph set. |
-| `ui/sidebar_view.py` | Flat chat/composer layout, dedicated context workspace, width-responsive action row, staged settings navigation, and direct UI signals. |
+| `ui/sidebar_view.py` | Two-band chat layout, suggestion empty state, unified composer, self-hiding status line, dedicated context workspace, staged settings navigation, and direct UI signals. |
 | `ui/sidebar.py` | Context, request/comparison, evidence navigation, persistence, export, and discovery coordination. |
 | `ui/settings_page.py` | Staged provider, harness, and request-limit settings in flat, progressively disclosed sections. |
 | `ui/transcript.py` | Conversation state, completion-focused scrolling, HTML-free Markdown import, wrapped code blocks, and internal evidence anchors. |

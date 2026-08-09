@@ -112,38 +112,45 @@ release.
    no import or registration error.
 3. Confirm the sidebar rail shows the split-diamond Axio Analyst mark in both
    its active and inactive tints, that it opens the **Axio Analyst** widget,
-   and that the header displays the same version as `plugin.json`.
-4. Move between functions and confirm the header scope line follows the cursor
-   and invalidates the old preview.
+   and that the overflow menu reports the same version as `plugin.json`.
+4. Move between functions and confirm the header and empty state follow the
+   cursor and invalidate the old preview.
 5. Verify keyboard navigation at narrow sidebar widths: tab from the header
-   glyphs through the transcript, prompt, **Context**, **Explain**, and
-   **Ask**; confirm `Ctrl+Enter` submits and the `Ask` menu is reachable.
-6. Drag the dock below and above 300 px. Confirm the action row drops button
-   text but never the enabled-pack count, and that Settings switches between
-   inline and stacked form rows without clipping wrapped text.
-7. Expand and collapse each Settings section and confirm its collapsed summary
+   glyphs through the transcript, prompt, scope chip, and send; confirm
+   `Ctrl+Enter` submits and the overflow menu is reachable.
+6. Confirm the empty state lists the function, its architecture, and the
+   configured provider, and that each suggested question dispatches a request
+   and is replaced by the conversation.
+7. Confirm the status line stays hidden at rest, appears during a request and
+   after an export or evidence navigation, then hides itself again.
+8. Drag the dock below and above 300 px. Confirm the scope chip elides the
+   function name but never the enabled-pack count, and that Settings switches
+   between inline and stacked form rows without clipping wrapped text.
+9. Expand and collapse each Settings section and confirm its collapsed summary
    matches the staged values.
-8. Apply and revert provider, model, effort, executable, timeout, and context
+10. Apply and revert provider, model, effort, executable, timeout, and context
    settings.
-9. Build primary-only and all-pack previews on the demo binary. Confirm exact
+11. Build primary-only and all-pack previews on the demo binary. Confirm exact
    item text, counts, truncation, selection capture, and absence of source paths.
-10. Send one request through every provider available to the tester, then use
-   the **Ask** menu to run a two-provider comparison and confirm one frozen
-   context plus separate usage.
-11. Confirm streaming behavior, manual-scroll preservation, progress, elapsed
+12. Send one request through every provider available to the tester, then use
+   the overflow menu's **Compare with** to run a two-provider comparison and
+   confirm one frozen context plus separate usage.
+13. Confirm streaming behavior, manual-scroll preservation, progress, elapsed
    time, cancellation, contained comparison errors, and transcript clearing.
-12. Confirm a fenced code block wraps instead of scrolling the transcript
+14. Confirm a fenced code block wraps instead of scrolling the transcript
    sideways and renders literal `<`, `>`, and `&`, while a provider HTML tag
    appears as inert text rather than formatting.
-13. Confirm valid evidence addresses navigate, invalid citations remain inert,
+15. Confirm each answer carries one footer line holding its evidence links,
+   unresolved-citation count, and usage.
+16. Confirm valid evidence addresses navigate, invalid citations remain inert,
    and generic provider Markdown links do not open.
-14. Enable persistence for the demo, restart/reopen the sidebar, verify restore
+17. Enable persistence for the demo, restart/reopen the sidebar, verify restore
    and Markdown export from the overflow menu, then Clear and verify the exact
-   record is deleted.
-15. Confirm the Settings introduction and About command display the same
-   version as the sidebar.
-16. Restart Binary Ninja and confirm persisted settings survive.
-17. Confirm no symbol, type, comment, analysis, or BNDB state changed.
+   record is deleted and the suggestion empty state returns.
+18. Confirm the Settings introduction, overflow menu, and About command display
+   the same version.
+19. Restart Binary Ninja and confirm persisted settings survive.
+20. Confirm no symbol, type, comment, analysis, or BNDB state changed.
 
 ## Change workflow
 

@@ -19,15 +19,26 @@ breaking changes must still be documented with migration instructions.
 
 - Replace the programmatically drawn `AX` text monogram used as the sidebar
   icon with the painted mark.
-- Flatten the chat surface to a single framed element. The context card,
-  transcript frame, and composer frame are gone; the header is a scope line
-  over a detail line, the transcript is frameless and dominant, and the
-  composer is a prompt above one action row and one status strip.
-- Move Export and Clear into a header overflow menu and the comparison provider
-  into the **Ask** button menu, removing two always-visible label bands.
-- Make the **Context** button carry the scope disclosure as `Context +N`, and
-  keep the count visible when a dock narrower than 300 pixels drops button
-  text.
+- Reduce the resting chat surface to two bands: one header row and one
+  composer. The context card, transcript frame, detail row, action row, and
+  permanent status strip are all gone.
+- Merge the composer into a single control carrying the prompt, the scope chip,
+  the keyboard hint, and the send action, which becomes **Stop** in place while
+  a request runs.
+- Replace the greeting message with an empty state naming the function, its
+  architecture, and the configured provider above four suggested questions, so
+  the conversation starts genuinely empty and **Explain** is discoverable
+  without a permanent button.
+- Move **Explain this function**, **Compare with**, **Export conversation**,
+  **Clear conversation**, and the installed version into the header overflow
+  menu.
+- Move the scope disclosure onto the composer's chip, which names the function
+  and appends `+N` for opt-in packs, eliding the name rather than the count on
+  a narrow dock.
+- Reveal the status line only while it has something to report, then hide it
+  again; progress becomes a two-pixel line above the composer.
+- Collapse each answer's role metadata, evidence links, and unresolved-citation
+  disclosure from up to four separate lines onto one footer line.
 - Replace the four Settings group boxes with flat sections; Executables,
   Request limits, and Local history collapse behind one-line summaries of their
   staged values.
