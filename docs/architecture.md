@@ -88,7 +88,8 @@ cursor/view notification
 
 The sidebar stores only serializable conversation values. It does not retain
 live Binary Ninja instructions or provider process objects after a request
-completes. Moving the cursor updates the context card but does not change the
+completes. Moving the cursor updates the header, empty state, and composer
+scope chip but does not change the
 snapshot already dispatched. Persistence is off by default; when enabled, the
 record is associated with a bounded sampled content fingerprint rather than a
 source path.

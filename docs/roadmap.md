@@ -81,6 +81,10 @@ Implemented through `0.9.0`:
   adapter; cost is shown only when the provider reports it.
 - Provider comparison runs the primary then comparison adapter sequentially;
   it is not a benchmark harness or statistical evaluator.
+- The one-line answer footer still wraps on a dock narrower than roughly 300
+  pixels, because the usage summary reports latency, characters, and tokens in
+  full. Shortening it is a product decision about how much accounting belongs
+  inline rather than behind a detail surface.
 - There is no proposed Binary Ninja transaction schema.
 - Codex exposes completed agent messages rather than token-level deltas.
 - CLI adapters cannot inspect arbitrary files or use unrestricted tools.

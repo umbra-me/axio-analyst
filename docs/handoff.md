@@ -137,20 +137,25 @@ dedicated Context workspace, narrow Settings forms, saved provider executable
 paths, and clean startup. A user-triggered Codex Explain request also completed
 successfully and reported usage metadata.
 
-The redesigned sidebar and the new mark were installed and loaded in a real
-Binary Ninja `5.4.10350-dev` GUI on the `samples/demo` fixture. A debug log
-(`binaryninja.exe -n -d -l <file>`) recorded
+Both redesign passes and the new mark were installed and loaded in a real
+Binary Ninja `5.4.10350-dev` GUI on the `samples/demo` fixture. After each
+pass a debug log (`binaryninja.exe -n -d -l <file>`) recorded
 `Axio Analyst v0.9.0: plugin registration complete.` with no sidebar
-registration error and no Python traceback, and a window capture confirmed:
+registration error and no Python traceback, and a screen capture confirmed:
 
 - the split-diamond mark rendering in Binary Ninja's own right rail under its
   active blue tint, legible beside the stock rail glyphs;
-- the flat header scope line and the frameless transcript;
-- the composer and its action glyphs;
-- send correctly disabled while the prompt is empty.
+- the two-band resting layout: one header row naming the function and its
+  address beside the settings and overflow glyphs, and one composer;
+- the empty state showing the function, its architecture, and the provider
+  actually configured in Binary Ninja user settings, above four suggested
+  questions;
+- the composer scope chip, keyboard hint, and send glyph, with send disabled
+  while the prompt is empty;
+- no status band at rest.
 
-That capture predates the second layout pass, which has been reviewed only
-through the Qt harness so far.
+Binary Ninja does not hot-reload Python plugins, so each pass required a fresh
+`-n` instance rather than a reload.
 
 Layout at other dock widths was reviewed separately with a Qt harness that
 loads the real `ui/sidebar_view.py` under Binary Ninja's own Python 3.13 and
@@ -161,9 +166,10 @@ than run headless. It covers 260-560 pixels including the suggestion empty
 state, the composer scope chip and its `+N` disclosure, the one-line answer
 footer, and expanded/collapsed Settings sections.
 
-Still unverified by hand: menu popups (overflow, `Compare with`), suggestion
-dispatch, status-line reveal and auto-hide, tab focus order, live theme
-switching, and the standing checklist items in
+Still unverified by hand, because they need clicking rather than rendering:
+menu popups (overflow, `Compare with`), suggestion dispatch, status-line
+reveal and auto-hide, tab focus order, live theme switching, and the standing
+checklist items in
 `development.md` for context-preview contents, evidence navigation,
 comparison, persistence, export, Clear deletion, cancellation, and
 Ollama/Claude requests.

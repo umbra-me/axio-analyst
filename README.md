@@ -118,7 +118,9 @@ python tools/plugin_dev.py status `
 4. Open **Settings**, select the provider, model, and reasoning effort, verify
    the executable path, and choose **Apply settings**.
 5. Place the cursor inside a function.
-6. Choose **Explain**, or enter a question and choose **Ask**.
+6. Choose one of the suggested questions, or type your own and press
+   `Ctrl+Enter` (or the send glyph). **Explain this function** is also in the
+   header overflow menu once a conversation is under way.
 
 The sidebar header names the current function and its start address. Until the
 conversation starts, the space below shows the function, its architecture, the
