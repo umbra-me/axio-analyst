@@ -11,11 +11,12 @@ quick start; these documents are the source of truth for detailed behavior.
 | [Setup and installation](setup.md) | Prerequisites, source and development installs, upgrades, removal, and first-run validation. |
 | [Configuration reference](configuration.md) | Every `axioAnalyst.*` setting, defaults, ranges, persistence, and UI behavior. |
 | [Provider contracts](providers.md) | Child-process commands, authentication boundary, input/output parsing, discovery, limits, and errors. |
-| [Architecture and roadmap](architecture.md) | Product boundaries, module responsibilities, threading, data flow, security model, and delivery phases. |
+| [Architecture](architecture.md) | Current dependency boundaries, module responsibilities, threading, data flow, and security model. |
+| [Roadmap](roadmap.md) | Product end state, current limitations, and future delivery phases. |
 | [Development and release guide](development.md) | Repository workflow, tests, extension points, manual GUI checks, and release procedure. |
 | [Troubleshooting](troubleshooting.md) | Startup, sidebar, provider, model discovery, timeout, rendering, and recovery diagnostics. |
-| [Current handoff](handoff.md) | Dated implementation state, verification evidence, local blocker, protected boundaries, and next work. |
-| [Extraction history](history.md) | Provenance of the standalone repository and naming transition. |
+| [Current handoff](handoff.md) | Dated implementation, live-install state, verification evidence, protected boundaries, and next work. |
+| [Extraction history](history.md) | Provenance of the standalone repository, naming transition, and package migration. |
 
 Repository-level policy documents remain at the root:
 
@@ -32,6 +33,8 @@ Repository-level policy documents remain at the root:
 - Record current behavior in the present tense. Put past release behavior in
   `CHANGELOG.md` or `history.md` instead of leaving stale notes in setup docs.
 - Keep the current implementation and future roadmap clearly separated.
+- Keep the current semantic version consistent with `plugin.json`; other docs
+  describe or link that source rather than defining an independent value.
 - Do not place credentials, proprietary binary material, machine-local settings
   values, or provider transcripts in documentation.
 - A handoff is a dated operational snapshot. Refresh it when repository,

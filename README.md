@@ -5,7 +5,7 @@ sends bounded, address-labelled High Level IL (HLIL) for the function under the
 cursor to a supervised Claude Code, Codex, or Ollama Cloud command-line
 harness, then streams the response into a native Binary Ninja sidebar.
 
-The current `0.7.0` release is a read-only vertical slice. It is useful for
+The current `0.8.0` release is a read-only vertical slice. It is useful for
 explaining functions, tracing values, recovering algorithms, and identifying
 areas that need deeper investigation. It does not rename symbols, change
 types, add comments, or otherwise modify the Binary Ninja database (BNDB).
@@ -24,11 +24,13 @@ types, add comments, or otherwise modify the Binary Ninja database (BNDB).
 - Background process execution, concurrent stdout/stderr draining, elapsed
   time, phase progress, timeout enforcement, and cancellation.
 - Explicit context disclosure and a bounded read-only data boundary.
+- Installed version visibility in the sidebar header, Settings page, log, and
+  **Plugins > Axio Analyst > About Axio Analyst**.
 
 ## Requirements
 
 - Binary Ninja 5.x with its Qt6 UI. Development is currently verified against
-  Binary Ninja `5.4.10326-dev`.
+  Binary Ninja `5.4.10350-dev`.
 - The Python runtime embedded in Binary Ninja; the plugin has no third-party
   Python dependencies beyond Binary Ninja and its bundled PySide6 modules.
 - At least one supported provider CLI installed, authenticated, and available
@@ -72,7 +74,26 @@ loaded by the current process are not hot-reloaded safely.
 
 For development from a separate checkout, use the bounded copier described in
 [Setup and installation](docs/setup.md). It copies only the runtime files and
-can report drift without changing the Binary Ninja user directory.
+can report drift without changing the Binary Ninja user directory. Upgrades
+from the former flat development layout can use its explicit
+`--prune-obsolete` migration flag while Binary Ninja is closed; arbitrary
+destination-only files are never removed.
+
+## Versioning
+
+`plugin.json` is the single source of truth for the semantic version. The
+runtime validates and reads that value through `core/version.py`; there is no
+second hard-coded Python version to synchronize. The installed version appears
+in Binary Ninja's plugin metadata, the sidebar header, Settings page, About
+command, and registration log.
+
+For a development copy, verify that every manifest-owned installed file and
+the metadata version match the checkout:
+
+```powershell
+python tools/plugin_dev.py status `
+  --plugins-dir "$env:APPDATA\Binary Ninja\plugins"
+```
 
 ## First request
 
@@ -91,13 +112,16 @@ shows the persisted configuration that will be used. While a request runs, the
 sidebar displays the current phase, elapsed time, streamed output where the
 provider supports it, and a **Stop** action.
 
-The plugin also registers two function commands for one-shot use:
+The plugin also registers these menu commands:
 
 - **Plugins > Axio Analyst > Explain current function**
 - **Plugins > Axio Analyst > Ask about current function...**
+- **Plugins > Axio Analyst > Open sidebar**
+- **Plugins > Axio Analyst > About Axio Analyst**
 
-Those commands use Binary Ninja's plain-text report surface. The sidebar keeps
-its own conversation transcript in memory for the lifetime of that widget.
+The Explain and Ask commands use Binary Ninja's plain-text report surface. The
+sidebar keeps its own conversation transcript in memory for the lifetime of
+that widget.
 
 ## Provider behavior
 
@@ -134,7 +158,8 @@ cited IL addresses before relying on them.
 - [Setup and installation](docs/setup.md)
 - [Configuration reference](docs/configuration.md)
 - [Provider contracts](docs/providers.md)
-- [Architecture and roadmap](docs/architecture.md)
+- [Architecture](docs/architecture.md)
+- [Roadmap](docs/roadmap.md)
 - [Development and release guide](docs/development.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Current handoff](docs/handoff.md)
@@ -149,10 +174,8 @@ The provider, prompt, parser, installer, and rendering layers are testable with
 stock Python and do not require importing Binary Ninja:
 
 ```powershell
-python -m unittest discover -s tests
-python -m compileall -q __init__.py models.py prompts.py providers.py `
-  registration.py rendering.py settings.py settings_page.py sidebar.py `
-  task.py tools tests
+python -m unittest discover -s tests -t .
+python -m compileall -q __init__.py application core host providers ui tools tests
 python -c "import json,pathlib; json.loads(pathlib.Path('plugin.json').read_text(encoding='utf-8'))"
 ```
 
@@ -172,11 +195,12 @@ Pop-Location
 
 ## Project status
 
-Version `0.7.0` implements the initial read-only vertical slice. Conversation
+Version `0.8.0` implements the initial read-only vertical slice. Conversation
 persistence, richer context packs, direct HTTP providers, credential-store and
 OAuth brokerage, structured evidence, reviewable BNDB changes, indexing, and
-agent tools remain roadmap work. The boundaries and delivery phases are
-documented in [Architecture and roadmap](docs/architecture.md).
+agent tools remain roadmap work. Current boundaries are documented in
+[Architecture](docs/architecture.md), with delivery phases in
+[Roadmap](docs/roadmap.md).
 
 Axio Analyst is independently implemented and is not affiliated with or based
 on proprietary Binary Ninja Sidekick code, prompts, or data. It is available

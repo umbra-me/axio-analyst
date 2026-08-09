@@ -6,12 +6,16 @@ breaking changes must still be documented with migration instructions.
 
 ## Unreleased
 
+## 0.8.0 - 2026-08-09
+
 ### Added
 
 - Publish the standalone Axio Analyst repository with complete setup,
   configuration, provider, architecture, development, troubleshooting, and
   handoff documentation.
 - Add a documentation ownership index and a manual Binary Ninja GUI checklist.
+- Add a validated semantic-version source backed by `plugin.json`, plus version
+  display in the sidebar, Settings page, log, and About command.
 
 ### Changed
 
@@ -20,6 +24,12 @@ breaking changes must still be documented with migration instructions.
   naming.
 - Establish the standalone repository as the product source of truth; the
   personal Binary Ninja configuration repository is only a local mirror.
+- Separate provider-neutral core and application logic, provider adapters,
+  Binary Ninja host integration, and Qt presentation into explicit packages.
+- Split provider, process, prompt, rendering, application, and distribution
+  tests so the test tree mirrors the runtime boundaries.
+- Teach the development installer to detect obsolete flat-layout modules and
+  optionally remove only that explicit migration allowlist.
 
 ## 0.7.0 - 2026-08-08
 

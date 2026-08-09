@@ -31,6 +31,16 @@ was installed under the new package directory. The standalone repository was
 then documented for public initial publication at
 `https://github.com/umbra-me/axio-analyst`.
 
+Version `0.8.0` replaced the flat runtime module layout with first-level
+packages for provider-neutral core and application logic, provider adapters,
+Binary Ninja host integration, and Qt presentation. The test suite was split
+to mirror those boundaries, and an explicit runtime manifest became the source
+for development installation and drift checks. The same release made
+`plugin.json` the validated semantic-version source and displayed it inside
+Binary Ninja. The package-based runtime was installed and visually verified in
+Binary Ninja Personal `5.4.10350-dev`; the obsolete flat modules were removed
+through the installer's exact migration allowlist.
+
 No proprietary implementation, prompt, or data from Binary Ninja Sidekick was
 used. Product direction is informed by the general category of integrated
 reverse-engineering assistants, while Axio Analyst's code, prompts, process
