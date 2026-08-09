@@ -42,6 +42,7 @@ RUNTIME_FILES = (
     "providers/process.py",
     "providers/streaming.py",
     "ui/__init__.py",
+    "ui/branding.py",
     "ui/markdown.py",
     "ui/progress.py",
     "ui/settings_page.py",
