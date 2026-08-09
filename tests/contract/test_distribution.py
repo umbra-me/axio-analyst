@@ -45,10 +45,26 @@ class TestRepositoryContract(unittest.TestCase):
         )
         self.assertIn("ui", metadata["type"])
 
-    def test_sidebar_icon_uses_axio_initials(self):
+    def test_sidebar_icon_is_the_painted_axio_mark(self):
         sidebar = (REPO_ROOT / "ui" / "sidebar.py").read_text(encoding="utf-8")
+        branding = (REPO_ROOT / "ui" / "branding.py").read_text(encoding="utf-8")
 
-        self.assertIn('            "AX",', sidebar)
+        self.assertIn(
+            "SidebarWidgetType.__init__(self, branding.sidebar_icon(), WIDGET_NAME)",
+            sidebar,
+        )
+        self.assertIn("def draw_mark(", branding)
+        self.assertNotIn("drawText(", branding)
+
+    def test_transcript_disables_markdown_html(self):
+        transcript = (REPO_ROOT / "ui" / "transcript.py").read_text(encoding="utf-8")
+        markdown = (REPO_ROOT / "ui" / "markdown.py").read_text(encoding="utf-8")
+
+        self.assertIn("MarkdownFeature.MarkdownNoHTML", transcript)
+        self.assertIn("sanitize_markdown", transcript)
+        self.assertEqual(transcript.count("insertMarkdown("), 1)
+        self.assertEqual(transcript.count("MARKDOWN_FEATURES"), 2)
+        self.assertNotIn("import html", markdown)
 
     def test_version_is_visible_in_binary_ninja_surfaces(self):
         sidebar_view = (REPO_ROOT / "ui" / "sidebar_view.py").read_text(
@@ -62,7 +78,7 @@ class TestRepositoryContract(unittest.TestCase):
         )
 
         self.assertIn('QtWidgets.QLabel(f"v{VERSION}")', sidebar_view)
-        self.assertIn("header.addWidget(self.version_label)", sidebar_view)
+        self.assertIn("header_detail.addWidget(self.version_label)", sidebar_view)
         self.assertIn('f"Axio Analyst v{VERSION}.', settings_page)
         self.assertIn('"Axio Analyst\\\\About Axio Analyst"', registration)
 

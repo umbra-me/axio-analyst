@@ -1,15 +1,54 @@
-"""Widget construction for the Axio Analyst sidebar."""
+"""Widget construction for the Axio Analyst sidebar.
+
+The chat surface is deliberately flat: the prompt editor is the only framed
+element, so the transcript reads as the primary surface instead of one panel
+among several. Secondary actions live in an overflow menu and the comparison
+provider lives under the Ask button, which keeps the resting layout to one
+action row and one status strip.
+"""
 
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from ..core.models import ContextOptions
 from ..core.version import VERSION
+from . import branding
 from .settings_page import SettingsPage
-
 
 TIGHT_SPACING = 4
 ROW_SPACING = 8
 SECTION_SPACING = 12
+
+#: Below this dock width the action row drops button text and keeps glyphs.
+NARROW_WIDTH = 300
+
+CHROME_TONE = "chrome"
+ACTION_TONE = "action"
+PRIMARY_TONE = "primary"
+
+CHAT_PAGE = 0
+SETTINGS_PAGE = 1
+CONTEXT_PAGE = 2
+
+COMPARISON_CHOICES = (
+    ("No comparison", ""),
+    ("Claude Code", "claude-code"),
+    ("Codex", "codex-cli"),
+    ("Ollama Cloud", "ollama-cloud"),
+)
+
+
+def shrink(widget: QtWidgets.QWidget, delta: float = -1.0) -> QtWidgets.QWidget:
+    font = widget.font()
+    font.setPointSizeF(max(8.0, font.pointSizeF() + delta))
+    widget.setFont(font)
+    return widget
+
+
+def emphasize(widget: QtWidgets.QWidget) -> QtWidgets.QWidget:
+    font = widget.font()
+    font.setWeight(QtGui.QFont.Weight.DemiBold)
+    widget.setFont(font)
+    return widget
 
 
 class ElidingLabel(QtWidgets.QLabel):
@@ -65,6 +104,14 @@ class PromptEdit(QtWidgets.QPlainTextEdit):
         super().keyPressEvent(event)
 
 
+def separator() -> QtWidgets.QFrame:
+    line = QtWidgets.QFrame()
+    line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+    line.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+    line.setFixedHeight(1)
+    return line
+
+
 class SidebarView(QtWidgets.QWidget):
     askRequested = QtCore.Signal()
     clearRequested = QtCore.Signal()
@@ -76,298 +123,252 @@ class SidebarView(QtWidgets.QWidget):
 
     def __init__(self, parent: QtWidgets.QWidget | None = None):
         super().__init__(parent)
+        self._glyph_buttons: list[tuple[QtWidgets.QAbstractButton, str, str]] = []
+        self._dim_widgets: list[QtWidgets.QWidget] = []
+        self._collapsible_labels: list[QtWidgets.QToolButton] = []
+        self._narrow = False
+        self._ready = False
         self._build_interface()
+        self._apply_theme()
+        self._ready = True
+
+    # -- construction -----------------------------------------------------
+
+    def _glyph_button(
+        self,
+        name: str,
+        text: str = "",
+        *,
+        tone: str = CHROME_TONE,
+    ) -> QtWidgets.QToolButton:
+        button = QtWidgets.QToolButton()
+        button.setAutoRaise(tone != PRIMARY_TONE)
+        button.setIconSize(QtCore.QSize(18, 18))
+        button.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
+        if text:
+            button.setText(text)
+            button.setToolButtonStyle(
+                QtCore.Qt.ToolButtonStyle.ToolButtonTextBesideIcon
+            )
+        self._glyph_buttons.append((button, name, tone))
+        return button
+
+    def _dim(self, widget: QtWidgets.QWidget) -> QtWidgets.QWidget:
+        self._dim_widgets.append(widget)
+        return widget
 
     def _build_interface(self) -> None:
         root = QtWidgets.QVBoxLayout(self)
-        root.setContentsMargins(8, 8, 8, 8)
+        root.setContentsMargins(10, 8, 10, 8)
         root.setSpacing(ROW_SPACING)
-
-        header = QtWidgets.QHBoxLayout()
-        self.chat_tab_button = QtWidgets.QToolButton()
-        self.chat_tab_button.setText("Chat")
-        self.chat_tab_button.setCheckable(True)
-        self.chat_tab_button.setAccessibleName("Show conversation")
-        self.settings_tab_button = QtWidgets.QToolButton()
-        self.settings_tab_button.setText("Settings")
-        self.settings_tab_button.setCheckable(True)
-        self.settings_tab_button.setAccessibleName("Show Axio Analyst settings")
-        self.page_buttons = QtWidgets.QButtonGroup(self)
-        self.page_buttons.setExclusive(True)
-        self.page_buttons.addButton(self.chat_tab_button)
-        self.page_buttons.addButton(self.settings_tab_button)
-        header.addWidget(self.chat_tab_button)
-        header.addWidget(self.settings_tab_button)
-        header.addStretch(1)
-        self.version_label = QtWidgets.QLabel(f"v{VERSION}")
-        self.version_label.setAccessibleName(f"Axio Analyst version {VERSION}")
-        self.version_label.setToolTip(f"Axio Analyst version {VERSION}")
-        version_font = self.version_label.font()
-        version_font.setPointSizeF(max(8.0, version_font.pointSizeF() - 1.0))
-        self.version_label.setFont(version_font)
-        header.addWidget(self.version_label)
-        root.addLayout(header)
 
         self.pages = QtWidgets.QStackedWidget()
         root.addWidget(self.pages, 1)
 
-        chat_page = QtWidgets.QWidget()
-        chat_layout = QtWidgets.QVBoxLayout(chat_page)
-        chat_layout.setContentsMargins(0, 0, 0, 0)
-        chat_layout.setSpacing(ROW_SPACING)
+        self.pages.addWidget(self._build_chat_page())
+        self.settings_page = SettingsPage()
+        self.pages.addWidget(self.settings_page)
+        self.pages.addWidget(self._build_context_page())
 
-        context_frame = QtWidgets.QFrame()
-        context_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        context_layout = QtWidgets.QVBoxLayout(context_frame)
-        context_layout.setContentsMargins(8, 6, 8, 6)
-        context_layout.setSpacing(TIGHT_SPACING)
+        self._connect()
+        self.pages.setCurrentIndex(CHAT_PAGE)
 
-        context_header = QtWidgets.QHBoxLayout()
-        context_header.setSpacing(ROW_SPACING)
-        self.context_name = ElidingLabel("No function selected")
-        name_font = self.context_name.font()
-        name_font.setWeight(QtGui.QFont.Weight.DemiBold)
-        self.context_name.setFont(name_font)
-        self.context_button = QtWidgets.QToolButton()
-        self.context_button.setText("Context")
-        self.context_button.setToolTip("Choose and preview the exact request context")
-        context_header.addWidget(self.context_name, 1)
-        context_header.addWidget(self.context_button)
-        context_layout.addLayout(context_header)
+    def _build_chat_page(self) -> QtWidgets.QWidget:
+        page = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(TIGHT_SPACING)
 
-        context_meta = QtWidgets.QHBoxLayout()
-        context_meta.setSpacing(ROW_SPACING)
-        self.context_detail = ElidingLabel(
-            "Move the cursor into a function to begin."
+        header = QtWidgets.QHBoxLayout()
+        header.setSpacing(TIGHT_SPACING)
+        self.context_name = emphasize(ElidingLabel("No function selected"))
+        self.settings_button = self._glyph_button("settings")
+        self.settings_button.setCheckable(True)
+        self.settings_button.setToolTip("Axio Analyst settings")
+        self.settings_button.setAccessibleName("Show Axio Analyst settings")
+        self.overflow_button = self._glyph_button("overflow")
+        self.overflow_button.setToolTip("Conversation actions")
+        self.overflow_button.setAccessibleName("Conversation actions")
+        self.overflow_menu = QtWidgets.QMenu(self.overflow_button)
+        self.export_action = self.overflow_menu.addAction("Export conversation...")
+        self.clear_action = self.overflow_menu.addAction("Clear conversation")
+        self.overflow_button.setMenu(self.overflow_menu)
+        self.overflow_button.setPopupMode(
+            QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup
         )
-        detail_font = self.context_detail.font()
-        detail_font.setPointSizeF(max(8.0, detail_font.pointSizeF() - 1.0))
-        self.context_detail.setFont(detail_font)
-        self.context_summary = QtWidgets.QLabel("Not previewed")
-        self.context_summary.setAccessibleName("Context snapshot summary")
-        self.context_summary.setSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Maximum,
-            QtWidgets.QSizePolicy.Policy.Preferred,
-        )
-        summary_font = self.context_summary.font()
-        summary_font.setPointSizeF(max(8.0, summary_font.pointSizeF() - 1.0))
-        self.context_summary.setFont(summary_font)
-        context_meta.addWidget(self.context_detail, 1)
-        context_meta.addWidget(self.context_summary)
-        context_layout.addLayout(context_meta)
-        chat_layout.addWidget(context_frame)
+        header.addWidget(self.context_name, 1)
+        header.addWidget(self.settings_button)
+        header.addWidget(self.overflow_button)
+        layout.addLayout(header)
 
-        transcript_header = QtWidgets.QHBoxLayout()
-        transcript_header.setSpacing(ROW_SPACING)
-        conversation_label = QtWidgets.QLabel("Conversation")
-        conversation_font = conversation_label.font()
-        conversation_font.setWeight(QtGui.QFont.Weight.DemiBold)
-        conversation_label.setFont(conversation_font)
-        self.backend_label = ElidingLabel()
-        backend_font = self.backend_label.font()
-        backend_font.setPointSizeF(max(8.0, backend_font.pointSizeF() - 1.0))
-        self.backend_label.setFont(backend_font)
-        self.clear_button = QtWidgets.QToolButton()
-        self.clear_button.setText("Clear")
-        self.clear_button.setToolTip("Clear this sidebar's conversation")
-        self.clear_button.setAccessibleName("Clear conversation")
-        self.export_button = QtWidgets.QToolButton()
-        self.export_button.setText("Export")
-        self.export_button.setToolTip("Export this conversation as Markdown")
-        self.export_button.setAccessibleName("Export conversation")
-        transcript_header.addWidget(conversation_label)
-        transcript_header.addWidget(self.backend_label, 1)
-        transcript_header.addWidget(self.export_button)
-        transcript_header.addWidget(self.clear_button)
-        chat_layout.addLayout(transcript_header)
+        header_detail = QtWidgets.QHBoxLayout()
+        header_detail.setSpacing(ROW_SPACING)
+        self.context_detail = self._dim(
+            shrink(ElidingLabel("Move the cursor into a function to begin."))
+        )
+        self.version_label = QtWidgets.QLabel(f"v{VERSION}")
+        self.version_label.setAccessibleName(f"Axio Analyst version {VERSION}")
+        self.version_label.setToolTip(f"Axio Analyst version {VERSION}")
+        self._dim(shrink(self.version_label))
+        header_detail.addWidget(self.context_detail, 1)
+        header_detail.addWidget(self.version_label)
+        layout.addLayout(header_detail)
+        layout.addSpacing(TIGHT_SPACING)
+        layout.addWidget(separator())
 
         self.transcript = QtWidgets.QTextBrowser()
+        self.transcript.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.transcript.setOpenLinks(False)
         self.transcript.setOpenExternalLinks(False)
         self.transcript.setUndoRedoEnabled(False)
         self.transcript.setAccessibleName("Axio Analyst conversation")
         self.transcript.setMinimumHeight(160)
-        self.transcript.document().setDocumentMargin(8)
-        palette = self.transcript.palette()
-        code_background = palette.color(
-            QtGui.QPalette.ColorRole.AlternateBase
-        ).name()
-        border_color = palette.color(QtGui.QPalette.ColorRole.Mid).name()
-        self.transcript.document().setDefaultStyleSheet(
-            "pre { margin: 8px 0; padding: 8px; background-color: "
-            f"{code_background}; border: 1px solid {border_color}; }} "
-            "code { font-family: monospace; } "
-            "h1, h2, h3 { margin-top: 12px; margin-bottom: 4px; } "
-            "p { margin-top: 4px; margin-bottom: 8px; }"
-        )
-        chat_layout.addWidget(self.transcript, 1)
-
-        composer = QtWidgets.QFrame()
-        composer.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        composer_layout = QtWidgets.QVBoxLayout(composer)
-        composer_layout.setContentsMargins(8, 6, 8, 6)
-        composer_layout.setSpacing(TIGHT_SPACING)
-
-        prompt_header = QtWidgets.QHBoxLayout()
-        prompt_header.setSpacing(ROW_SPACING)
-        prompt_label = QtWidgets.QLabel("Ask a question")
-        prompt_font = prompt_label.font()
-        prompt_font.setWeight(QtGui.QFont.Weight.DemiBold)
-        prompt_label.setFont(prompt_font)
-        shortcut_label = QtWidgets.QLabel("Ctrl+Enter to send")
-        shortcut_font = shortcut_label.font()
-        shortcut_font.setPointSizeF(max(8.0, shortcut_font.pointSizeF() - 1.0))
-        shortcut_label.setFont(shortcut_font)
-        self.compare_toggle = QtWidgets.QToolButton()
-        self.compare_toggle.setText("Compare")
-        self.compare_toggle.setCheckable(True)
-        self.compare_toggle.setToolTip("Compare the response with a second provider")
-        prompt_header.addWidget(prompt_label)
-        prompt_header.addStretch(1)
-        prompt_header.addWidget(shortcut_label)
-        prompt_header.addWidget(self.compare_toggle)
-        composer_layout.addLayout(prompt_header)
+        self.transcript.document().setDocumentMargin(2)
+        layout.addWidget(self.transcript, 1)
 
         self.prompt = PromptEdit()
         self.prompt.setPlaceholderText(
-            "Trace a value, recover an algorithm, or explain behavior..."
+            "Ask about this function...    Ctrl+Enter to send"
         )
         self.prompt.setAccessibleName("Question about current function")
-        prompt_height = max(52, self.prompt.fontMetrics().lineSpacing() * 3 + 12)
-        self.prompt.setFixedHeight(prompt_height)
+        self.prompt.setFixedHeight(
+            max(54, self.prompt.fontMetrics().lineSpacing() * 3 + 14)
+        )
         self.prompt.setTabChangesFocus(True)
-        composer_layout.addWidget(self.prompt)
-
-        self.comparison_panel = QtWidgets.QWidget()
-        compare_row = QtWidgets.QHBoxLayout(self.comparison_panel)
-        compare_row.setContentsMargins(0, 0, 0, 0)
-        compare_row.setSpacing(ROW_SPACING)
-        compare_label = QtWidgets.QLabel("Second provider")
-        self.compare_combo = QtWidgets.QComboBox()
-        self.compare_combo.setAccessibleName("Optional comparison provider")
-        self.compare_combo.addItem("No comparison", "")
-        self.compare_combo.addItem("Claude Code", "claude-code")
-        self.compare_combo.addItem("Codex", "codex-cli")
-        self.compare_combo.addItem("Ollama Cloud", "ollama-cloud")
-        compare_row.addWidget(compare_label)
-        compare_row.addWidget(self.compare_combo, 1)
-        self.comparison_panel.hide()
-        composer_layout.addWidget(self.comparison_panel)
+        layout.addWidget(self.prompt)
 
         actions = QtWidgets.QHBoxLayout()
-        actions.setSpacing(ROW_SPACING)
-        self.explain_button = QtWidgets.QPushButton("Explain function")
+        actions.setSpacing(TIGHT_SPACING)
+        self.context_button = self._glyph_button(
+            "scope", "Context", tone=ACTION_TONE
+        )
+        self.context_button.setAccessibleName("Request context")
+        self.explain_button = self._glyph_button(
+            "explain", "Explain", tone=ACTION_TONE
+        )
         self.explain_button.setToolTip("Explain the current function")
-        self.ask_button = QtWidgets.QPushButton("Ask")
+        self.explain_button.setAccessibleName("Explain current function")
+
+        self.ask_button = self._glyph_button("send", "Ask", tone=PRIMARY_TONE)
         self.ask_button.setToolTip("Send question (Ctrl+Enter)")
-        self.ask_button.setDefault(True)
-        self.stop_button = QtWidgets.QPushButton("Stop request")
+        self.ask_button.setAccessibleName("Send question")
+        self.ask_menu = QtWidgets.QMenu(self.ask_button)
+        self.comparison_group = QtGui.QActionGroup(self)
+        self.comparison_group.setExclusive(True)
+        compare_menu = self.ask_menu.addMenu("Compare with")
+        compare_menu.setIcon(self._compare_icon())
+        for label, backend in COMPARISON_CHOICES:
+            action = compare_menu.addAction(label)
+            action.setCheckable(True)
+            action.setData(backend)
+            action.setChecked(not backend)
+            self.comparison_group.addAction(action)
+        self.compare_menu = compare_menu
+        self.ask_button.setMenu(self.ask_menu)
+        self.ask_button.setPopupMode(
+            QtWidgets.QToolButton.ToolButtonPopupMode.MenuButtonPopup
+        )
+
+        self.stop_button = self._glyph_button("stop", "Stop", tone=PRIMARY_TONE)
         self.stop_button.setToolTip("Cancel the active request")
+        self.stop_button.setAccessibleName("Stop request")
+
         self.submit_action = QtWidgets.QStackedWidget()
         self.submit_action.addWidget(self.ask_button)
         self.submit_action.addWidget(self.stop_button)
         self.submit_action.setSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Minimum,
             QtWidgets.QSizePolicy.Policy.Fixed,
         )
+        self.submit_action.setMinimumWidth(96)
+        self.submit_action.setFixedHeight(self.ask_button.sizeHint().height())
+
+        actions.addWidget(self.context_button)
+        actions.addStretch(1)
         actions.addWidget(self.explain_button)
-        actions.addWidget(self.submit_action, 1)
-        composer_layout.addLayout(actions)
+        actions.addWidget(self.submit_action)
+        layout.addLayout(actions)
+
+        status_row = QtWidgets.QHBoxLayout()
+        status_row.setSpacing(ROW_SPACING)
+        self.status_label = self._dim(shrink(ElidingLabel("Ready")))
+        self.status_label.setAccessibleName("Request status")
+        self.backend_label = self._dim(shrink(ElidingLabel()))
+        self.backend_label.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight
+            | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        self.backend_label.setAccessibleName("Configured provider")
+        self.elapsed_label = self._dim(shrink(QtWidgets.QLabel()))
+        self.elapsed_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        self.elapsed_label.setAccessibleName("Request elapsed time")
+        status_row.addWidget(self.status_label, 3)
+        status_row.addWidget(self.backend_label, 4)
+        status_row.addWidget(self.elapsed_label)
+        layout.addLayout(status_row)
 
         self.progress_bar = QtWidgets.QProgressBar()
         self.progress_bar.setTextVisible(False)
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
-        self.progress_bar.setMaximumHeight(4)
+        self.progress_bar.setFixedHeight(3)
         self.progress_bar.setAccessibleName("Request progress")
         self.progress_bar.hide()
-        composer_layout.addWidget(self.progress_bar)
+        layout.addWidget(self.progress_bar)
+        return page
 
-        status_row = QtWidgets.QHBoxLayout()
-        status_row.setSpacing(ROW_SPACING)
-        self.status_label = ElidingLabel("Ready")
-        self.status_label.setAccessibleName("Request status")
-        self.elapsed_label = QtWidgets.QLabel()
-        self.elapsed_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
-        self.elapsed_label.setAccessibleName("Request elapsed time")
-        status_row.addWidget(self.status_label, 1)
-        status_row.addWidget(self.elapsed_label)
-        composer_layout.addLayout(status_row)
+    def _build_context_page(self) -> QtWidgets.QWidget:
+        page = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(ROW_SPACING)
 
-        self.disclosure = ElidingLabel(
-            "Scope: current function · extra context is opt-in"
+        header = QtWidgets.QHBoxLayout()
+        header.setSpacing(TIGHT_SPACING)
+        self.context_back_button = self._glyph_button("back")
+        self.context_back_button.setToolTip("Back to the conversation")
+        self.context_back_button.setAccessibleName("Back to conversation")
+        header.addWidget(self.context_back_button)
+        header.addWidget(emphasize(QtWidgets.QLabel("Request context")), 1)
+        layout.addLayout(header)
+
+        note = self._dim(
+            shrink(
+                QtWidgets.QLabel(
+                    "The current function is always included. Add only the "
+                    "nearby evidence this request needs."
+                )
+            )
         )
-        self.disclosure.setAccessibleName("Request context disclosure")
-        self.disclosure.set_detail_tooltip(
-            "The primary function is included by default. Only visibly enabled, "
-            "bounded context packs are added when you ask."
-        )
-        disclosure_font = self.disclosure.font()
-        disclosure_font.setPointSizeF(
-            max(8.0, disclosure_font.pointSizeF() - 1.0)
-        )
-        self.disclosure.setFont(disclosure_font)
-        composer_layout.addWidget(self.disclosure)
-        chat_layout.addWidget(composer)
+        note.setWordWrap(True)
+        layout.addWidget(note)
+        layout.addWidget(separator())
 
-        context_page = QtWidgets.QWidget()
-        context_page_layout = QtWidgets.QVBoxLayout(context_page)
-        context_page_layout.setContentsMargins(0, 0, 0, 0)
-        context_page_layout.setSpacing(SECTION_SPACING)
-
-        context_page_header = QtWidgets.QHBoxLayout()
-        context_title = QtWidgets.QLabel("Request context")
-        context_title_font = context_title.font()
-        context_title_font.setWeight(QtGui.QFont.Weight.DemiBold)
-        context_title.setFont(context_title_font)
-        self.context_back_button = QtWidgets.QToolButton()
-        self.context_back_button.setText("Back to chat")
-        context_page_header.addWidget(context_title)
-        context_page_header.addStretch(1)
-        context_page_header.addWidget(self.context_back_button)
-        context_page_layout.addLayout(context_page_header)
-
-        context_note = QtWidgets.QLabel(
-            "The current function is always included. Add only the nearby "
-            "evidence this request needs."
-        )
-        context_note.setWordWrap(True)
-        context_page_layout.addWidget(context_note)
-
-        options_group = QtWidgets.QGroupBox("Optional context packs")
-        options_layout = QtWidgets.QVBoxLayout(options_group)
-        options_layout.setSpacing(TIGHT_SPACING)
         self.selection_context = QtWidgets.QCheckBox("Current selection")
         self.callers_context = QtWidgets.QCheckBox("Direct callers (3)")
         self.callees_context = QtWidgets.QCheckBox("Direct callees (5)")
         self.strings_context = QtWidgets.QCheckBox("Referenced strings (20)")
         self.imports_context = QtWidgets.QCheckBox("Referenced imports (20)")
         self.types_context = QtWidgets.QCheckBox("Relevant types")
-        context_checks = (
-            self.selection_context,
-            self.callers_context,
-            self.callees_context,
-            self.strings_context,
-            self.imports_context,
-            self.types_context,
-        )
-        for check in context_checks:
-            options_layout.addWidget(check)
-            check.toggled.connect(
-                lambda *_args: self.contextOptionsChanged.emit()
-            )
-        context_page_layout.addWidget(options_group)
+        for check in self.context_checks():
+            layout.addWidget(check)
+            check.toggled.connect(lambda *_args: self.contextOptionsChanged.emit())
 
+        layout.addWidget(separator())
         preview_row = QtWidgets.QHBoxLayout()
-        preview_label = QtWidgets.QLabel("Exact request preview")
-        preview_font = preview_label.font()
-        preview_font.setWeight(QtGui.QFont.Weight.DemiBold)
-        preview_label.setFont(preview_font)
-        self.preview_button = QtWidgets.QPushButton("Build preview")
-        preview_row.addWidget(preview_label)
-        preview_row.addStretch(1)
+        preview_row.setSpacing(TIGHT_SPACING)
+        self.context_summary = self._dim(
+            shrink(ElidingLabel("Current function only · not previewed"))
+        )
+        self.context_summary.setAccessibleName("Context snapshot summary")
+        self.preview_button = self._glyph_button(
+            "preview", "Build preview", tone=PRIMARY_TONE
+        )
+        self.preview_button.setAccessibleName("Build exact context preview")
+        preview_row.addWidget(self.context_summary, 1)
         preview_row.addWidget(self.preview_button)
-        context_page_layout.addLayout(preview_row)
+        layout.addLayout(preview_row)
+
         self.context_preview = QtWidgets.QPlainTextEdit()
         self.context_preview.setReadOnly(True)
         self.context_preview.setPlaceholderText(
@@ -375,49 +376,116 @@ class SidebarView(QtWidgets.QWidget):
         )
         self.context_preview.setAccessibleName("Exact provider context preview")
         self.context_preview.setMinimumHeight(120)
-        context_page_layout.addWidget(self.context_preview, 1)
+        layout.addWidget(self.context_preview, 1)
+        return page
 
-        self.settings_page = SettingsPage()
-        self.pages.addWidget(chat_page)
-        self.pages.addWidget(self.settings_page)
-        self.pages.addWidget(context_page)
-
-        self.chat_tab_button.clicked.connect(self.show_chat)
-        self.settings_tab_button.clicked.connect(self.show_settings)
+    def _connect(self) -> None:
+        self.settings_button.toggled.connect(self._settings_toggled)
         self.context_button.clicked.connect(self.show_context)
         self.context_back_button.clicked.connect(self.show_chat)
-        self.clear_button.clicked.connect(lambda *_: self.clearRequested.emit())
-        self.export_button.clicked.connect(lambda *_: self.exportRequested.emit())
+        self.settings_page.backRequested.connect(self.show_chat)
+        self.clear_action.triggered.connect(lambda *_: self.clearRequested.emit())
+        self.export_action.triggered.connect(lambda *_: self.exportRequested.emit())
         self.explain_button.clicked.connect(lambda *_: self.explainRequested.emit())
         self.ask_button.clicked.connect(lambda *_: self.askRequested.emit())
         self.prompt.submitRequested.connect(self.askRequested.emit)
         self.stop_button.clicked.connect(lambda *_: self.stopRequested.emit())
         self.preview_button.clicked.connect(lambda *_: self.previewRequested.emit())
-        self.compare_toggle.toggled.connect(self.comparison_panel.setVisible)
-        self.setTabOrder(self.chat_tab_button, self.settings_tab_button)
-        self.setTabOrder(self.settings_tab_button, self.context_button)
-        self.setTabOrder(self.context_button, self.export_button)
-        self.setTabOrder(self.export_button, self.clear_button)
-        self.setTabOrder(self.clear_button, self.prompt)
-        self.setTabOrder(self.prompt, self.ask_button)
-        self.setTabOrder(self.ask_button, self.explain_button)
-        self.setTabOrder(self.explain_button, self.compare_toggle)
-        self.chat_tab_button.setChecked(True)
-        self.pages.setCurrentIndex(0)
+
+        self.setTabOrder(self.settings_button, self.overflow_button)
+        self.setTabOrder(self.overflow_button, self.transcript)
+        self.setTabOrder(self.transcript, self.prompt)
+        self.setTabOrder(self.prompt, self.context_button)
+        self.setTabOrder(self.context_button, self.explain_button)
+        self.setTabOrder(self.explain_button, self.ask_button)
+        self.setTabOrder(self.ask_button, self.stop_button)
+        self.setTabOrder(self.context_back_button, self.selection_context)
+        self.setTabOrder(self.types_context, self.preview_button)
+
+    # -- theming and responsiveness ---------------------------------------
+
+    def _compare_icon(self) -> QtGui.QIcon:
+        return branding.glyph_icon(
+            "compare",
+            self.palette().color(QtGui.QPalette.ColorRole.WindowText),
+        )
+
+    def _apply_theme(self) -> None:
+        palette = self.palette()
+        foreground = palette.color(QtGui.QPalette.ColorRole.WindowText)
+        muted = palette.color(QtGui.QPalette.ColorRole.PlaceholderText)
+        tones = {
+            CHROME_TONE: muted,
+            ACTION_TONE: foreground,
+            PRIMARY_TONE: palette.color(QtGui.QPalette.ColorRole.ButtonText),
+        }
+        for button, name, tone in self._glyph_buttons:
+            button.setIcon(branding.glyph_icon(name, tones[tone]))
+        for widget in self._dim_widgets:
+            widget_palette = widget.palette()
+            widget_palette.setColor(QtGui.QPalette.ColorRole.WindowText, muted)
+            widget.setPalette(widget_palette)
+        self.compare_menu.setIcon(branding.glyph_icon("compare", foreground))
+
+        transcript_palette = self.transcript.palette()
+        transcript_palette.setColor(
+            QtGui.QPalette.ColorRole.Base,
+            palette.color(QtGui.QPalette.ColorRole.Window),
+        )
+        self.transcript.setPalette(transcript_palette)
+
+    def changeEvent(self, event: QtCore.QEvent) -> None:
+        super().changeEvent(event)
+        if event.type() == QtCore.QEvent.Type.PaletteChange:
+            self._apply_theme()
+
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(event)
+        narrow = self.width() < NARROW_WIDTH
+        if not self._ready or narrow == self._narrow:
+            return
+        self._narrow = narrow
+        self.explain_button.setToolButtonStyle(
+            QtCore.Qt.ToolButtonStyle.ToolButtonIconOnly
+            if narrow
+            else QtCore.Qt.ToolButtonStyle.ToolButtonTextBesideIcon
+        )
+        self.settings_page.set_narrow(narrow)
+        self.refresh_scope_disclosure()
+
+    # -- navigation --------------------------------------------------------
+
+    def _settings_toggled(self, checked: bool) -> None:
+        if checked:
+            self.pages.setCurrentIndex(SETTINGS_PAGE)
+        elif self.pages.currentIndex() == SETTINGS_PAGE:
+            self.pages.setCurrentIndex(CHAT_PAGE)
+            self.prompt.setFocus()
 
     def show_chat(self, *_args: object) -> None:
-        self.chat_tab_button.setChecked(True)
-        self.pages.setCurrentIndex(0)
+        self.settings_button.setChecked(False)
+        self.pages.setCurrentIndex(CHAT_PAGE)
         self.prompt.setFocus()
 
     def show_settings(self, *_args: object) -> None:
-        self.settings_tab_button.setChecked(True)
-        self.pages.setCurrentIndex(1)
+        self.settings_button.setChecked(True)
 
     def show_context(self, *_args: object) -> None:
-        self.chat_tab_button.setChecked(True)
-        self.pages.setCurrentIndex(2)
+        self.settings_button.setChecked(False)
+        self.pages.setCurrentIndex(CONTEXT_PAGE)
         self.context_back_button.setFocus()
+
+    # -- state -------------------------------------------------------------
+
+    def context_checks(self) -> tuple[QtWidgets.QCheckBox, ...]:
+        return (
+            self.selection_context,
+            self.callers_context,
+            self.callees_context,
+            self.strings_context,
+            self.imports_context,
+            self.types_context,
+        )
 
     def selected_context_options(self) -> ContextOptions:
         return ContextOptions(
@@ -429,11 +497,57 @@ class SidebarView(QtWidgets.QWidget):
             include_types=self.types_context.isChecked(),
         )
 
+    def enabled_pack_count(self) -> int:
+        return sum(1 for check in self.context_checks() if check.isChecked())
+
     def selected_comparison_backend(self) -> str:
-        return str(self.compare_combo.currentData() or "")
+        action = self.comparison_group.checkedAction()
+        return str(action.data() or "") if action is not None else ""
+
+    def clear_comparison(self) -> None:
+        for action in self.comparison_group.actions():
+            if not action.data():
+                action.setChecked(True)
+                return
+
+    def set_comparison_enabled(self, enabled: bool) -> None:
+        self.compare_menu.setEnabled(enabled)
+
+    def refresh_scope_disclosure(self) -> None:
+        """Keep the opt-in extra-context state visible at every dock width.
+
+        A narrow dock drops the word ``Context`` but never the pack count, so
+        the non-default state stays legible where space is scarcest.
+        """
+        packs = self.enabled_pack_count()
+        if packs:
+            enabled = ", ".join(
+                check.text() for check in self.context_checks() if check.isChecked()
+            )
+            self.context_button.setText(
+                f"+{packs}" if self._narrow else f"Context +{packs}"
+            )
+            self.context_button.setToolButtonStyle(
+                QtCore.Qt.ToolButtonStyle.ToolButtonTextBesideIcon
+            )
+            self.context_button.setToolTip(
+                "Request context: current function plus "
+                f"{packs} opt-in pack{'s' if packs != 1 else ''} ({enabled}). "
+                "Choose to review or preview the exact snapshot."
+            )
+        else:
+            self.context_button.setText("" if self._narrow else "Context")
+            self.context_button.setToolButtonStyle(
+                QtCore.Qt.ToolButtonStyle.ToolButtonIconOnly
+                if self._narrow
+                else QtCore.Qt.ToolButtonStyle.ToolButtonTextBesideIcon
+            )
+            self.context_button.setToolTip(
+                "Request context: current function only. Choose to add "
+                "bounded opt-in packs or preview the exact snapshot."
+            )
 
     def set_context_snapshot(self, summary: str, preview: str) -> None:
         display_summary = summary if preview else "Not previewed"
         self.context_summary.setText(display_summary)
-        self.context_summary.setToolTip(display_summary)
         self.context_preview.setPlainText(preview)

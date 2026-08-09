@@ -13,7 +13,7 @@ from binaryninjaui import (
     UIContext,
     ViewFrame,
 )
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from ..application import ConversationMessage, ConversationStore, new_record
 from ..core.evidence import classify_evidence
@@ -29,6 +29,7 @@ from ..host.settings import (
 )
 from ..host.storage import binary_fingerprint, conversation_store
 from ..host.task import AnalyzeFunctionTask, ContextPreviewTask
+from . import branding
 from .progress import RequestProgress
 from .sidebar_view import SidebarView
 from .transcript import Transcript
@@ -93,6 +94,7 @@ class AxioAnalystSidebar(SidebarWidget):
         self.destroyed.connect(self._mark_dead)
         self._load_transcript()
         self._refresh_backend_label()
+        self.view.refresh_scope_disclosure()
         self._update_actions()
         if self._selected_backend() == "ollama-cloud":
             self._discover_ollama_models()
@@ -103,7 +105,7 @@ class AxioAnalystSidebar(SidebarWidget):
 
     def _settings_provider_changed(self, backend: str) -> None:
         if self.view.selected_comparison_backend() == backend:
-            self.view.compare_combo.setCurrentIndex(0)
+            self.view.clear_comparison()
         self._update_actions()
         if backend == "ollama-cloud":
             self._discover_ollama_models()
@@ -300,6 +302,7 @@ class AxioAnalystSidebar(SidebarWidget):
 
     def _invalidate_context_preview(self, *_args: object) -> None:
         self.view.set_context_snapshot("Preview not built", "")
+        self.view.refresh_scope_disclosure()
 
     def _current_selection(self) -> Optional[tuple[int, int]]:
         if self.frame is None:
@@ -382,11 +385,12 @@ class AxioAnalystSidebar(SidebarWidget):
             ready and bool(self.view.prompt.toPlainText().strip())
         )
         self.view.stop_button.setEnabled(self._task is not None)
-        self.view.clear_button.setEnabled(not busy)
-        self.view.export_button.setEnabled(not busy and bool(self.conversation.messages))
+        self.view.clear_action.setEnabled(not busy)
+        self.view.export_action.setEnabled(
+            not busy and bool(self.conversation.messages)
+        )
         self.view.preview_button.setEnabled(ready)
-        self.view.compare_toggle.setEnabled(not busy)
-        self.view.compare_combo.setEnabled(not busy)
+        self.view.set_comparison_enabled(not busy)
         self.view.submit_action.setCurrentWidget(
             self.view.stop_button if self._task is not None else self.view.ask_button
         )
@@ -559,18 +563,7 @@ class AxioAnalystSidebar(SidebarWidget):
 
 class AxioAnalystSidebarType(SidebarWidgetType):
     def __init__(self):
-        icon = QtGui.QImage(56, 56, QtGui.QImage.Format.Format_ARGB32)
-        icon.fill(0)
-        painter = QtGui.QPainter(icon)
-        painter.setFont(QtGui.QFont("Open Sans", 28, QtGui.QFont.Weight.DemiBold))
-        painter.setPen(QtGui.QColor(255, 255, 255, 255))
-        painter.drawText(
-            QtCore.QRectF(0, 0, 56, 56),
-            QtCore.Qt.AlignmentFlag.AlignCenter,
-            "AX",
-        )
-        painter.end()
-        SidebarWidgetType.__init__(self, icon, WIDGET_NAME)
+        SidebarWidgetType.__init__(self, branding.sidebar_icon(), WIDGET_NAME)
 
     def createWidget(self, frame: ViewFrame, data: BinaryView) -> SidebarWidget:
         return AxioAnalystSidebar(WIDGET_NAME, frame, data)
