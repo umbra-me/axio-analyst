@@ -6,7 +6,16 @@ from typing import Optional
 from PySide6 import QtGui, QtWidgets
 
 from ..application.conversations import ConversationMessage
-from .markdown import restored_scroll_value, safe_markdown
+from .markdown import restored_scroll_value, sanitize_markdown
+
+#: Raw provider HTML is neutralised here rather than by escaping the source, so
+#: fenced code blocks keep their literal ``<``, ``>``, and ``&`` characters.
+MARKDOWN_FEATURES = (
+    QtGui.QTextDocument.MarkdownFeature.MarkdownDialectGitHub
+    | QtGui.QTextDocument.MarkdownFeature.MarkdownNoHTML
+)
+
+ASSISTANT_ROLE = "Axio Analyst"
 
 
 @dataclass
@@ -135,6 +144,32 @@ class Transcript:
             self.render(force_bottom=True)
         self.active_index = None
 
+    def _relax_code_blocks(
+        self,
+        start: int,
+        end: int,
+        palette: QtGui.QPalette,
+    ) -> None:
+        """Let fenced code wrap and read as a card.
+
+        Qt imports code blocks with non-breakable lines, which forces the whole
+        transcript into horizontal scrolling at realistic dock widths.
+        """
+        document = self.browser.document()
+        editor = QtGui.QTextCursor(document)
+        background = palette.color(QtGui.QPalette.ColorRole.AlternateBase)
+        block = document.findBlock(start)
+        while block.isValid() and block.position() <= end:
+            block_format = block.blockFormat()
+            if block_format.nonBreakableLines():
+                block_format.setNonBreakableLines(False)
+                block_format.setBackground(background)
+                block_format.setLeftMargin(8.0)
+                block_format.setRightMargin(8.0)
+                editor.setPosition(block.position())
+                editor.setBlockFormat(block_format)
+            block = block.next()
+
     def render(
         self,
         force_bottom: bool = False,
@@ -149,6 +184,11 @@ class Transcript:
         header = QtGui.QTextCharFormat()
         header.setFontWeight(QtGui.QFont.Weight.DemiBold)
         header.setForeground(palette.color(QtGui.QPalette.ColorRole.Link))
+        speaker_header = QtGui.QTextCharFormat()
+        speaker_header.setFontWeight(QtGui.QFont.Weight.DemiBold)
+        speaker_header.setForeground(
+            palette.color(QtGui.QPalette.ColorRole.Text)
+        )
         meta_format = QtGui.QTextCharFormat()
         meta_format.setForeground(
             palette.color(QtGui.QPalette.ColorRole.PlaceholderText)
@@ -166,12 +206,19 @@ class Transcript:
                 cursor.insertBlock(separator)
             if index == focus_index:
                 focus_position = cursor.position()
-            cursor.insertText(message.role, header)
+            cursor.insertText(
+                message.role,
+                header if message.role == ASSISTANT_ROLE else speaker_header,
+            )
             if message.meta:
                 cursor.insertText(f"  ·  {message.meta}", meta_format)
             cursor.insertBlock()
             body = message.body or "_Receiving response..._"
-            cursor.insertMarkdown(safe_markdown(body.strip()))
+            body_start = cursor.position()
+            cursor.insertMarkdown(
+                sanitize_markdown(body.strip()), MARKDOWN_FEATURES
+            )
+            self._relax_code_blocks(body_start, cursor.position(), palette)
             cursor.insertBlock()
             if message.evidence:
                 cursor.insertText("Evidence: ", meta_format)

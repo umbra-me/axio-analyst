@@ -4,17 +4,21 @@ import unittest
 
 from tests import package_loader  # noqa: F401
 
-from axio_analyst.ui.markdown import restored_scroll_value, safe_markdown
+from axio_analyst.ui.markdown import restored_scroll_value, sanitize_markdown
 
 
 class TestMarkdownRendering(unittest.TestCase):
-    def test_safe_markdown_preserves_formatting_and_escapes_html(self):
-        rendered = safe_markdown("**bold** <img src=x> & text")
+    def test_sanitize_preserves_markdown_and_code_punctuation(self):
+        source = "**bold** <img src=x> & text\n\n```c\nif (a > b && c < d)\n```"
 
-        self.assertEqual(rendered, "**bold** &lt;img src=x&gt; &amp; text")
+        self.assertEqual(sanitize_markdown(source), source)
 
-    def test_safe_markdown_removes_nul(self):
-        self.assertEqual(safe_markdown("before\x00after"), "beforeafter")
+    def test_sanitize_removes_nul_and_control_characters(self):
+        self.assertEqual(sanitize_markdown("before\x00after"), "beforeafter")
+        self.assertEqual(sanitize_markdown("bell\x07escape\x1b"), "bellescape")
+
+    def test_sanitize_keeps_newlines_and_tabs(self):
+        self.assertEqual(sanitize_markdown("a\n\tb"), "a\n\tb")
 
     def test_live_tail_follows_when_reader_is_at_bottom(self):
         self.assertEqual(restored_scroll_value(100, 100, 140), 140)

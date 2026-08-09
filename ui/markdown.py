@@ -1,11 +1,24 @@
-"""Safe text preparation for the native conversation renderer."""
+"""Safe text preparation for the native conversation renderer.
 
-import html
+Raw provider HTML is neutralised by the Markdown parser itself: the transcript
+imports with ``QTextDocument.MarkdownNoHTML``, so md4c never emits an HTML
+block or span and a tag can only ever appear as inert literal text. That is
+stronger than escaping the source string, and unlike escaping it does not leak
+``&gt;`` and ``&lt;`` into fenced code blocks, where CommonMark does not decode
+entities. This module only removes control characters that would otherwise
+corrupt the imported document.
+"""
+
+_ALLOWED_CONTROLS = {"\n", "\t"}
 
 
-def safe_markdown(value: str) -> str:
-    """Preserve Markdown while preventing provider-supplied raw HTML."""
-    return html.escape(value.replace("\x00", ""), quote=False)
+def sanitize_markdown(value: str) -> str:
+    """Drop control characters while leaving every Markdown construct intact."""
+    return "".join(
+        character
+        for character in value
+        if character in _ALLOWED_CONTROLS or ord(character) >= 0x20
+    )
 
 
 def restored_scroll_value(
