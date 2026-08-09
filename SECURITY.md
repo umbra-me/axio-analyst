@@ -3,8 +3,8 @@
 ## Supported version
 
 Axio Analyst is pre-release. Only the latest development version on `main` is
-currently supported. A versioned support table will be added when tagged
-releases begin.
+currently supported. The current source and development-install version is
+`0.8.0`. A versioned support table will be added when tagged releases begin.
 
 ## Reporting a vulnerability
 
@@ -36,7 +36,10 @@ sensitive, untrusted data crossing distinct boundaries:
 4. **Provider output to Qt:** raw HTML is escaped before Markdown presentation;
    transcript links are not opened.
 
-Version `0.7.0` does not write to the BNDB and does not persist conversations.
+Version `0.8.0` does not write to the BNDB and does not persist conversations.
+Its package split is also a trust boundary: `core/` and `application/` cannot
+import Binary Ninja, Qt, subprocess, or network modules, and `providers/`
+cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
 
 ## Enforced safeguards
 
@@ -54,6 +57,8 @@ Version `0.7.0` does not write to the BNDB and does not persist conversations.
   ceiling.
 - Main-thread-only UI updates and liveness checks for late callbacks.
 - No symbol, type, comment, analysis, or database mutation.
+- One validated semantic version sourced from `plugin.json`; invalid version
+  metadata fails plugin import instead of silently reporting a different build.
 
 ## Not guaranteed
 

@@ -10,6 +10,8 @@ Check the installation shape. The plugin folder must be exactly:
 
 ```text
 <Binary Ninja user directory>/plugins/axio_analyst/__init__.py
+<Binary Ninja user directory>/plugins/axio_analyst/plugin.json
+<Binary Ninja user directory>/plugins/axio_analyst/{application,core,host,providers,ui}/
 ```
 
 A common mistake is an extra directory level such as
@@ -24,9 +26,30 @@ Then check:
 - Binary Ninja's log has no Python import or Qt registration error;
 - the host is Binary Ninja 5.x with PySide6/Qt6.
 
+`plugin_dev.py status` reports three kinds of drift: manifest files that are
+missing, manifest files whose content changed, and known obsolete root modules
+from the pre-0.8 flat layout. Close Binary Ninja and use `install
+--prune-obsolete` only for that explicit legacy-module list. The installer does
+not recursively clean the plugin directory or remove unrelated files.
+
 The two function commands are registered before the sidebar import. If the menu
 commands exist but the sidebar does not, focus on `binaryninjaui`/PySide6 and
 sidebar-registration errors rather than provider configuration.
+
+## The displayed version is unexpected
+
+The authoritative version is the string in the installed `plugin.json`.
+Axio Analyst reads the same value for the sidebar header, Settings page, About
+command, and registration log. If those surfaces disagree with the checkout:
+
+1. Close Binary Ninja so imported Python modules are not reused.
+2. Run `plugin_dev.py status` against the confirmed user plugin folder.
+3. Reinstall the manifest-owned runtime and confirm status reports current.
+4. Restart Binary Ninja and check the registration log again.
+
+An invalid or non-semantic version in `plugin.json` intentionally prevents the
+plugin from loading. Correct the metadata in the source checkout rather than
+hard-coding a different Python version.
 
 ## A provider executable is not found
 

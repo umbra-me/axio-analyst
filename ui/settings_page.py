@@ -2,7 +2,8 @@
 
 from PySide6 import QtCore, QtWidgets
 
-from .settings import (
+from ..core.version import VERSION
+from ..host.settings import (
     BACKEND_LABELS,
     MODEL_CHOICES,
     REASONING_EFFORTS,
@@ -47,8 +48,8 @@ class SettingsPage(QtWidgets.QWidget):
         content_layout.setSpacing(12)
 
         intro = QtWidgets.QLabel(
-            "Configure local harnesses and request limits. Credentials remain "
-            "inside each provider CLI."
+            f"Axio Analyst v{VERSION}. Configure local harnesses and request "
+            "limits. Credentials remain inside each provider CLI."
         )
         intro.setWordWrap(True)
         content_layout.addWidget(intro)
@@ -78,12 +79,8 @@ class SettingsPage(QtWidgets.QWidget):
         model_layout.addWidget(self.model_combo, 1)
         self.refresh_models_button = QtWidgets.QToolButton()
         self.refresh_models_button.setText("Refresh")
-        self.refresh_models_button.setToolTip(
-            "Fetch available Ollama Cloud models"
-        )
-        self.refresh_models_button.setAccessibleName(
-            "Refresh Ollama Cloud models"
-        )
+        self.refresh_models_button.setToolTip("Fetch available Ollama Cloud models")
+        self.refresh_models_button.setAccessibleName("Refresh Ollama Cloud models")
         model_layout.addWidget(self.refresh_models_button)
 
         self.effort_combo = QtWidgets.QComboBox()
@@ -180,8 +177,7 @@ class SettingsPage(QtWidgets.QWidget):
         runtime = get_runtime_config()
         preferences = get_sidebar_preferences()
         self._draft_selections = {
-            backend: get_provider_selection(backend)
-            for backend in BACKEND_LABELS
+            backend: get_provider_selection(backend) for backend in BACKEND_LABELS
         }
         self._active_backend = runtime.provider.backend
 

@@ -7,7 +7,8 @@ outside Binary Ninja, and the current read-only security boundary.
 ## Before starting
 
 - Read `AGENTS.md` for exact commands and repository constraints.
-- Read `docs/architecture.md` for module ownership and roadmap boundaries.
+- Read `docs/architecture.md` for module ownership and `docs/roadmap.md` for
+  future delivery boundaries.
 - Check `CHANGELOG.md` and `docs/handoff.md` for current state and blockers.
 - Discuss runtime, native, privileged, paid, or credential-management
   dependencies before implementing them.
@@ -18,12 +19,18 @@ outside Binary Ninja, and the current read-only security boundary.
 - Keep changes focused and match the surrounding Python style.
 - Keep provider, parser, prompt, and rendering logic importable under stock
   Python. Do not make their tests depend on a Binary Ninja licence.
+- Keep `core/` and `application/` free of Binary Ninja, Qt, subprocess, and
+  network imports; keep `providers/` free of Binary Ninja and Qt imports.
 - Keep provider work off the GUI thread and Qt updates on the main thread.
 - Do not read CLI credential files or persist tokens in settings, logs, tests,
   fixtures, or documentation.
 - Preserve raw-HTML escaping and the current-function context cap.
 - Add direct tests for provider command construction, output parsing, error
   behavior, cancellation, and streaming changes.
+- Update `tools/runtime_manifest.py` whenever a runtime module is added,
+  removed, or moved; never replace its allowlist with a recursive copy.
+- Change the semantic version only in `plugin.json`; runtime and UI surfaces
+  read it through `core/version.py`.
 - Update the maintained document that owns changed behavior.
 
 ## Verification
@@ -31,10 +38,8 @@ outside Binary Ninja, and the current read-only security boundary.
 Run the complete local suite from the repository root:
 
 ```powershell
-python -m unittest discover -s tests
-python -m compileall -q __init__.py models.py prompts.py providers.py `
-  registration.py rendering.py settings.py settings_page.py sidebar.py `
-  task.py tools tests
+python -m unittest discover -s tests -t .
+python -m compileall -q __init__.py application core host providers ui tools tests
 python -c "import json,pathlib; json.loads(pathlib.Path('plugin.json').read_text(encoding='utf-8'))"
 ```
 

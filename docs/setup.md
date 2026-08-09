@@ -94,18 +94,43 @@ python tools/plugin_dev.py status `
   --plugins-dir "$env:APPDATA\Binary Ninja\plugins"
 ```
 
-The copier manages these files and no others:
+A zero exit reports `Axio Analyst is current`. A nonzero exit identifies
+missing, changed, or known obsolete runtime paths without modifying them.
+
+The copier manages the root entry point and metadata plus the runtime packages
+below:
 
 ```text
-__init__.py        models.py          plugin.json
-prompts.py         providers.py       registration.py
-rendering.py       settings.py        settings_page.py
-sidebar.py         task.py
+__init__.py
+plugin.json
+application/
+core/
+host/
+providers/
+ui/
 ```
 
-It does not delete destination-only files, change Binary Ninja settings, copy
-tests or documentation, touch databases or licences, or inspect provider
-credentials.
+`tools/runtime_manifest.py` is the exact per-file allowlist. A contract test
+ensures every Python module under those packages is represented before the
+copier can be considered complete.
+
+By default, it does not delete destination-only files, change Binary Ninja
+settings, copy tests or documentation, touch databases or licences, or inspect
+provider credentials.
+
+After upgrading a development copy from the former flat layout, old root
+modules are reported as obsolete. While Binary Ninja is closed, remove exactly
+those known modules during installation with:
+
+```powershell
+python tools/plugin_dev.py install `
+  --plugins-dir "$env:APPDATA\Binary Ninja\plugins" `
+  --prune-obsolete
+```
+
+The flag does not recursively clean the plugin directory or remove arbitrary
+destination-only files. It is intended specifically for migration from the
+tracked flat modules used before `0.8.0`.
 
 ## Provider preparation
 
@@ -131,10 +156,11 @@ git pull --ff-only
 ```
 
 For a separate development checkout, update the checkout and rerun
-`tools/plugin_dev.py install`. Restart Binary Ninja after either method.
+`tools/plugin_dev.py install`. Add `--prune-obsolete` only when status reports
+the known flat-layout modules. Restart Binary Ninja after either method.
 
 Before upgrading across a settings-namespace or storage migration, read
-`CHANGELOG.md`. Version `0.7.0` stores only user settings under
+`CHANGELOG.md`. Version `0.8.0` stores only user settings under
 `axioAnalyst.*`; there is no conversation database to migrate.
 
 ## Remove
@@ -152,11 +178,13 @@ names, effort choices, and request limits, not provider credentials.
 After restarting Binary Ninja:
 
 1. Confirm **Axio Analyst** appears in the right sidebar and Plugins menu.
-2. Open Settings and confirm the configured executable path.
-3. Apply a provider, model, and reasoning selection.
-4. Select a function with HLIL and send a simple explanation request.
-5. Confirm progress appears, output renders as Markdown, and **Stop** is enabled
+2. Confirm the sidebar header, Settings introduction, About command, and
+   registration log show the version from `plugin.json`.
+3. Open Settings and confirm the configured executable path.
+4. Apply a provider, model, and reasoning selection.
+5. Select a function with HLIL and send a simple explanation request.
+6. Confirm progress appears, output renders as Markdown, and **Stop** is enabled
    during the request.
-6. Check the Binary Ninja log if the sidebar or request fails.
+7. Check the Binary Ninja log if the sidebar or request fails.
 
 Use the C++ fixture in `samples/demo` when a harmless known binary is needed.

@@ -37,6 +37,12 @@ Open `build/Release/axio_analyst_demo.exe` in Binary Ninja. The `build/`
 directory is intentionally ignored because the executable is a generated local
 test artifact.
 
+For a release smoke test, open the `AX` sidebar and confirm its header version
+matches `plugin.json`, the Settings introduction repeats that version, and the
+Binary Ninja log contains the versioned registration message. This validates
+host loading and widget construction without sending the fixture to a provider.
+Provider requests remain a separate, explicit test action.
+
 Useful Axio Analyst questions include:
 
 - "Explain the function that validates the six-digit code."

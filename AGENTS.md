@@ -2,9 +2,9 @@
 
 ## Commands
 
-- Run tests: `python -m unittest discover -s tests`
-- Run one test: `python -m unittest tests.test_axio_analyst.TestPromptConstruction.test_prompt_preserves_evidence_addresses`
-- Compile Python: `python -m compileall -q __init__.py models.py prompts.py providers.py registration.py rendering.py settings.py settings_page.py sidebar.py task.py tools tests`
+- Run tests: `python -m unittest discover -s tests -t .`
+- Run one test: `python -m unittest tests.unit.core.test_prompts.TestPromptConstruction.test_prompt_preserves_evidence_addresses`
+- Compile Python: `python -m compileall -q __init__.py application core host providers ui tools tests`
 - Validate metadata: `python -c "import json,pathlib; json.loads(pathlib.Path('plugin.json').read_text(encoding='utf-8'))"`
 - Check a development install: `python tools/plugin_dev.py status --plugins-dir <Binary-Ninja-plugins-dir>`
 - Install a development copy: `python tools/plugin_dev.py install --plugins-dir <Binary-Ninja-plugins-dir>`
@@ -12,12 +12,12 @@
 
 ## Architecture
 
-- Root Python files are the loadable Binary Ninja plugin; `plugin.json` is its distribution metadata.
-- `providers.py` owns supervised Claude Code, Codex, and Ollama Cloud processes. Prompts go through stdin and provider logic does not import Binary Ninja.
-- `task.py` is the Binary Ninja boundary for address-labelled HLIL, background work, cancellation, and main-thread callbacks.
-- `sidebar.py`, `settings_page.py`, and `rendering.py` own the Qt6 UI and sanitized Markdown transcript.
-- `settings.py` owns the machine-local `axioAnalyst` Binary Ninja settings namespace.
-- The end-state architecture and safety model are in `docs/architecture.md`.
+- The root `__init__.py` is the loadable Binary Ninja entry point; runtime implementation lives in first-level packages.
+- `core/` and `application/` are stock-Python domain and use-case layers with no Binary Ninja, Qt, process, or network imports.
+- `providers/` owns supervised Claude Code, Codex, and Ollama Cloud adapters; prompts go through stdin and credentials stay with each CLI.
+- `host/` owns Binary Ninja context, settings, background work, callbacks, and registration.
+- `ui/` owns the Qt6 sidebar, settings view, transcript, progress, and sanitized Markdown.
+- Current boundaries are in `docs/architecture.md`; future phases are in `docs/roadmap.md`.
 
 ## Gotchas
 

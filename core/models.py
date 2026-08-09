@@ -1,7 +1,6 @@
 """Provider-neutral request and response types for Axio Analyst."""
 
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 
 @dataclass(frozen=True)
@@ -31,10 +30,6 @@ class ProviderResult:
     backend: str
     model: str = ""
     reasoning_effort: str = ""
-
-
-CancelCheck = Optional[Callable[[], bool]]
-StreamCallback = Optional[Callable[[str], None]]
 
 
 class ProviderError(RuntimeError):

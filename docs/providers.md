@@ -5,6 +5,13 @@ accepts a normalized prompt and returns a normalized result without importing
 Binary Ninja. Authentication, network transport, account entitlements, and
 provider-side retention remain the responsibility of the installed CLI.
 
+`core/provider.py` defines the interface, `application/analyze.py` owns the
+provider-neutral use case, and `providers/__init__.py` selects the concrete
+Claude Code, Codex, or Ollama adapter from `ProviderConfig`. Individual command
+and parser implementations live in `providers/claude.py`, `codex.py`, and
+`ollama.py`; shared supervision and stream decoding live in `process.py` and
+`streaming.py`.
+
 ## Shared process contract
 
 For every request Axio Analyst:
@@ -129,7 +136,8 @@ or failed in the transcript.
 ## Adding another provider
 
 A new adapter should implement `Provider.complete`, return `ProviderResult`,
-and remain importable under stock Python. It must define:
+be exported through the provider factory, and remain importable under stock
+Python. It must define:
 
 - executable/endpoint and authentication ownership;
 - exact command or HTTP request contract;
@@ -140,6 +148,10 @@ and remain importable under stock Python. It must define:
 - model and effort capabilities;
 - unit tests for success, malformed output, failure, timeout, cancellation, and
   streaming boundaries.
+
+Add the module to `tools/runtime_manifest.py`. The distribution contract test
+must still prove that providers do not import Binary Ninja or Qt and that every
+runtime Python file is included in development installs.
 
 Direct HTTP providers are roadmap work. They will require a separate credential
 broker and must not place secrets in Binary Ninja settings or BNDB state.

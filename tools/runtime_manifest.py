@@ -1,0 +1,47 @@
+"""Authoritative allowlist for the loadable Binary Ninja plugin."""
+
+RUNTIME_PACKAGE_ROOTS = ("application", "core", "host", "providers", "ui")
+
+OBSOLETE_RUNTIME_FILES = (
+    "models.py",
+    "prompts.py",
+    "providers.py",
+    "registration.py",
+    "rendering.py",
+    "settings.py",
+    "settings_page.py",
+    "sidebar.py",
+    "task.py",
+)
+
+RUNTIME_FILES = (
+    "__init__.py",
+    "plugin.json",
+    "application/__init__.py",
+    "application/analyze.py",
+    "core/__init__.py",
+    "core/models.py",
+    "core/policy.py",
+    "core/prompts.py",
+    "core/provider.py",
+    "core/version.py",
+    "host/__init__.py",
+    "host/context.py",
+    "host/model_discovery.py",
+    "host/registration.py",
+    "host/settings.py",
+    "host/task.py",
+    "providers/__init__.py",
+    "providers/claude.py",
+    "providers/codex.py",
+    "providers/ollama.py",
+    "providers/process.py",
+    "providers/streaming.py",
+    "ui/__init__.py",
+    "ui/markdown.py",
+    "ui/progress.py",
+    "ui/settings_page.py",
+    "ui/sidebar.py",
+    "ui/sidebar_view.py",
+    "ui/transcript.py",
+)

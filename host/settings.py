@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from binaryninja import Settings
 
-from .models import ProviderConfig
+from ..core.models import ProviderConfig
 
 GROUP = "axioAnalyst"
 _IGNORE_DATABASE_SCOPES = ["SettingsProjectScope", "SettingsResourceScope"]
@@ -174,10 +174,7 @@ def set_provider_selection(backend: str, model: str, reasoning_effort: str) -> N
     prefix = _PROVIDER_PREFIXES[backend]
     settings = Settings()
     settings.set_string(f"{GROUP}.{prefix}.model", model)
-    settings.set_string(
-        f"{GROUP}.{prefix}.reasoningEffort",
-        reasoning_effort,
-    )
+    settings.set_string(f"{GROUP}.{prefix}.reasoningEffort", reasoning_effort)
 
 
 def set_backend(backend: str) -> None:

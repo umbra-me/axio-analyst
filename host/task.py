@@ -1,6 +1,5 @@
-"""Binary Ninja integration and background analysis task."""
+"""Binary Ninja background task for one analysis request."""
 
-import os
 import time
 from typing import Callable, Optional
 
@@ -9,14 +8,15 @@ from binaryninja.interaction import show_plain_text_report
 from binaryninja.log import log_error, log_info, log_warn
 from binaryninja.mainthread import execute_on_main_thread
 
-from .models import (
+from ..application import analyze
+from ..core.models import (
     FunctionContext,
     ProviderCancelled,
     ProviderError,
     ProviderResult,
 )
-from .prompts import build_prompt, truncate_text
-from .providers import create_provider
+from ..providers import create_provider
+from .context import render_function_context
 from .settings import RuntimeConfig
 
 TITLE = "Axio Analyst"
@@ -26,34 +26,6 @@ ErrorCallback = Callable[[str], None]
 CancelledCallback = Callable[[], None]
 ProgressCallback = Callable[[str, int], None]
 StreamCallback = Callable[[str], None]
-
-
-def render_function_context(
-    bv: BinaryView,
-    function: Function,
-    max_context_chars: int,
-) -> FunctionContext:
-    hlil = function.hlil
-    if hlil is None:
-        raise ProviderError("Binary Ninja could not produce HLIL for this function.")
-
-    lines = [f"0x{instruction.address:x}: {instruction}" for instruction in hlil.instructions]
-    rendered, truncated = truncate_text("\n".join(lines), max_context_chars)
-
-    architecture = bv.arch.name if bv.arch is not None else "unknown"
-    platform = bv.platform.name if bv.platform is not None else "unknown"
-    filename = getattr(bv.file, "filename", "") or "unknown"
-
-    return FunctionContext(
-        binary_name=os.path.basename(filename),
-        function_name=function.name,
-        function_start=function.start,
-        architecture=architecture,
-        platform=platform,
-        function_type=str(function.type),
-        hlil=rendered,
-        truncated=truncated,
-    )
 
 
 class AnalyzeFunctionTask(BackgroundTaskThread):
@@ -93,7 +65,6 @@ class AnalyzeFunctionTask(BackgroundTaskThread):
             try:
                 callback(*args)
             except RuntimeError:
-                # A sidebar can be destroyed while a provider request finishes.
                 pass
             except Exception as exc:
                 log_error(f"{TITLE}: result callback failed: {exc}")
@@ -132,13 +103,17 @@ class AnalyzeFunctionTask(BackgroundTaskThread):
                 raise ProviderCancelled("Request cancelled before dispatch.")
 
             self._set_progress("Building request", 25)
-            prompt = build_prompt(context, self.question)
             provider = create_provider(self.config.provider)
-            self._set_progress("Starting provider", 40)
-            result = provider.complete(
-                prompt,
-                lambda: self.cancelled,
-                self._stream,
+            result = analyze(
+                context,
+                self.question,
+                provider,
+                is_cancelled=lambda: self.cancelled,
+                on_stream=self._stream,
+                on_provider_start=lambda: self._set_progress(
+                    "Starting provider",
+                    40,
+                ),
             )
             self._flush_stream()
             self._set_progress("Finalizing response", 90)

@@ -8,6 +8,11 @@ The Settings page stages edits until **Apply settings** is chosen. **Revert**
 reloads the last persisted values. Provider-specific model and effort choices
 are retained independently when switching between providers.
 
+The plugin version is not a user setting. `plugin.json` owns the semantic
+version, and `core/version.py` validates it during import. Binary Ninja exposes
+that value in plugin metadata while Axio Analyst displays it in the sidebar,
+Settings page, About command, and registration log.
+
 ## Settings
 
 | Key | Type | Default | Allowed values or range | Purpose |
@@ -77,3 +82,7 @@ The sidebar transcript is in memory only and is cleared when the widget is
 destroyed or when **Clear** is chosen. Provider CLIs may have their own logging,
 telemetry, retention, and server-side policies; consult the selected provider
 before sending proprietary material.
+
+No `axioAnalyst.*` key stores the plugin version. Upgrading the plugin changes
+runtime files and metadata without rewriting the user's provider selection,
+executable paths, request limits, or credentials.
