@@ -62,11 +62,12 @@ class AxioAnalystSidebar(SidebarWidget):
         root.addWidget(self.view)
         self.setLayout(root)
 
+        self._provider_summary = ""
         self.conversation = Transcript(self.view.transcript)
         self.request_progress = RequestProgress(
             self.view.progress_bar,
-            self.view.status_label,
-            self.view.elapsed_label,
+            self.view.status_line.message,
+            self.view.status_line.elapsed,
             lambda: self._task is not None,
             self,
         )
@@ -81,6 +82,7 @@ class AxioAnalystSidebar(SidebarWidget):
         self.view.previewRequested.connect(self._preview_context)
         self.view.contextOptionsChanged.connect(self._invalidate_context_preview)
         self.view.stopRequested.connect(self._cancel)
+        self.view.suggestionChosen.connect(self._ask_suggestion)
         self.view.prompt.textChanged.connect(self._update_actions)
         self.view.transcript.anchorClicked.connect(self._navigate_evidence)
         self.view.settings_page.providerChanged.connect(
@@ -151,7 +153,7 @@ class AxioAnalystSidebar(SidebarWidget):
                 try:
                     self._conversation_store.delete(self._binary_id)
                 except (OSError, ValueError) as exc:
-                    self.view.status_label.setText(
+                    self.view.status_line.message.setText(
                         f"Could not delete saved conversation: {exc}"
                     )
 
@@ -186,9 +188,9 @@ class AxioAnalystSidebar(SidebarWidget):
                         )
                     )
                 self.conversation.load(tuple(revalidated))
-                self.view.status_label.setText("Restored local conversation")
+                self.view.status_line.message.setText("Restored local conversation")
         except (OSError, ValueError) as exc:
-            self.view.status_label.setText(f"Could not restore conversation: {exc}")
+            self.view.status_line.message.setText(f"Could not restore conversation: {exc}")
 
     def _persist_transcript(self) -> None:
         if (
@@ -208,7 +210,7 @@ class AxioAnalystSidebar(SidebarWidget):
             )
             self._conversation_store.save(record)
         except (OSError, ValueError) as exc:
-            self.view.status_label.setText(f"Could not save conversation: {exc}")
+            self.view.status_line.message.setText(f"Could not save conversation: {exc}")
 
     def _export_transcript(self) -> None:
         if self.bv is None or not self._binary_id:
@@ -230,22 +232,40 @@ class AxioAnalystSidebar(SidebarWidget):
                 self.conversation.snapshot(),
             )
             ConversationStore.export_markdown(record, Path(path))
-            self.view.status_label.setText(f"Exported conversation to {path}")
+            self.view.status_line.message.setText(f"Exported conversation to {path}")
         except (OSError, ValueError) as exc:
-            self.view.status_label.setText(f"Could not export conversation: {exc}")
+            self.view.status_line.message.setText(f"Could not export conversation: {exc}")
 
     def _analysis_stream(self, chunk: str) -> None:
         if self._alive and self.conversation.stream(chunk):
-            self.view.status_label.setText("Receiving response...")
+            self.view.status_line.message.setText("Receiving response...")
 
     def _refresh_backend_label(self, config: Optional[RuntimeConfig] = None) -> None:
         active = config or get_runtime_config()
         model = active.provider.model or "default model"
-        effort = active.provider.reasoning_effort or "default effort"
         backend = BACKEND_LABELS.get(active.provider.backend, active.provider.backend)
-        summary = f"{backend}  ·  {model}  ·  {effort}"
-        self.view.backend_label.setText(summary)
-        self.view.backend_label.setToolTip(summary)
+        self._provider_summary = f"{backend} · {model}"
+        self._refresh_scope()
+
+    def _refresh_scope(self) -> None:
+        """The empty state answers what will run before the first request."""
+        function = self._current_function
+        if function is None:
+            self.view.set_scope(
+                "No function selected",
+                "",
+                "Move the cursor into a function to begin.",
+                False,
+            )
+            return
+        architecture = (
+            self.bv.arch.name
+            if self.bv is not None and self.bv.arch is not None
+            else "unknown architecture"
+        )
+        address = f"0x{function.start:x}"
+        detail = f"{address} · {architecture} · {self._provider_summary}"
+        self.view.set_scope(function.name, address, detail, True)
 
     def _refresh_from_frame(self) -> None:
         if self.frame is None:
@@ -281,21 +301,7 @@ class AxioAnalystSidebar(SidebarWidget):
             )
         )
         self._current_function = function
-        if function is None:
-            self.view.context_name.setText("No function selected")
-            self.view.context_detail.setText(
-                "Move the cursor into a function to begin."
-            )
-        else:
-            self.view.context_name.setText(function.name)
-            architecture = (
-                self.bv.arch.name
-                if self.bv is not None and self.bv.arch is not None
-                else "unknown architecture"
-            )
-            self.view.context_detail.setText(
-                f"0x{function.start:x}  |  {architecture}  |  current function HLIL"
-            )
+        self._refresh_scope()
         if changed:
             self._invalidate_context_preview()
         self._update_actions()
@@ -345,14 +351,14 @@ class AxioAnalystSidebar(SidebarWidget):
         )
         self._preview_task = None
         if self._task is None:
-            self.view.status_label.setText("Context preview is current")
+            self.view.status_line.message.setText("Context preview is current")
         self._update_actions()
 
     def _preview_error(self, message: str) -> None:
         if not self._alive:
             return
         self._preview_task = None
-        self.view.status_label.setText(f"Could not build context preview: {message}")
+        self.view.status_line.message.setText(f"Could not build context preview: {message}")
         self._update_actions()
 
     def _preview_context(self) -> None:
@@ -364,7 +370,7 @@ class AxioAnalystSidebar(SidebarWidget):
         ):
             return
         config = get_runtime_config()
-        self.view.status_label.setText("Building exact context preview...")
+        self.view.status_line.message.setText("Building exact context preview...")
         self._preview_task = ContextPreviewTask(
             self.bv,
             self._current_function,
@@ -380,11 +386,12 @@ class AxioAnalystSidebar(SidebarWidget):
     def _update_actions(self, *_args: object) -> None:
         busy = self._task is not None or self._preview_task is not None
         ready = self._current_function is not None and not busy
-        self.view.explain_button.setEnabled(ready)
+        self.view.explain_action.setEnabled(ready)
         self.view.ask_button.setEnabled(
             ready and bool(self.view.prompt.toPlainText().strip())
         )
         self.view.stop_button.setEnabled(self._task is not None)
+        self.view.set_conversation_empty(not self.conversation.messages)
         self.view.clear_action.setEnabled(not busy)
         self.view.export_action.setEnabled(
             not busy and bool(self.conversation.messages)
@@ -407,6 +414,10 @@ class AxioAnalystSidebar(SidebarWidget):
         if question:
             self._start_request(question, question)
 
+    def _ask_suggestion(self, question: str) -> None:
+        if self._task is None and self._current_function is not None:
+            self._start_request(question, question)
+
     def _start_request(self, question: str, display_question: str) -> None:
         if self._task is not None or self._current_function is None or self.bv is None:
             return
@@ -414,16 +425,14 @@ class AxioAnalystSidebar(SidebarWidget):
         self._save_selection()
         config = get_runtime_config()
         function = self._current_function
-        self.conversation.append("You", display_question, function.name)
+        self.conversation.append("You", display_question)
         self._persist_transcript()
         backend = BACKEND_LABELS.get(config.provider.backend, config.provider.backend)
         model = config.provider.model or "default model"
-        effort = config.provider.reasoning_effort or "default effort"
-        self.conversation.start_response(
-            f"{function.name}  ·  {backend}  ·  {model}  ·  {effort}"
-        )
+        self.conversation.start_response(f"{backend} · {model}")
         self.view.prompt.clear()
         self._refresh_backend_label(config)
+        self.view.status_line.hold()
         self.request_progress.begin(f"Preparing {function.name} with {backend}...")
 
         self._task = AnalyzeFunctionTask(
@@ -460,7 +469,7 @@ class AxioAnalystSidebar(SidebarWidget):
     def _cancel(self) -> None:
         if self._task is None:
             return
-        self.view.status_label.setText("Cancelling request...")
+        self.view.status_line.message.setText("Cancelling request...")
         self.view.stop_button.setEnabled(False)
         self._task.cancel()
 
@@ -485,7 +494,7 @@ class AxioAnalystSidebar(SidebarWidget):
         evidence, unresolved = classify_evidence(response, self._is_valid_address)
         self.conversation.complete(
             response,
-            f"{context.primary.function_name}  ·  " + "  |  ".join(metadata),
+            "   ·   ".join(metadata),
             evidence,
             unresolved,
         )
@@ -494,6 +503,7 @@ class AxioAnalystSidebar(SidebarWidget):
         status = "Complete with provider errors" if any(
             result.error for result in results
         ) else "Complete"
+        self.view.status_line.release()
         self.request_progress.finish(status, completed=True)
         self._update_actions()
 
@@ -503,6 +513,7 @@ class AxioAnalystSidebar(SidebarWidget):
         self.conversation.fail(message)
         self._task = None
         self._persist_transcript()
+        self.view.status_line.release()
         self.request_progress.finish("Request failed. Check the message above.")
         self._update_actions()
 
@@ -512,6 +523,7 @@ class AxioAnalystSidebar(SidebarWidget):
         self.conversation.cancel()
         self._task = None
         self._persist_transcript()
+        self.view.status_line.release()
         self.request_progress.finish("Request cancelled")
         self._update_actions()
 
@@ -542,21 +554,21 @@ class AxioAnalystSidebar(SidebarWidget):
         except ValueError:
             return
         if not self._is_valid_address(address) or self.frame is None:
-            self.view.status_label.setText(f"Address 0x{address:x} is not valid")
+            self.view.status_line.message.setText(f"Address 0x{address:x} is not valid")
             return
         try:
             view = self.frame.getCurrentViewInterface()
             navigator = getattr(view, "navigate", None) if view is not None else None
             if navigator is not None:
                 navigator(address)
-                self.view.status_label.setText(f"Navigated to 0x{address:x}")
+                self.view.status_line.message.setText(f"Navigated to 0x{address:x}")
                 return
             if self.bv is not None:
                 current_view = self.frame.getCurrentView()
                 self.bv.navigate(current_view, address)
-                self.view.status_label.setText(f"Navigated to 0x{address:x}")
+                self.view.status_line.message.setText(f"Navigated to 0x{address:x}")
         except Exception as exc:
-            self.view.status_label.setText(
+            self.view.status_line.message.setText(
                 f"Could not navigate to 0x{address:x}: {exc}"
             )
 

@@ -34,12 +34,12 @@ class Transcript:
         self.active_index: Optional[int] = None
 
     def reset(self) -> None:
-        self.messages = [
-            ChatMessage(
-                "Axio Analyst",
-                "Select a function, ask a question, or use **Explain** for a quick read.",
-            )
-        ]
+        """Leave the conversation genuinely empty.
+
+        The sidebar shows a suggestion panel while there are no messages, so a
+        greeting message here would only be a fake first turn to scroll past.
+        """
+        self.messages = []
         self.active_index = None
         self.render(force_bottom=True)
 
@@ -170,6 +170,46 @@ class Transcript:
                 editor.setBlockFormat(block_format)
             block = block.next()
 
+    @staticmethod
+    def _insert_footer(
+        cursor: QtGui.QTextCursor,
+        message: ChatMessage,
+        meta_format: QtGui.QTextCharFormat,
+        evidence_format: QtGui.QTextCharFormat,
+    ) -> None:
+        """Collect evidence, unresolved citations, and usage onto one line.
+
+        These used to occupy up to three separate lines under every answer,
+        which crowded the conversation at realistic dock widths.
+        """
+        if not (message.evidence or message.unresolved_evidence or message.meta):
+            return
+        footer = QtGui.QTextBlockFormat()
+        footer.setTopMargin(2.0)
+        cursor.insertBlock(footer)
+        leading = False
+        for address in message.evidence:
+            if leading:
+                cursor.insertText("  ", meta_format)
+            link_format = QtGui.QTextCharFormat(evidence_format)
+            link_format.setAnchorHref(f"axio://address/{address:x}")
+            cursor.insertText(f"0x{address:x}", link_format)
+            leading = True
+        if message.unresolved_evidence:
+            addresses = ", ".join(
+                f"0x{address:x}" for address in message.unresolved_evidence
+            )
+            count = len(message.unresolved_evidence)
+            separator = "   ·   " if leading else ""
+            cursor.insertText(
+                f"{separator}{count} unresolved ({addresses})",
+                meta_format,
+            )
+            leading = True
+        if message.meta:
+            separator = "   ·   " if leading else ""
+            cursor.insertText(f"{separator}{message.meta}", meta_format)
+
     def render(
         self,
         force_bottom: bool = False,
@@ -210,8 +250,6 @@ class Transcript:
                 message.role,
                 header if message.role == ASSISTANT_ROLE else speaker_header,
             )
-            if message.meta:
-                cursor.insertText(f"  ·  {message.meta}", meta_format)
             cursor.insertBlock()
             body = message.body or "_Receiving response..._"
             body_start = cursor.position()
@@ -219,25 +257,7 @@ class Transcript:
                 sanitize_markdown(body.strip()), MARKDOWN_FEATURES
             )
             self._relax_code_blocks(body_start, cursor.position(), palette)
-            cursor.insertBlock()
-            if message.evidence:
-                cursor.insertText("Evidence: ", meta_format)
-                for evidence_index, address in enumerate(message.evidence):
-                    if evidence_index:
-                        cursor.insertText("  ", meta_format)
-                    link_format = QtGui.QTextCharFormat(evidence_format)
-                    link_format.setAnchorHref(f"axio://address/{address:x}")
-                    cursor.insertText(f"0x{address:x}", link_format)
-                cursor.insertBlock()
-            if message.unresolved_evidence:
-                addresses = ", ".join(
-                    f"0x{address:x}" for address in message.unresolved_evidence
-                )
-                cursor.insertText(
-                    f"Unresolved address citations: {addresses}",
-                    meta_format,
-                )
-                cursor.insertBlock()
+            self._insert_footer(cursor, message, meta_format, evidence_format)
 
         self.browser.setTextCursor(cursor)
         if focus_position is not None:

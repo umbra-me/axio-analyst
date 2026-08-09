@@ -77,8 +77,8 @@ class TestRepositoryContract(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn('QtWidgets.QLabel(f"v{VERSION}")', sidebar_view)
-        self.assertIn("header_detail.addWidget(self.version_label)", sidebar_view)
+        self.assertIn('menu.addAction(f"Axio Analyst v{VERSION}")', sidebar_view)
+        self.assertIn("self.version_action.setEnabled(False)", sidebar_view)
         self.assertIn('f"Axio Analyst v{VERSION}.', settings_page)
         self.assertIn('"Axio Analyst\\\\About Axio Analyst"', registration)
 
