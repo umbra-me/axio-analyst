@@ -165,6 +165,12 @@ Before upgrading across a settings-namespace or storage migration, read
 under `<Binary Ninja user directory>/axio-analyst/conversations/`. There is no
 automatic migration from another product or location.
 
+Binary Ninja application updates are separate from Axio Analyst source or
+development installs. If the application displays **Updater is not valid**, do
+not reinstall, delete, or prune the `axio_analyst` directory as a remedy. Use
+the safe application-updater recovery sequence in
+[`troubleshooting.md`](troubleshooting.md#binary-ninja-reports-updater-is-not-valid).
+
 ## Remove
 
 Close Binary Ninja, then remove only the exact `axio_analyst` plugin directory
@@ -208,3 +214,5 @@ After restarting Binary Ninja:
 10. Check the Binary Ninja log if the sidebar or request fails.
 
 Use the C++ fixture in `samples/demo` when a harmless known binary is needed.
+The latest completed host-only pass and its deferred provider checks are
+recorded in [`gui-verification.md`](gui-verification.md).

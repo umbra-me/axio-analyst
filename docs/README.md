@@ -15,7 +15,8 @@ quick start; these documents are the source of truth for detailed behavior.
 | [Roadmap](roadmap.md) | Product end state, current limitations, and future delivery phases. |
 | [Sidekick capability inventory](sidekick-capability-inventory.md) | Dated, source-backed inventory of the Sidekick reference product, including analysis, UI, storage, permissions, automation, privacy, and implications for Axio. |
 | [Development and release guide](development.md) | Repository workflow, tests, extension points, manual GUI checks, and release procedure. |
-| [Troubleshooting](troubleshooting.md) | Startup, sidebar, provider, model discovery, timeout, rendering, and recovery diagnostics. |
+| [GUI verification](gui-verification.md) | Dated real-host evidence, deferred interaction checks, fixture launch safety, and the current application-updater observation. |
+| [Troubleshooting](troubleshooting.md) | Startup, sidebar, Binary Ninja updater, provider, model discovery, timeout, rendering, and recovery diagnostics. |
 | [Current handoff](handoff.md) | Dated implementation, live-install state, verification evidence, protected boundaries, and next work. |
 | [Extraction history](history.md) | Provenance of the standalone repository, naming transition, and package migration. |
 

@@ -8,6 +8,11 @@ breaking changes must still be documented with migration instructions.
 
 ### Added
 
+- Add a dated real-host GUI verification report covering registration, the
+  redesigned resting layout, function tracking, context previews, Settings,
+  read-only evidence, and the provider-authorisation boundary.
+- Document safe recovery for Binary Ninja's application-level **Updater is not
+  valid** error separately from Axio Analyst installation and runtime failures.
 - Add `ui/branding.py`: an original painted Axio Analyst mark - a split diamond
   standing for one bounded context read more than one way - plus a thirteen
   glyph action set drawn in one stroke language on a shared 24-unit grid. The

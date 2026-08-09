@@ -233,6 +233,13 @@ A real Binary Ninja GUI launch is still required to prove sidebar registration
 and Qt behavior because a personal Binary Ninja licence does not expose
 `binaryninjaui` to ordinary headless Python.
 
+The latest live pass used Binary Ninja Personal `5.4.10350-dev` and the demo
+fixture. Plugin registration, the resting sidebar, function tracking,
+primary/all-pack context previews, Settings summaries, version surfaces, and
+the read-only boundary passed without provider dispatch. Provider interaction,
+narrow keyboard traversal, persistence, and restart cases remain explicitly
+deferred. See the dated [GUI verification report](docs/gui-verification.md).
+
 The harmless C++ reversing fixture lives in [`samples/demo`](samples/demo).
 On Windows with CMake and the MSVC toolchain, run:
 

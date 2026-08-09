@@ -36,6 +36,44 @@ The two function commands are registered before the sidebar import. If the menu
 commands exist but the sidebar does not, focus on `binaryninjaui`/PySide6 and
 sidebar-registration errors rather than provider configuration.
 
+## Binary Ninja reports Updater is not valid
+
+The **Update Failed: Updater is not valid.** dialog belongs to Binary Ninja's
+application updater. It is not emitted by Axio Analyst, its development
+installer, or a provider adapter. If Axio Analyst still registers and
+`plugin_dev.py status` reports current, diagnose the application update path
+separately.
+
+Use this recovery order:
+
+1. Close Binary Ninja normally, confirm no analysis session still needs saving,
+   and retry **Help > Check for Updates** once.
+2. Confirm the intended stable or development channel in **Update Channel** and
+   that Binary Ninja can reach its update service. A proxy can be configured
+   through Binary Ninja's HTTPS proxy setting.
+3. If the same validation error returns, leave `%APPDATA%\Binary Ninja`
+   intact. It contains the licence, settings, user plugins, symbols, and other
+   unrelated state.
+4. Obtain a fresh eligible installer from the Binary Ninja customer portal or
+   licence-recovery path and use it to update/repair the application. Vector
+   35 documents this as the fallback when the self-updater fails.
+5. If a fresh installer also fails, report the exact Binary Ninja build,
+   channel, Windows version, and sanitized error to Vector 35 support.
+
+Do not delete the update cache or reinstall Axio Analyst merely because this
+dialog appears. The 2026-08-10 observation recorded in
+[`gui-verification.md`](gui-verification.md#binary-ninja-application-updater)
+found matching content hashes and valid Vector 35 signatures on both updater
+executables, while Axio Analyst continued to load normally. That evidence makes
+the plugin an unlikely cause but does not identify the updater's internal
+validation failure.
+
+Official references:
+
+- [Binary Ninja updates](https://docs.binary.ninja/guide/index.html#updates)
+- [Binary Ninja FAQ](https://binary.ninja/faq/)
+- [Binary Ninja support and licence recovery](https://binary.ninja/support/)
+
 ## The displayed version is unexpected
 
 The authoritative version is the string in the installed `plugin.json`.

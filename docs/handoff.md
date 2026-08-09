@@ -1,6 +1,6 @@
 # Axio Analyst handoff
 
-Last updated: 2026-08-10 (second pass: sidebar redesign and product mark)
+Last updated: 2026-08-10 (third pass: real-host GUI verification)
 
 ## Repository identity
 
@@ -117,7 +117,7 @@ review diff, one undoable transaction, and an audit record.
 
 ## Verification snapshot
 
-Source-tree checks completed on 2026-08-10 after the redesign:
+Source-tree checks completed again on 2026-08-10 after the live GUI pass:
 
 - `python -m unittest discover -s tests -t .`: 55 tests passed;
 - `python -m compileall` over runtime, tools, and tests: passed;
@@ -132,30 +132,34 @@ Source-tree checks completed on 2026-08-10 after the redesign:
 - `git diff --check` passed.
 
 The published `0.9.0` plugin loads in a real Binary Ninja GUI. Earlier isolated
-demo instances verified the then-current Chat layout, visible version,
-dedicated Context workspace, narrow Settings forms, saved provider executable
-paths, and clean startup. A user-triggered Codex Explain request also completed
+demo instances verified the previous Chat layout, visible version, dedicated
+Context workspace, narrow Settings forms, saved provider executable paths, and
+clean startup. A user-triggered Codex Explain request also completed
 successfully and reported usage metadata.
 
-Both redesign passes and the new mark were installed and loaded in a real
-Binary Ninja `5.4.10350-dev` GUI on the `samples/demo` fixture. After each
-pass a debug log (`binaryninja.exe -n -d -l <file>`) recorded
-`Axio Analyst v0.9.0: plugin registration complete.` with no sidebar
-registration error and no Python traceback, and a screen capture confirmed:
+The redesigned runtime and mark were checked again in Binary Ninja Personal
+`5.4.10350-dev` on the `samples/demo` fixture. The registration log reported
+`Axio Analyst v0.9.0: plugin registration complete.` with no sidebar error or
+Python traceback. The live non-network check confirmed:
 
-- the split-diamond mark rendering in Binary Ninja's own right rail under its
-  active blue tint, legible beside the stock rail glyphs;
-- the two-band resting layout: one header row naming the function and its
-  address beside the settings and overflow glyphs, and one composer;
-- the empty state showing the function, its architecture, and the provider
-  actually configured in Binary Ninja user settings, above four suggested
-  questions;
-- the composer scope chip, keyboard hint, and send glyph, with send disabled
-  while the prompt is empty;
-- no status band at rest.
+- the active split-diamond mark, two-band resting layout, empty state, four
+  suggestions, composer scope chip, keyboard hint, send glyph, and hidden idle
+  status;
+- version `0.9.0` in the registration log, Settings introduction, and overflow
+  menu;
+- function tracking from `main` to `sub_140001000`, including header/address
+  replacement and invalidation of the prior preview;
+- a one-item, 3,275-character primary preview and an eight-item,
+  14,195-character all-pack preview with no source path;
+- staged Settings summaries and expansion of the 270-second timeout and
+  65,000-character context limit without applying a change;
+- no provider dispatch, BNDB creation, symbol/type/comment mutation, or tracked
+  repository change.
 
-Binary Ninja does not hot-reload Python plugins, so each pass required a fresh
-`-n` instance rather than a reload.
+The exact evidence and remaining checks are maintained in
+[`gui-verification.md`](gui-verification.md). Binary Ninja does not hot-reload
+Python plugins, so the check used a separate `-n` instance and closed only that
+instance afterward.
 
 Layout at other dock widths was reviewed separately with a Qt harness that
 loads the real `ui/sidebar_view.py` under Binary Ninja's own Python 3.13 and
@@ -166,13 +170,12 @@ than run headless. It covers 260-560 pixels including the suggestion empty
 state, the composer scope chip and its `+N` disclosure, the one-line answer
 footer, and expanded/collapsed Settings sections.
 
-Still unverified by hand, because they need clicking rather than rendering:
-menu popups (overflow, `Compare with`), suggestion dispatch, status-line
-reveal and auto-hide, tab focus order, live theme switching, and the standing
-checklist items in
-`development.md` for context-preview contents, evidence navigation,
-comparison, persistence, export, Clear deletion, cancellation, and
-Ollama/Claude requests.
+Still unverified by hand in the redesigned runtime: narrow-width tab focus and
+`Ctrl+Enter`; suggestion/provider dispatch; status reveal and auto-hide;
+streaming, cancellation, evidence navigation, comparison, export, persistence,
+Clear deletion, restart, live theme switching, inactive mark tint, and the
+About command. No provider was invoked during the latest pass because the test
+did not have fresh authorization to send the fixture context externally.
 
 ## Current live-install state
 
@@ -184,15 +187,26 @@ replaced five `ui/` modules; `--prune-obsolete` was not used and no unrelated
 destination content was removed or modified. The Codex and Ollama executable
 overrides remain saved in Binary Ninja user settings.
 
-The Binary Ninja process inventoried at the start of this session exited on its
-own before the install; it was never stopped or restarted by tooling. The
-verification instance was started separately with `-n` so it could not disturb
-an existing session.
+Verification and command-line probe instances started specifically for these
+checks were closed afterward. Pre-existing user Binary Ninja sessions were
+inventoried and left running.
+
+Binary Ninja's separate Windows application updater currently reports
+**Update Failed: Updater is not valid.** The pending cache's content-addressed
+payload hashes match, and its `update.exe` is identical to the installed copy;
+both have valid Vector 35 Authenticode signatures. The plugin still registers
+and the installed runtime still reports current, so no evidence connects this
+failure to Axio Analyst. Follow
+[`troubleshooting.md`](troubleshooting.md#binary-ninja-reports-updater-is-not-valid)
+and use a fresh eligible installer from Vector 35 if retrying the self-updater
+fails. The cache and application installation were not changed during this
+assessment.
 
 Binary Ninja does not hot-reload Python plugins, so any further runtime change
 needs a restart or a fresh `-n` instance. Do not broadly clean the Binary Ninja
 user directory; it contains licences, settings, symbols, themes, and unrelated
-plugins.
+plugins. Do not stop existing Binary Ninja sessions merely to refresh the
+development copy; coordinate a normal restart with the user.
 
 ## Published state and next steps
 
@@ -205,14 +219,23 @@ changes sit under `Unreleased` in the changelog; the source version is still
 `0.9.0` and no tag was created. The Sidekick inventory is reference research;
 it does not imply code reuse or a compatibility commitment.
 
+This third documentation pass adds the dated real-host report, replaces stale
+manual-check claims with the completed/deferred split, and records the separate
+Binary Ninja updater failure and supported recovery path. It changes no runtime
+module or plugin metadata.
+
 Next product and verification steps:
 
-1. Confirm the overflow and `Compare with` menus, tab focus order, and theme
-   switching by hand in the installed GUI.
-2. Complete the remaining expanded GUI checklist with `samples/demo` and test
-   only providers the user authorizes.
-3. Fix any host-only issues, rerun all verification, and refresh this handoff.
-4. Decide whether the redesign warrants a version bump, then decide the
+1. Use a deterministic local harness for streaming, cancellation, Markdown,
+   evidence, export, Clear, and persistence cases that do not need a real
+   provider.
+2. Complete the remaining narrow-width, keyboard, theme, About, restart, and
+   explicitly authorized provider/Compare checks in `gui-verification.md`.
+3. Resolve the separate Binary Ninja self-updater failure through Vector 35's
+   supported installer path; do not alter the plugin or user directory as a
+   workaround.
+4. Fix any host-only issues, rerun all verification, and refresh this handoff.
+5. Decide whether the redesign warrants a version bump, then decide the
    tagged-release and Binary Ninja plugin-manager publication path; keep hosted
    CI disabled unless it is explicitly approved.
 

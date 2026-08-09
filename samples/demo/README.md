@@ -37,11 +37,35 @@ Open `build/Release/axio_analyst_demo.exe` in Binary Ninja. The `build/`
 directory is intentionally ignored because the executable is a generated local
 test artifact.
 
+For a separate Windows test instance, pass the generated binary as a positional
+argument:
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\Vector35\BinaryNinja\binaryninja.exe" `
+  -n -d .\build\Release\axio_analyst_demo.exe
+```
+
+Do not put the fixture immediately after Binary Ninja's `-l` option. That
+option treats the next argument as the debug-log destination and can overwrite
+this disposable executable. If that occurs, close the test instance and force
+a clean generated build before rerunning `build.ps1`:
+
+```powershell
+cmake --build build --config Release --target clean
+.\build.ps1
+```
+
 For a release smoke test, open the `AX` sidebar and confirm its header version
 matches `plugin.json`, the Settings introduction repeats that version, and the
 Binary Ninja log contains the versioned registration message. This validates
 host loading and widget construction without sending the fixture to a provider.
 Provider requests remain a separate, explicit test action.
+
+The 2026-08-10 live pass verified the registration log, resting sidebar,
+function switching, a one-item/3,275-character primary preview, an
+eight-item/14,195-character all-pack preview, Settings summaries, and no BNDB
+creation. See [`docs/gui-verification.md`](../../docs/gui-verification.md) for
+the complete evidence and deferred interaction checks.
 
 Useful Axio Analyst questions include:
 

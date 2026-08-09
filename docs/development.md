@@ -152,6 +152,19 @@ release.
 19. Restart Binary Ninja and confirm persisted settings survive.
 20. Confirm no symbol, type, comment, analysis, or BNDB state changed.
 
+The latest execution of this checklist is recorded in
+[`gui-verification.md`](gui-verification.md). On 2026-08-10, the real-host
+non-network shell checks passed against Binary Ninja Personal
+`5.4.10350-dev`: registration, resting layout, version surfaces, function
+tracking, primary/all-pack previews, Settings summaries, and the read-only
+boundary. The report lists every provider, keyboard, persistence, export, and
+restart item that remains unverified rather than treating a rendered control as
+proof of its behavior.
+
+When launching the fixture from a command line, pass the executable as a
+positional argument. Binary Ninja's `-l` option consumes the next argument as a
+debug-log destination; it is not the load-file switch.
+
 ## Change workflow
 
 1. Read `AGENTS.md` and the documentation owning the behavior being changed.
