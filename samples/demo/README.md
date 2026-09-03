@@ -13,7 +13,7 @@ useful reversing shapes:
 
 ## Build and run
 
-From this directory:
+From this directory, on Windows:
 
 ```powershell
 .\build.ps1
@@ -23,6 +23,20 @@ From this directory:
 Requirements are CMake and a Visual Studio installation with the MSVC C++
 toolchain. `build.ps1` configures an x64 Release build and leaves all generated
 files under `build/`.
+
+On macOS or Linux:
+
+```sh
+./build.sh
+./build/axio_analyst_demo --demo
+```
+
+Requirements are CMake and a C++17 compiler (Apple Clang from the Xcode
+Command Line Tools on macOS); Ninja is used when present. `build.sh` configures
+a native Release build for the machine's own architecture, so an Apple Silicon
+Mac produces an arm64 Mach-O and an Intel Mac an x86_64 one. The single-config
+generator puts the executable directly under `build/` rather than
+`build/Release/`. The `--demo` output is identical on every platform.
 
 Expected `--demo` output:
 
@@ -36,6 +50,10 @@ signal: critical (26)
 Open `build/Release/axio_analyst_demo.exe` in Binary Ninja. The `build/`
 directory is intentionally ignored because the executable is a generated local
 test artifact.
+
+On macOS, open the generated binary in Binary Ninja from the Finder or with
+`open -a "Binary Ninja" build/axio_analyst_demo`; the same positional-argument
+rule applies to `/Applications/Binary Ninja.app/Contents/MacOS/binaryninja`.
 
 For a separate Windows test instance, pass the generated binary as a positional
 argument:

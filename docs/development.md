@@ -18,7 +18,7 @@ packages grouped by dependency boundary.
 | `tests/contract/` | Repository layout, dependency-boundary, metadata, and installer contracts. |
 | `tools/runtime_manifest.py` | Authoritative explicit allowlist of installed runtime files. |
 | `tools/plugin_dev.py` | Bounded runtime copier and drift checker. |
-| `samples/demo/` | Harmless C++ reverse-engineering fixture. |
+| `samples/demo/` | Harmless C++ reverse-engineering fixture; `build.ps1` on Windows, `build.sh` on macOS and Linux. |
 | `docs/` | Maintained product, architecture, operations, and handoff documentation. |
 
 ## Design constraints

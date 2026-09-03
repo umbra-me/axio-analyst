@@ -9,6 +9,7 @@
 - Check a development install: `python tools/plugin_dev.py status --plugins-dir <Binary-Ninja-plugins-dir>`
 - Install a development copy: `python tools/plugin_dev.py install --plugins-dir <Binary-Ninja-plugins-dir>`
 - Build the Windows demo: `cd samples/demo; ./build.ps1`
+- Build the macOS or Linux demo: `cd samples/demo && ./build.sh`
 
 ## Architecture
 

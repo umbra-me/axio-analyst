@@ -250,6 +250,12 @@ Push-Location samples/demo
 Pop-Location
 ```
 
+On macOS or Linux with CMake and a C++17 compiler:
+
+```sh
+(cd samples/demo && ./build.sh && ./build/axio_analyst_demo --demo)
+```
+
 When launching the fixture through `binaryninja.exe`, pass it as a positional
 file argument. Binary Ninja's built-in help defines
 `-l, --debug-log <file>` as the log destination; it is not the option for

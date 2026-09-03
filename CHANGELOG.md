@@ -8,6 +8,11 @@ breaking changes must still be documented with migration instructions.
 
 ### Added
 
+- Add `samples/demo/build.sh`, the macOS and Linux counterpart of `build.ps1`:
+  a native Release build of the same fixture through CMake, Ninja when present,
+  with the executable directly under `build/`. Verified on Apple Silicon: the
+  `--demo` output matches the Windows build byte for byte and all eight named
+  functions survive as symbols.
 - Add a dated real-host GUI verification report covering registration, the
   redesigned resting layout, function tracking, context previews, Settings,
   read-only evidence, the provider-authorisation boundary, and Binary Ninja's
