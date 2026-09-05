@@ -46,3 +46,22 @@ class TestAnalyze(unittest.TestCase):
         self.assertEqual(result.usage.input_chars, len(provider.prompt))
         self.assertEqual(result.usage.output_chars, len("done"))
         self.assertGreaterEqual(result.usage.duration_seconds, 0)
+
+
+class TestDeterministicStreaming(unittest.TestCase):
+    def test_streaming_and_cancellation_use_the_same_frozen_prompt(self):
+        from axio_analyst.core.models import ProviderCancelled
+        context = FunctionContext("fixture", "main", 0x1000, "x86_64", "test", "int()", "0x1000: return 0")
+        class Fixture(Provider):
+            def complete(self, prompt, is_cancelled=None, on_stream=None):
+                for chunk in ("At ", "0x1000", " returns zero."):
+                    if is_cancelled and is_cancelled(): raise ProviderCancelled("cancelled")
+                    if on_stream: on_stream(chunk)
+                return ProviderResult("At 0x1000 returns zero.", "fixture")
+        chunks = []
+        result = analyze(context, "Explain", Fixture(), on_stream=chunks.append)
+        self.assertEqual("".join(chunks), result.text)
+        chunks = []
+        with self.assertRaises(ProviderCancelled):
+            analyze(context, "Explain", Fixture(), is_cancelled=lambda: len(chunks) == 1, on_stream=chunks.append)
+        self.assertEqual(chunks, ["At "])

@@ -6,6 +6,7 @@ from typing import Optional
 from PySide6 import QtGui, QtWidgets
 
 from ..application.conversations import ConversationMessage
+from ..core.findings import Finding
 from .markdown import restored_scroll_value, sanitize_markdown
 
 #: Raw provider HTML is neutralised here rather than by escaping the source, so
@@ -25,6 +26,7 @@ class ChatMessage:
     meta: str = ""
     evidence: tuple[int, ...] = ()
     unresolved_evidence: tuple[int, ...] = ()
+    findings: tuple[Finding, ...] = ()
 
 
 class Transcript:
@@ -50,9 +52,10 @@ class Transcript:
         meta: str = "",
         evidence: tuple[int, ...] = (),
         unresolved_evidence: tuple[int, ...] = (),
+        findings: tuple[Finding, ...] = (),
     ) -> int:
         self.messages.append(
-            ChatMessage(role, body, meta, evidence, unresolved_evidence)
+            ChatMessage(role, body, meta, evidence, unresolved_evidence, findings)
         )
         self.render(force_bottom=True)
         return len(self.messages) - 1
@@ -75,6 +78,7 @@ class Transcript:
         meta: str,
         evidence: tuple[int, ...] = (),
         unresolved_evidence: tuple[int, ...] = (),
+        findings: tuple[Finding, ...] = (),
     ) -> None:
         completed_index: Optional[int] = None
         if self.active_index is None:
@@ -84,6 +88,7 @@ class Transcript:
                 meta,
                 evidence,
                 unresolved_evidence,
+                findings,
             )
         else:
             completed_index = self.active_index
@@ -92,6 +97,7 @@ class Transcript:
             message.meta = meta
             message.evidence = evidence
             message.unresolved_evidence = unresolved_evidence
+            message.findings = findings
             self.render(focus_index=completed_index)
         self.active_index = None
 
@@ -103,6 +109,7 @@ class Transcript:
                 message.meta,
                 message.evidence,
                 message.unresolved_evidence,
+                message.findings,
             )
             for message in messages
         ]
@@ -117,6 +124,7 @@ class Transcript:
                 meta=message.meta,
                 evidence=message.evidence,
                 unresolved_evidence=message.unresolved_evidence,
+                findings=message.findings,
             )
             for message in self.messages
         )

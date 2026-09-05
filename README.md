@@ -1,5 +1,7 @@
 # Axio Analyst
 
+Current source changes and verification gates: [September 5 change set](docs/change-set-2026-09-05.md).
+
 Axio Analyst is a provider-neutral analysis workspace for Binary Ninja. It
 builds an inspectable, bounded context snapshot around the function under the
 cursor, sends that snapshot to a supervised Claude Code, Codex, or Ollama Cloud

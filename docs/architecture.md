@@ -157,10 +157,11 @@ types are sent only when their visible checkbox is enabled. Source paths, whole
 binaries, BNDB files, indirect neighbourhoods, and arbitrary unrelated
 functions are not sent.
 
-The optional schema-version-1 conversation record contains the binary display
+The optional schema-version-2 conversation record (schema 1 remains readable) contains the binary display
 name, timestamp, role/body/meta text, and validated/unresolved evidence
-addresses. It does not contain a source path, context snapshot, prompt, provider
-credential, or raw binary bytes. Persistence is off by default. **Clear**
+addresses and unverified findings with bounded supplied context excerpts, context
+digests and provider/model/version metadata. It does not contain a provider
+credential, complete context snapshot, or raw binary bytes. Persistence is off by default. **Clear**
 deletes the exact fingerprint record and **Export** writes a user-selected
 Markdown file. The current release never changes names, types, comments,
 analysis, or BNDB state.

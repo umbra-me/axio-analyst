@@ -93,3 +93,8 @@ Portable/collaborative workspaces still require encryption, migration, and
 retention decisions beyond the bounded local transcript. BNDB write features
 require validated proposed operations, review, one undoable
 transaction, and an audit record. These are design gates, not optional cleanup.
+
+Schema 2 optional transcripts and Markdown exports contain bounded supplied
+context excerpts within unverified findings, plus a frozen-context hash and
+provider/model/version metadata. Treat those artifacts as potentially sensitive
+analysis content. Persistence remains disabled by default.

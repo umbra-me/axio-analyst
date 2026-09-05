@@ -8,7 +8,9 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+from ..core.findings import Finding, MAX_FINDINGS, finding_from_json
+
+SCHEMA_VERSION = 2
 MAX_MESSAGES = 200
 MAX_MESSAGE_CHARS = 1_000_000
 MAX_RECORD_BYTES = 8_000_000
@@ -22,6 +24,7 @@ class ConversationMessage:
     meta: str = ""
     evidence: tuple[int, ...] = ()
     unresolved_evidence: tuple[int, ...] = ()
+    findings: tuple[Finding, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -73,17 +76,21 @@ def _message_from_json(value: object) -> ConversationMessage:
             raise ValueError(f"Conversation {key} must contain addresses")
         return tuple(raw)
 
+    findings = value.get("findings", [])
+    if not isinstance(findings, list) or len(findings) > MAX_FINDINGS:
+        raise ValueError("Too many findings")
     return ConversationMessage(
         role=role,
         body=body,
         meta=meta,
         evidence=addresses("evidence"),
         unresolved_evidence=addresses("unresolved_evidence"),
+        findings=tuple(finding_from_json(finding) for finding in findings),
     )
 
 
 def record_from_json(payload: object) -> ConversationRecord:
-    if not isinstance(payload, dict) or payload.get("schema_version") != SCHEMA_VERSION:
+    if not isinstance(payload, dict) or payload.get("schema_version") not in (1, SCHEMA_VERSION):
         raise ValueError("Unsupported conversation schema")
     binary_id = payload.get("binary_id", "")
     binary_name = payload.get("binary_name", "")
@@ -122,6 +129,14 @@ def render_conversation_markdown(record: ConversationRecord) -> str:
                 f"0x{address:x}" for address in message.unresolved_evidence
             )
             lines.extend([f"Unresolved addresses: {refs}", ""])
+        for finding in message.findings:
+            lines.extend(["### Finding (unverified)", "", finding.claim, "",
+                          f"Context SHA-256: {finding.context_sha256}",
+                          f"Analysis version: {finding.analysis_version}",
+                          f"Provider/model: {finding.provider} / {finding.model}", "",
+                          "Supplied context excerpt:", ""])
+            lines.extend("> " + line for line in finding.context_excerpt.splitlines())
+            lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -163,6 +178,7 @@ class ConversationStore:
         ).encode("utf-8")
         if len(payload) > MAX_RECORD_BYTES:
             raise ValueError("Conversation exceeds the local storage limit")
+        record_from_json(json.loads(payload))  # Validate findings on writes as well as reads.
         target = self._path(record.binary_id)
         temporary_name = ""
         try:

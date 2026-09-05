@@ -22,6 +22,7 @@ RUNTIME_FILES = (
     "application/conversations.py",
     "core/__init__.py",
     "core/evidence.py",
+    "core/findings.py",
     "core/models.py",
     "core/policy.py",
     "core/prompts.py",

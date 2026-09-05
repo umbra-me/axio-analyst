@@ -1,5 +1,9 @@
 # Axio Analyst roadmap
 
+For the September 5 implementation and its remaining gates, see
+[the current change set](change-set-2026-09-05.md). Earlier verification entries
+below apply to their recorded revisions, not automatically to this change.
+
 The current architecture and security boundaries are documented in
 [architecture.md](architecture.md). This document owns future product scope so
 aspirational behavior is not confused with the implemented release.

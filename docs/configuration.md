@@ -110,7 +110,7 @@ API keys, OAuth tokens, provider cookies, full prompts, context snapshots, or
 binary bytes. Executable paths and selected model names may be sensitive on
 shared machines, so do not commit a populated Binary Ninja `settings.json`.
 
-Conversation persistence is off by default. When enabled, schema-version-1
+Conversation persistence is off by default. When enabled, schema-version-2 (with schema-1 read compatibility)
 records are stored below:
 
 ```text
@@ -120,7 +120,8 @@ records are stored below:
 The 64-character filename is derived from bounded samples of the BinaryView
 contents and address span; no source path is embedded in it. A record contains
 the binary base name, updated timestamp, up to 200 role/body/meta messages, and
-validated/unresolved evidence addresses. Each message is limited to 1 MB and a
+validated/unresolved evidence addresses and unverified findings with bounded
+supplied context excerpts, context hashes and provider/model/version metadata. Each message is limited to 1 MB and a
 record to 8 MB. Saves use same-directory atomic replacement and request owner-
 only permissions where supported. **Clear** deletes only the exact current
 fingerprint record. Disabling persistence stops future load/save but deliberately
@@ -134,3 +135,6 @@ consult the selected provider before sending proprietary material.
 No `axioAnalyst.*` key stores the plugin version. Upgrading the plugin changes
 runtime files and metadata without rewriting the user's provider selection,
 executable paths, request limits, persistence preference, or credentials.
+
+Schema 2 findings additionally persist bounded supplied context excerpts and
+context hashes with provider/model/version metadata. See [the change set](change-set-2026-09-05.md).

@@ -1,5 +1,9 @@
 # Axio Analyst handoff
 
+For the September 5 implementation and its remaining gates, see
+[the current change set](change-set-2026-09-05.md). Earlier verification entries
+below apply to their recorded revisions, not automatically to this change.
+
 Last updated: 2026-08-10 (third pass: real-host GUI verification)
 
 ## Repository identity

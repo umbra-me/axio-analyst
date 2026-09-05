@@ -6,6 +6,8 @@ breaking changes must still be documented with migration instructions.
 
 ## Unreleased
 
+- September 5: Unverified structured findings, context provenance and schema-2 transcript persistence/export with schema-1 compatibility. See [change set](docs/change-set-2026-09-05.md).
+
 ### Added
 
 - Add `samples/demo/build.sh`, the macOS and Linux counterpart of `build.ps1`:

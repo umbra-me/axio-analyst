@@ -38,3 +38,5 @@
 - Unit tests, compileall, and plugin metadata validation pass.
 - A development install reports no drift and Binary Ninja launches with the sidebar registered.
 - Provider prompts remain off process command lines; previews match frozen snapshots; no secrets, transcripts, or machine-local settings are tracked.
+
+Current integration, schema and release boundaries: [September 5 change set](docs/change-set-2026-09-05.md). Keep its completed and pending validation separate.

@@ -17,6 +17,8 @@ from PySide6 import QtCore, QtWidgets
 
 from ..application import ConversationMessage, ConversationStore, new_record
 from ..core.evidence import classify_evidence
+from ..core.findings import build_findings
+from ..core.version import VERSION
 from ..core.models import ContextBundle, ProviderConfig, ProviderResult
 from ..core.prompts import DEFAULT_QUESTION, render_context
 from ..core.usage import format_usage
@@ -185,6 +187,7 @@ class AxioAnalystSidebar(SidebarWidget):
                             meta=message.meta,
                             evidence=evidence,
                             unresolved_evidence=unresolved,
+                            findings=message.findings,
                         )
                     )
                 self.conversation.load(tuple(revalidated))
@@ -491,12 +494,17 @@ class AxioAnalystSidebar(SidebarWidget):
             sections.append(f"{heading}\n\n{body}".strip())
             metadata.append(f"{backend}: {format_usage(result.usage)}")
         response = "\n\n---\n\n".join(sections)
+        findings = tuple(finding for result in results if not result.error
+                         for finding in build_findings(result.text, context, VERSION, result.backend, result.model))[:64]
+        if findings:
+            metadata.append(f"{len(findings)} unverified finding(s) · context {findings[0].context_sha256[:12]}")
         evidence, unresolved = classify_evidence(response, self._is_valid_address)
         self.conversation.complete(
             response,
             "   ·   ".join(metadata),
             evidence,
             unresolved,
+            findings,
         )
         self._task = None
         self._persist_transcript()
