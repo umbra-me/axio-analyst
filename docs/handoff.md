@@ -6,14 +6,17 @@ For the current source fixes and remaining gates, see
 implementation and live receipts. Earlier verification entries below apply to
 their recorded revisions, not automatically to the current source.
 
-Last updated: 2026-10-09 (release-readiness source fixes and documentation complete)
+Last updated: 2026-10-09 (source fixes committed; manual verification plan prepared)
 
 ## Current continuation state
 
-The release-readiness audit fixes are complete, with implementation, regression
-tests, and documentation in one local change set. The baseline before these
-fixes is `9945d84530025139958aad55226c170a18f430f3`; use `git log -1` to inspect
-the current local commit. Version remains `0.9.0`, with changes under Unreleased.
+The release-readiness audit fixes, regression tests, and reconciled behavior
+documentation are in local commit `259b81fb9549f2f0767be97b6499b1443386128b`.
+The baseline before these fixes is `9945d84530025139958aad55226c170a18f430f3`.
+The Phase 3 [manual verification plan](manual-verification.md) and
+[results template](manual-verification-results-template.md) are now prepared;
+no new live results have been reported. Version remains `0.9.0`, with changes
+under Unreleased.
 No live install, provider inference, tag, push, release, or submission was
 performed for this phase.
 
@@ -37,10 +40,11 @@ Codex snapshot-only confinement is still unproven. Windows Job Object behavior
 and live Binary Ninja acceptance remain unverified for this patch. The sampled
 conversation identity can alias binaries that differ outside sampled regions.
 These limits are explicit in [providers.md](providers.md) and
-[configuration.md](configuration.md). The next release-readiness phase is a
-manual live-verification checklist and observed receipts, subject to separate
-authorization for installation/provider dispatch. Do not infer live acceptance
-from this local source checkpoint. These release-readiness phase numbers are
+[configuration.md](configuration.md). The next release-readiness step is
+execution of the prepared manual checklist by the user, followed by dated
+reported receipts. No installation/provider dispatch was performed while writing
+the plan. Do not infer live acceptance from this local source checkpoint.
+These release-readiness phase numbers are
 separate from the future product phases in [roadmap.md](roadmap.md).
 
 The remaining sections retain historical implementation/installation evidence.

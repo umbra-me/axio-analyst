@@ -20,6 +20,15 @@ below. The October 9 Phase 2 source changes have **not** been installed or
 verified in the live Binary Ninja GUI. Native Qt transcript unit tests are
 separate from host acceptance.
 
+## Candidate manual plan — October 9
+
+The [manual verification plan](manual-verification.md) gives steps, expected
+results, and evidence to record for the deferred cases on source commit
+`259b81fb9549f2f0767be97b6499b1443386128b`. Use the
+[unfilled results template](manual-verification-results-template.md) for separate
+provider, cancellation, and restart observations. Preparation of this plan is
+not a live test result. No new GUI receipt has been reported for this candidate.
+
 ## Earlier non-network shell receipt
 
 Date: 2026-08-10

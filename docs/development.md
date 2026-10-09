@@ -143,6 +143,10 @@ receipts in [GUI verification](gui-verification.md).
 
 ## Manual GUI checklist
 
+Use [the detailed manual plan](manual-verification.md) for executable steps and
+receipt fields for the current candidate. The summary below is the recurring
+release checklist; it is not a record of completed observations.
+
 1. Start a supported Binary Ninja build with user plugins enabled.
 2. Confirm the log contains the versioned Axio Analyst registration message and
    no import or registration error.
