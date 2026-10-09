@@ -94,6 +94,7 @@ class ProviderResult:
     reasoning_effort: str = ""
     usage: ProviderUsage = field(default_factory=ProviderUsage)
     error: str = ""
+    cancelled: bool = False
 
 
 class ProviderError(RuntimeError):

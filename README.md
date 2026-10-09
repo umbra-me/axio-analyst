@@ -1,6 +1,6 @@
 # Axio Analyst
 
-Current source changes and verification gates: [September 5 change set](docs/change-set-2026-09-05.md).
+Current source changes and verification gates: [October 9 change set](docs/change-set-2026-10-09.md).
 
 Axio Analyst is a provider-neutral analysis workspace for Binary Ninja. It
 builds an inspectable, bounded context snapshot around the function under the
@@ -24,6 +24,8 @@ types, add comments, or otherwise modify the Binary Ninja database (BNDB).
   string/import, and relevant-type packs under one deterministic total cap.
 - Address citations become validated internal navigation targets; unknown
   addresses remain inert and are labelled unresolved.
+- Unverified structured findings retain bounded claims, cited addresses,
+  supplied context excerpts, and provider/context provenance.
 - Optional, off-by-default local conversation restoration keyed by a path-free
   content fingerprint, with explicit deletion and Markdown export.
 - Optional comparison of the active provider with one other configured
@@ -35,18 +37,19 @@ types, add comments, or otherwise modify the Binary Ninja database (BNDB).
 - Editable model selection and provider-specific reasoning effort.
 - Dynamic Ollama Cloud catalog discovery with `ollama list` as an offline
   fallback.
-- Streamed Markdown responses with provider HTML disabled at the parser,
-  wrapped code blocks, and a stable manual scroll position.
+- Bounded literal-text previews while streaming, followed by HTML-disabled
+  Markdown at completion, with wrapped code blocks and stable manual scrolling.
 - Background process execution, concurrent stdout/stderr draining, elapsed
   time, phase progress, timeout enforcement, and cancellation.
-- Explicit context disclosure and a bounded read-only data boundary.
+- Explicit bounded context disclosure and read-only BNDB integration.
 - Installed version visibility in the sidebar overflow menu, Settings page, log, and
   **Plugins > Axio Analyst > About Axio Analyst**.
 
 ## Requirements
 
-- Binary Ninja 5.x with its Qt6 UI. Development is currently verified against
-  Binary Ninja `5.4.10350-dev`.
+- Binary Ninja 5.x or 6.x with its Qt6 UI. Historical host checks used
+  `5.4.10350-dev` on Windows and `6.1.10608-dev` on macOS; the October 9
+  source changes still require live host acceptance.
 - The Python runtime embedded in Binary Ninja; the plugin has no third-party
   Python dependencies beyond Binary Ninja and its bundled PySide6 modules.
 - At least one supported provider CLI installed, authenticated, and available
@@ -171,9 +174,11 @@ user-selected path.
 | Ollama Cloud | `ollama run` | Existing `ollama signin` session | Raw response chunks |
 
 Claude Code runs without tools, Chrome integration, slash commands, or session
-persistence. Codex runs ephemerally in a read-only sandbox and ignores user
-rules/configuration. Ollama disables prompt history for the child process and
-hides thinking output. See [Provider contracts](docs/providers.md) for exact
+persistence. Codex runs ephemerally in a read-only sandbox, ignores user
+rules/configuration, and disables shell/image tools and web search. These flags
+do not establish snapshot-only confidentiality; see the open gate in the
+[Codex contract](docs/providers.md#codex). Ollama disables prompt history for
+the child process and hides thinking output. See [Provider contracts](docs/providers.md) for exact
 arguments, parsing rules, limits, and failure behavior.
 
 ## What is sent
@@ -194,9 +199,11 @@ also contain:
 - up to twenty referenced strings and twenty referenced imports;
 - relevant function type declarations.
 
-The configured character limit applies to the combined context. Per-function
-caps keep one neighbour from consuming the entire request. The exact item list,
-content, size, and truncation state are visible before dispatch.
+The configured character limit applies to the combined context-item text,
+excluding prompt instructions, metadata, and the user question. Per-function
+caps keep one neighbour from consuming the context budget. Extraction also has
+instruction/candidate traversal ceilings with visible truncation notices. The
+exact item list, content, size, and truncation state are visible before dispatch.
 
 No request is sent until the user chooses **Ask** or **Explain**. Prompts are
 written through stdin rather than included in the process command line.
@@ -235,12 +242,14 @@ A real Binary Ninja GUI launch is still required to prove sidebar registration
 and Qt behavior because a personal Binary Ninja licence does not expose
 `binaryninjaui` to ordinary headless Python.
 
-The latest live pass used Binary Ninja Personal `5.4.10350-dev` and the demo
-fixture. Plugin registration, the resting sidebar, function tracking,
-primary/all-pack context previews, Settings summaries, version surfaces, and
-the read-only boundary passed without provider dispatch. Provider interaction,
-narrow keyboard traversal, persistence, and restart cases remain explicitly
-deferred. See the dated [GUI verification report](docs/gui-verification.md).
+On October 9, 130 tests were discovered: stock Python passed 121 and skipped
+nine optional Qt tests; the bundled-Qt run passed all 130. These checks cover
+source behavior and unshown native Qt widgets, rather than live host acceptance.
+The latest live receipt is September 5 on Binary Ninja Personal `6.1.10608-dev`:
+a limited Ollama flow, evidence navigation, restart, pre-output cancellation,
+and cancelled-conversation restoration passed. The October source changes have
+not been installed or checked in the live GUI. See the dated
+[GUI verification index](docs/gui-verification.md) for the remaining cases.
 
 The harmless C++ reversing fixture lives in [`samples/demo`](samples/demo).
 On Windows with CMake and the MSVC toolchain, run:

@@ -10,21 +10,23 @@ provider-neutral use case, and `providers/__init__.py` selects the concrete
 Claude Code, Codex, or Ollama adapter from `ProviderConfig`. Individual command
 and parser implementations live in `providers/claude.py`, `codex.py`, and
 `ollama.py`; shared supervision and stream decoding live in `process.py` and
-`streaming.py`.
+`streaming.py`; OS process-tree cleanup lives in `process_tree.py`.
 
 ## Shared process contract
 
 For every request Axio Analyst:
 
-1. creates or reuses a dedicated temporary working directory named
-   `axio-analyst` under the operating-system temp directory;
+1. creates a unique `axio-analyst-*` working directory under the OS temp
+   directory and removes it after cleanup;
 2. launches the configured executable without a visible console window on
    Windows;
-3. sends the complete prompt over stdin;
-4. drains stdout and stderr concurrently on daemon reader threads;
+3. submits the prompt on a separate daemon writer so a blocked stdin pipe
+   does not prevent timeout or cancellation checks;
+4. drains stdout and stderr concurrently on daemon reader threads through a
+   queue capped at 64 chunks of up to 4,096 bytes;
 5. incrementally decodes UTF-8 with replacement for malformed bytes;
 6. enforces cancellation, the configured timeout, and an 8 MB combined output
-   limit;
+   limit, counted by the readers before queueing;
 7. reports a bounded stderr diagnostic when the process exits unsuccessfully;
 8. parses the provider output into a `ProviderResult`;
 9. normalizes elapsed seconds and input/output character counts, retaining
@@ -32,7 +34,25 @@ For every request Axio Analyst:
 
 Prompts are never command-line arguments. Provider work does not run on the Qt
 GUI thread. Stream updates are coalesced before being returned to the main
-thread to avoid excessive UI redraws.
+thread. While receiving, the transcript inserts sanitized literal text into
+the active response up to a 64,000-character live-preview ceiling, with a
+visible notice when reached. Raw chunks are retained separately and assembled
+for snapshots or terminal rendering, avoiding repeated growing-string copies.
+The full result or cancelled/failed partial text is parsed as Markdown once at
+the terminal update. Existing conversation Markdown is not reparsed for every
+incoming chunk.
+
+The deadline starts before process creation and remains checked during stdin
+submission, streaming, and post-EOF process waiting. Python cannot preempt a
+blocked OS process-creation call. Cleanup runs on success and every failure,
+including callback exceptions, with kill/wait escalation attempted even if
+graceful cleanup raises: POSIX children use a new session/process group;
+Windows children are assigned to a kill-on-close Job Object. Windows attachment
+occurs after launch, so descendants created before attachment are not proven
+contained. The Windows path still requires live validation. POSIX descendants
+that deliberately escape the process group are also outside this cleanup
+mechanism; it is lifecycle supervision, not a security sandbox. Cleanup waits
+up to two seconds before escalation and another two seconds after killing.
 
 ## Claude Code
 
@@ -76,6 +96,9 @@ codex exec
   --ephemeral
   --ignore-user-config
   --ignore-rules
+  --disable shell_tool
+  --disable view_image
+  --config web_search="disabled"
   --skip-git-repo-check
   [--model MODEL]
   [--config model_reasoning_effort="EFFORT"]
@@ -83,10 +106,18 @@ codex exec
 ```
 
 The trailing `-` selects stdin. Ephemeral execution prevents session reuse, the
-read-only sandbox prevents writes, and user configuration/rules are ignored so
-they cannot silently broaden the analysis task. Axio Analyst parses JSON Lines
-events, surfaces lifecycle status where available, and uses the completed
-agent message as the response. A `turn.completed.usage` object populates input,
+read-only sandbox requests write restrictions, and user configuration/rules
+are ignored. Shell and image tools and web search are explicitly disabled.
+These controls do **not** establish snapshot-only filesystem or tool access.
+In the inspected Codex `0.153.2` [tool registration source](https://github.com/openai/codex/blob/rust-v0.153.2/codex-rs/core/src/tools/spec_plan.rs),
+patch-tool registration is independent of shell/image switches. No supported
+global tool-off control was established. Do not rely on this adapter to keep
+unrelated readable files confidential; that release gate remains open.
+
+Axio Analyst parses JSON Lines and accepts a final agent message only with a
+`turn.completed` event and no `error` or `turn.failed` event. A failed turn
+remains a failure even if it emitted useful-looking text first. A
+`turn.completed.usage` object populates input,
 cached-input, and output token counts when present. Current Codex JSONL does
 not expose token-level text deltas through this adapter.
 
@@ -138,6 +169,9 @@ Primary-provider streaming remains visible; the completed transcript replaces
 it with labelled provider sections and separate usage summaries. A comparison
 provider failure is contained and shown beside any successful result. Choosing
 the same backend as the active provider collapses to a normal single request.
+Cancelling the comparison preserves a completed primary result and its
+findings/usage, while marking the comparison cancelled. Cancelling the primary
+retains the normal partial-text cancellation path.
 
 Comparison is deliberately not concurrent: this avoids competing child
 processes, keeps cancellation deterministic, and makes local resource usage
@@ -151,15 +185,14 @@ Expected failures become user-visible `ProviderError` messages:
 - executable path is empty or not found;
 - provider process cannot start;
 - configured timeout expires;
-- user cancels the task;
 - combined stdout/stderr exceeds 8 MB;
 - process exits nonzero;
 - structured output is malformed or contains no final response;
 - Ollama model is empty or produces no text.
 
-Cancellation first terminates the process, waits up to two seconds, then kills
-it if necessary. Partial streamed text remains visible and is marked cancelled
-or failed in the transcript.
+Cancellation uses `ProviderCancelled`, distinct from a provider error, and
+always enters process-tree cleanup. Partial streamed text remains visible and
+is marked cancelled or failed in the transcript.
 
 ## Adding another provider
 

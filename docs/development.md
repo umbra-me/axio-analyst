@@ -14,7 +14,8 @@ packages grouped by dependency boundary.
 | `providers/` | CLI supervision, streaming, provider adapters, catalog parsing, and factory. |
 | `host/` | Binary Ninja context, settings, background tasks, model discovery, and registration. |
 | `ui/` | Qt6 sidebar controller/view, settings page, transcript, progress, and Markdown safety. |
-| `tests/unit/` | Pure unit tests arranged by runtime package. |
+| `tests/unit/` | Pure, host-fake, and optional bundled-Qt unit tests arranged by runtime package. |
+| `tests/integration/` | Shared process-supervisor tests using harmless local child programs. |
 | `tests/contract/` | Repository layout, dependency-boundary, metadata, and installer contracts. |
 | `tools/runtime_manifest.py` | Authoritative explicit allowlist of installed runtime files. |
 | `tools/plugin_dev.py` | Bounded runtime copier and drift checker. |
@@ -23,8 +24,8 @@ packages grouped by dependency boundary.
 
 ## Design constraints
 
-- Binary Ninja 5.x is a Qt6 host. Use its bundled PySide6 modules; do not add a
-  PySide2-only path.
+- Supported Binary Ninja hosts use Qt6. Use their bundled PySide6 modules;
+  do not add a PySide2-only path.
 - Keep `core/`, `application/`, and `providers/` importable without Binary
   Ninja so provider logic remains testable on stock Python. `core/` and
   `application/` must also remain free of Qt, subprocess, and network imports.
@@ -55,6 +56,21 @@ Run a focused test:
 python -m unittest `
   tests.unit.core.test_prompts.TestPromptConstruction.test_prompt_preserves_evidence_addresses
 ```
+
+Optional native Qt transcript tests use Binary Ninja's existing PySide6 bundle;
+they do not launch Binary Ninja or dispatch providers. On macOS, from the
+repository root with the app at its usual path:
+
+```sh
+AXIO_QT_TESTS=1 PYTHONPATH="/Applications/Binary Ninja.app/Contents/Resources/python3" \
+  python3 -m unittest tests.unit.ui.test_transcript_qt
+```
+
+Use a compatible Python and the actual bundled Python directory on other
+systems. Without `AXIO_QT_TESTS=1`, those tests are skipped so the normal suite
+remains runnable without Qt. The tested macOS Qt bundle provides the Cocoa
+platform plugin, not `offscreen`; these widgets are unshown on the normal
+desktop platform.
 
 Check or install the live development copy:
 
@@ -92,6 +108,21 @@ The current suite covers:
 - Ollama local/cloud catalog parsing and cloud-tag normalization;
 - executable validation, nonzero exits, timeout, cancellation, output limits,
   concurrent stdout/stderr draining, and streamed chunk delivery;
+- blocked-stdin and post-EOF deadlines/cancellation, callback-exception cleanup,
+  POSIX descendant cleanup, bounded producer output, split UTF-8, and unique
+  temporary-directory cleanup;
+- Codex message-before-failure and missing-terminal-event rejection;
+- lazy context formatting, late selections, cancellation during collection,
+  bounded empty/nonmatching searches, pre-decode value slicing, traversal
+  truncation notices, and the same deduplicated neighbour limits in the type pack;
+- binary/generation-bound request callbacks and preview invalidation, original
+  binary persistence/address validation, and comparison cancellation retaining
+  completed primary findings/usage;
+- asynchronous Ollama fallback deadline, output cap, close cancellation, and
+  stale-result rejection after executable changes;
+- optional native Qt incremental text insertion, HTML-disabled final Markdown,
+  Unicode/footer placement, completion, failure, cancellation, and reset;
+- an 8 MB chunk stream retaining an exact snapshot with a bounded live preview;
 - control-character sanitization, code-punctuation preservation, and transcript
   scroll restoration;
 - the painted sidebar mark and the HTML-free Markdown import contract;
@@ -101,9 +132,14 @@ The current suite covers:
 - development installer target naming, nested-file copy, drift reporting, and
   exact obsolete-module pruning without deleting unrelated files.
 
-Pure tests cannot validate `binaryninjaui`, widget placement, signal wiring, or
-real host startup. Manual GUI verification is therefore required before a
-release.
+Host-fake and optional native Qt tests exercise source methods without proving
+`binaryninjaui` integration, real signal wiring, or host startup. Windows Job
+Object cleanup also requires Windows validation. Manual GUI verification is
+required before a release.
+
+The [October 9 change set](change-set-2026-10-09.md) records the current local
+source verification. Keep its results separate from the historical real-host
+receipts in [GUI verification](gui-verification.md).
 
 ## Manual GUI checklist
 
@@ -152,14 +188,12 @@ release.
 19. Restart Binary Ninja and confirm persisted settings survive.
 20. Confirm no symbol, type, comment, analysis, or BNDB state changed.
 
-The latest execution of this checklist is recorded in
-[`gui-verification.md`](gui-verification.md). On 2026-08-10, the real-host
-non-network shell checks passed against Binary Ninja Personal
-`5.4.10350-dev`: registration, resting layout, version surfaces, function
-tracking, primary/all-pack previews, Settings summaries, and the read-only
-boundary. The report lists every provider, keyboard, persistence, export, and
-restart item that remains unverified rather than treating a rendered control as
-proof of its behavior.
+The latest real-host receipt is September 5, indexed in
+[`gui-verification.md`](gui-verification.md). It records a limited Ollama flow,
+evidence navigation, pre-output cancellation and cancelled-history restoration.
+It does not establish acceptance of the October 9 patch, other providers,
+comparison, mid-stream cancellation, successful-response persistence, or narrow
+keyboard traversal.
 
 When launching the fixture from a command line, pass the executable as a
 positional argument. Binary Ninja's built-in command-line help lists files

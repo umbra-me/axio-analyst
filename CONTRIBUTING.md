@@ -1,6 +1,8 @@
 # Contributing
 
-Axio Analyst is currently developed against Binary Ninja 5.4 and its Qt6 UI.
+Axio Analyst targets Binary Ninja's Qt6 UI. Recorded host checks cover
+Binary Ninja 5.4 on Windows and 6.1 on macOS; later source changes need their own
+host acceptance.
 Contributions should preserve the provider-neutral architecture, testability
 outside Binary Ninja, and the current read-only security boundary.
 
@@ -26,6 +28,12 @@ outside Binary Ninja, and the current read-only security boundary.
   fixtures, or documentation.
 - Preserve the HTML-free Markdown import, explicit opt-in context packs, exact
   preview, and deterministic combined context cap.
+- Keep streaming insertion bounded and literal until the terminal Markdown
+  render; keep extraction traversal limits and truncation notices visible.
+- Bind asynchronous callbacks to their request generation and BinaryView.
+  Cancelling secondary comparison work must preserve completed primary results.
+- Keep Codex's snapshot-only confidentiality gate explicit; a read-only sandbox
+  does not prove that unrelated readable files are inaccessible.
 - Keep conversation records versioned, bounded, path-free, credential-free,
   atomically written, and off by default.
 - Validate address citations before constructing internal navigation anchors;
@@ -48,9 +56,13 @@ python -m compileall -q __init__.py application core host providers ui tools tes
 python -c "import json,pathlib; json.loads(pathlib.Path('plugin.json').read_text(encoding='utf-8'))"
 ```
 
-UI changes require the manual checklist in `docs/development.md`. If a real
-Binary Ninja launch is unavailable, state that clearly; pure tests are not a
-substitute for host validation.
+The optional native Qt transcript checks and their macOS command are in
+[the development guide](docs/development.md#local-verification). They use the
+existing Binary Ninja PySide6 bundle and require no new dependency installation.
+UI changes also require the manual checklist in `docs/development.md`. If a real
+Binary Ninja launch is unavailable, state that clearly; host fakes and native
+Qt tests are not a substitute for host validation. Process-tree changes require
+platform-specific validation; the Windows Job Object path remains unverified.
 
 ## Commits and pull requests
 

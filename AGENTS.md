@@ -23,7 +23,7 @@
 
 ## Gotchas
 
-- Binary Ninja 5.x hosts Qt6. Do not introduce a PySide2-only import path.
+- Supported Binary Ninja hosts use Qt6. Do not introduce a PySide2-only import path.
 - Stock Python tests cannot import `binaryninja`; `__init__.py` must keep pure modules importable without the host.
 - The plugin delegates authentication to installed CLIs and must never read or persist their credentials.
 - Raw provider Markdown is untrusted. The transcript must keep importing with
@@ -31,6 +31,7 @@
   because CommonMark leaves entities undecoded inside fenced code.
 - Version 0.9 is read-only and must not mutate the BNDB.
 - Extra context packs are opt-in; generic provider links stay inert and transcript persistence stays off by default.
+- Codex read-only execution is not snapshot-only confidentiality; preserve the open gate in `docs/providers.md`.
 - A real Binary Ninja GUI launch is required to prove sidebar registration.
 
 ## Definition of done
@@ -39,4 +40,4 @@
 - A development install reports no drift and Binary Ninja launches with the sidebar registered.
 - Provider prompts remain off process command lines; previews match frozen snapshots; no secrets, transcripts, or machine-local settings are tracked.
 
-Current integration, schema and release boundaries: [September 5 change set](docs/change-set-2026-09-05.md). Keep its completed and pending validation separate.
+Current source verification and release gates: [October 9 change set](docs/change-set-2026-10-09.md). Historical live receipts are indexed in `docs/gui-verification.md`; source tests do not refresh them.

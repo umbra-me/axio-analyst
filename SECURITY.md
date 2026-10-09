@@ -51,19 +51,28 @@ cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
 
 - Explicit Ask or Explain action before dispatch.
 - Binary base filename only; the full path is omitted.
-- Exact pre-dispatch context preview and a deterministic combined character cap.
+- Inspectable context previews and a deterministic combined character cap.
+  Each request rebuilds its own frozen snapshot; a prior preview is not a lock
+  on later host analysis state.
 - Current-function context by default; every additional pack is opt-in and has
   explicit item-count/per-function limits.
+- Extraction has explicit HLIL and candidate-traversal ceilings with visible
+  truncation; see [the configuration reference](docs/configuration.md#request-time-behavior).
 - Prompts on stdin rather than process command lines.
 - No direct access to provider credential stores.
 - Claude Code tools, Chrome integration, slash commands, and session
   persistence disabled.
 - Codex ephemeral execution in a read-only sandbox with user rules and config
-  ignored.
+  ignored, shell/image tools disabled, and web search disabled. Snapshot-only
+  confinement remains unproven; see [the Codex contract](docs/providers.md#codex).
 - Ollama prompt history disabled for the child process and thinking hidden.
-- Concurrent pipe draining, timeout, cancellation, and an 8 MB combined output
-  ceiling.
-- Main-thread-only UI updates and liveness checks for late callbacks.
+- Concurrent stdin/stdout/stderr handling, a bounded output queue, deadline
+  checks through process exit, and an 8 MB combined output ceiling. Process-tree
+  cleanup runs on all exit paths, subject to the
+  [documented platform limits](docs/providers.md#shared-process-contract).
+- Main-thread-only UI updates and liveness/generation/binary checks for late callbacks.
+- Chunk-based accumulation and a 64,000-character literal-text live preview,
+  followed by one HTML-disabled Markdown parse at completion, failure, or cancellation.
 - Optional transcript persistence is schema-versioned, limited to 200 messages
   and 8 MB, atomically replaced, and deleted through **Clear**.
 - Provider comparison reuses one frozen context snapshot for both adapters.
@@ -78,7 +87,13 @@ cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
   their own policies.
 - A model suggestion or catalog entry does not guarantee account access.
 - The plugin cannot protect data after it is submitted to the chosen provider.
-- Context preview shows exactly what the provider receives, but Axio Analyst
+- The plugin's explicit payload is bounded, but Codex may have capabilities
+  beyond that payload. Read-only execution is not a confidentiality boundary.
+- HTML disabling does not establish a policy for Markdown image/resource loads;
+  local/remote resource behavior still requires separate validation.
+- The sampled transcript fingerprint is not a full-file digest: binaries that
+  differ only outside sampled regions can share a conversation record.
+- Context preview shows the snapshot it collected, but Axio Analyst
   does not automatically identify or redact secrets embedded in decompilation,
   strings, symbols, or user questions.
 

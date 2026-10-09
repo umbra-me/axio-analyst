@@ -52,6 +52,8 @@ class AxioAnalystSidebar(SidebarWidget):
         self._task: Optional[AnalyzeFunctionTask] = None
         self._preview_task: Optional[ContextPreviewTask] = None
         self._alive = True
+        self._request_generation = 0
+        self._preview_generation = 0
         self._binary_id = ""
         try:
             self._conversation_store = conversation_store()
@@ -115,7 +117,12 @@ class AxioAnalystSidebar(SidebarWidget):
             self._discover_ollama_models()
 
     def _settings_applied(self) -> None:
+        self._invalidate_context_preview()
         self._refresh_backend_label()
+        if self._selected_backend() == "ollama-cloud":
+            self.model_discovery.refresh(
+                self.view.settings_page.selected_ollama_executable()
+            )
         self._update_actions()
 
     def _save_selection(self, *_args: object) -> None:
@@ -141,6 +148,8 @@ class AxioAnalystSidebar(SidebarWidget):
 
     def _mark_dead(self, *_args: object) -> None:
         self._alive = False
+        self._request_generation += 1
+        self._preview_generation += 1
         self.request_progress.stop()
         self.model_discovery.close()
         if self._task is not None:
@@ -272,20 +281,28 @@ class AxioAnalystSidebar(SidebarWidget):
 
     def _refresh_from_frame(self) -> None:
         if self.frame is None:
+            self._replace_binary_view(None)
             self._set_current_function(None)
             return
         try:
             view = self.frame.getCurrentViewInterface()
             if view is None:
+                self._replace_binary_view(None)
                 self._set_current_function(None)
                 return
             data = view.getData()
-            if data is not None and data is not self.bv:
-                self.bv = data
-                self._load_transcript()
+            self._replace_binary_view(data)
             self._set_function_for_offset(view.getCurrentOffset())
         except Exception:
+            self._replace_binary_view(None)
             self._set_current_function(None)
+
+    def _replace_binary_view(self, data: Optional[BinaryView]) -> None:
+        if data is not self.bv:
+            self._detach_request()
+            self._invalidate_context_preview()
+            self.bv = data
+            self._load_transcript()
 
     def _set_function_for_offset(self, offset: int) -> None:
         if self.bv is None:
@@ -310,8 +327,40 @@ class AxioAnalystSidebar(SidebarWidget):
         self._update_actions()
 
     def _invalidate_context_preview(self, *_args: object) -> None:
+        self._preview_generation += 1
+        if self._preview_task is not None:
+            self._preview_task.cancel()
+            self._preview_task = None
         self.view.set_context_snapshot("Preview not built", "")
         self.view.refresh_scope_disclosure()
+        self._update_actions()
+
+    def _detach_request(self) -> None:
+        """Reject queued callbacks before replacing the active binary/conversation."""
+        self._request_generation += 1
+        if self._task is not None:
+            self._task.cancel()
+            self._task = None
+        self.request_progress.stop()
+        self.view.status_line.release()
+
+    def _request_callback(self, callback):
+        generation, binary_view = self._request_generation, self.bv
+
+        def deliver(*args):
+            if (self._alive and self._task is not None
+                    and generation == self._request_generation and self.bv is binary_view):
+                callback(*args)
+        return deliver
+
+    def _preview_callback(self, callback):
+        generation, binary_view = self._preview_generation, self.bv
+
+        def deliver(*args):
+            if (self._alive and self._preview_task is not None
+                    and generation == self._preview_generation and self.bv is binary_view):
+                callback(*args)
+        return deliver
 
     def _current_selection(self) -> Optional[tuple[int, int]]:
         if self.frame is None:
@@ -373,6 +422,7 @@ class AxioAnalystSidebar(SidebarWidget):
         ):
             return
         config = get_runtime_config()
+        self._preview_generation += 1
         self.view.status_line.message.setText("Building exact context preview...")
         self._preview_task = ContextPreviewTask(
             self.bv,
@@ -380,8 +430,8 @@ class AxioAnalystSidebar(SidebarWidget):
             config.max_context_chars,
             self.view.selected_context_options(),
             self._current_selection(),
-            self._context_ready,
-            self._preview_error,
+            self._preview_callback(self._context_ready),
+            self._preview_callback(self._preview_error),
         )
         self._update_actions()
         self._preview_task.start()
@@ -425,6 +475,8 @@ class AxioAnalystSidebar(SidebarWidget):
         if self._task is not None or self._current_function is None or self.bv is None:
             return
 
+        self._invalidate_context_preview()
+        self._request_generation += 1
         self._save_selection()
         config = get_runtime_config()
         function = self._current_function
@@ -444,12 +496,12 @@ class AxioAnalystSidebar(SidebarWidget):
             question,
             config,
             show_report=False,
-            on_complete=self._analysis_complete,
-            on_error=self._analysis_error,
-            on_cancelled=self._analysis_cancelled,
-            on_progress=self.request_progress.update,
-            on_stream=self._analysis_stream,
-            on_context=self._context_ready,
+            on_complete=self._request_callback(self._analysis_complete),
+            on_error=self._request_callback(self._analysis_error),
+            on_cancelled=self._request_callback(self._analysis_cancelled),
+            on_progress=self._request_callback(self.request_progress.update),
+            on_stream=self._request_callback(self._analysis_stream),
+            on_context=self._request_callback(self._context_ready),
             context_options=self.view.selected_context_options(),
             selection=self._current_selection(),
             comparison_provider=self._comparison_provider(config),
@@ -490,7 +542,8 @@ class AxioAnalystSidebar(SidebarWidget):
             effort = result.reasoning_effort or "default effort"
             backend = BACKEND_LABELS.get(result.backend, result.backend)
             heading = f"## {backend} · {model} · {effort}" if len(results) > 1 else ""
-            body = result.text if not result.error else f"**Request failed:** {result.error}"
+            failure_label = "Request cancelled" if result.cancelled else "Request failed"
+            body = result.text if not result.error else f"**{failure_label}:** {result.error}"
             sections.append(f"{heading}\n\n{body}".strip())
             metadata.append(f"{backend}: {format_usage(result.usage)}")
         response = "\n\n---\n\n".join(sections)
@@ -508,11 +561,14 @@ class AxioAnalystSidebar(SidebarWidget):
         )
         self._task = None
         self._persist_transcript()
+        cancelled = any(result.cancelled for result in results)
         status = "Complete with provider errors" if any(
             result.error for result in results
         ) else "Complete"
+        if cancelled:
+            status = "Comparison cancelled; completed results retained"
         self.view.status_line.release()
-        self.request_progress.finish(status, completed=True)
+        self.request_progress.finish(status, completed=not cancelled)
         self._update_actions()
 
     def _analysis_error(self, message: str) -> None:

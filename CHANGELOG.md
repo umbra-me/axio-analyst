@@ -6,10 +6,17 @@ breaking changes must still be documented with migration instructions.
 
 ## Unreleased
 
+- October 9: Release-readiness source fixes and regression coverage, without a
+  version bump or new live GUI receipt. See the [change set](docs/change-set-2026-10-09.md)
+  for completed source checks and remaining confinement/platform/host gates.
 - September 5: Unverified structured findings, context provenance and schema-2 transcript persistence/export with schema-1 compatibility. See [change set](docs/change-set-2026-09-05.md).
 
 ### Added
 
+- Add POSIX process-group and Windows kill-on-close Job Object cleanup using
+  only the Python standard library; Windows behavior still requires validation.
+- Add harmless-child lifecycle tests, host-fake callback/context/discovery tests,
+  and optional native Qt transcript tests using Binary Ninja's existing bundle.
 - Add `samples/demo/build.sh`, the macOS and Linux counterpart of `build.ps1`:
   a native Release build of the same fixture through CMake, Ninja when present,
   with the executable directly under `build/`. Verified on Apple Silicon: the
@@ -31,6 +38,14 @@ breaking changes must still be documented with migration instructions.
 
 ### Changed
 
+- Keep streamed output as raw chunks, insert a literal live preview capped at
+  64,000 characters with a visible notice, and render canonical Markdown once
+  at completion, failure, or cancellation.
+- Give each CLI run a unique temporary working directory, bounded reader queue,
+  and cleanup on success and all failure paths.
+- Run `ollama list` discovery through the shared supervisor with a 10-second
+  deadline and 1 MB output cap, superseding old discovery when its executable
+  changes.
 - Replace the programmatically drawn `AX` text monogram used as the sidebar
   icon with the painted mark.
 - Reduce the resting chat surface to two bands: one header row and one
@@ -61,6 +76,19 @@ breaking changes must still be documented with migration instructions.
 
 ### Fixed
 
+- Keep timeout/cancellation checks active while stdin is blocked and after
+  output pipes close; attempt kill/wait even when graceful cleanup fails.
+- Reject Codex turns containing `error`/`turn.failed` or lacking
+  `turn.completed`, including turns that emit an agent message first.
+- Reject late analysis/preview callbacks after binary replacement, settings
+  changes, or request supersession; retain the correct binary for navigation
+  and persistence.
+- Bound lazy HLIL extraction and candidate searches, expose truncation when
+  searches exhaust their limits, and slice string/import values before decode.
+- Share the same deduplicated three-caller/five-callee selection between
+  neighbourhood context and relevant types.
+- Preserve completed primary findings and usage when secondary comparison
+  work is cancelled.
 - Render fenced code blocks correctly. Escaping the provider string before the
   Markdown import leaked `&gt;`, `&lt;`, and `&amp;` into every code block,
   because CommonMark does not decode entities inside code.
@@ -70,6 +98,11 @@ breaking changes must still be documented with migration instructions.
 
 ### Security
 
+- Disable Codex shell/image tools and web search explicitly. Snapshot-only
+  confidentiality remains unproven: independent tool registration and readable
+  local files remain an open release gate, documented in the provider contract.
+- Document process-tree containment limits, sampled conversation-identity
+  aliases, and the unverified Markdown image/resource-loading policy.
 - Neutralise raw provider HTML at the parser instead of in the source string:
   the transcript imports with `QTextDocument.MarkdownNoHTML`, so md4c never
   emits an HTML block or span and a provider tag can only appear as inert

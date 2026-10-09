@@ -41,6 +41,18 @@ Binary Ninja. The package-based runtime was installed and visually verified in
 Binary Ninja Personal `5.4.10350-dev`; the obsolete flat modules were removed
 through the installer's exact migration allowlist.
 
+Version `0.9.0` added bounded opt-in context packs, evidence navigation,
+off-by-default local transcripts, provider comparison, and usage accounting.
+The unreleased September 5 change added explicit unverified findings and
+schema-2 transcript/export provenance while retaining schema-1 read support;
+its [dated change set](change-set-2026-09-05.md) preserves the live receipts.
+
+The [October 9 change set](change-set-2026-10-09.md) records source fixes for
+provider lifecycle, binary-bound callbacks, streaming, context extraction,
+model discovery, and comparison cancellation. Version remains `0.9.0`.
+Its regression evidence does not establish a new live installation, provider
+inference result, tagged release, or publication.
+
 No proprietary implementation, prompt, or data from Binary Ninja Sidekick was
 used. Product direction is informed by the general category of integrated
 reverse-engineering assistants, while Axio Analyst's code, prompts, process

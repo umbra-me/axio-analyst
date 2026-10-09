@@ -22,6 +22,7 @@ def codex_stream_delta(event: Any) -> str:
 def parse_codex_response(stdout: str) -> tuple[str, ProviderUsage]:
     messages: list[str] = []
     errors: list[str] = []
+    completed = False
     final_usage = ProviderUsage()
     for line in stdout.splitlines():
         if not line.strip():
@@ -41,9 +42,12 @@ def parse_codex_response(stdout: str) -> tuple[str, ProviderUsage]:
                     messages.append(message)
         elif event.get("type") in ("error", "turn.failed"):
             detail = event.get("message") or event.get("error")
-            if isinstance(detail, str) and detail.strip():
-                errors.append(detail.strip())
+            if isinstance(detail, dict):
+                detail = detail.get("message")
+            errors.append(detail.strip() if isinstance(detail, str) and detail.strip()
+                          else "Provider reported a failed turn.")
         elif event.get("type") == "turn.completed":
+            completed = True
             usage_value = event.get("usage")
             if isinstance(usage_value, dict):
                 input_tokens = usage_value.get("input_tokens")
@@ -52,25 +56,29 @@ def parse_codex_response(stdout: str) -> tuple[str, ProviderUsage]:
                 final_usage = ProviderUsage(
                     input_tokens=(
                         input_tokens
-                        if isinstance(input_tokens, int) and input_tokens >= 0
+                        if type(input_tokens) is int and input_tokens >= 0
                         else None
                     ),
                     output_tokens=(
                         output_tokens
-                        if isinstance(output_tokens, int) and output_tokens >= 0
+                        if type(output_tokens) is int and output_tokens >= 0
                         else None
                     ),
                     cached_input_tokens=(
                         cached_tokens
-                        if isinstance(cached_tokens, int) and cached_tokens >= 0
+                        if type(cached_tokens) is int and cached_tokens >= 0
                         else None
                     ),
                 )
 
-    if messages:
-        return strip_terminal_sequences(messages[-1]).strip(), final_usage
     if errors:
         raise ProviderError(f"Codex failed: {errors[-1]}")
+    if not completed:
+        raise ProviderError("Codex returned no completed turn.")
+    if messages:
+        text = strip_terminal_sequences(messages[-1]).strip()
+        if text:
+            return text, final_usage
     raise ProviderError("Codex returned no final agent message.")
 
 
@@ -98,6 +106,12 @@ class CodexCliProvider(CliProvider):
             "--ephemeral",
             "--ignore-user-config",
             "--ignore-rules",
+            "--disable",
+            "shell_tool",
+            "--disable",
+            "view_image",
+            "--config",
+            'web_search="disabled"',
             "--skip-git-repo-check",
         ]
         if self.config.model:

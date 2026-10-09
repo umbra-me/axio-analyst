@@ -41,6 +41,7 @@ RUNTIME_FILES = (
     "providers/codex.py",
     "providers/ollama.py",
     "providers/process.py",
+    "providers/process_tree.py",
     "providers/streaming.py",
     "ui/__init__.py",
     "ui/branding.py",

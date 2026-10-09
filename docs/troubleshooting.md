@@ -24,7 +24,7 @@ Then check:
 - user plugins are not disabled with `-p` or `BN_DISABLE_USER_PLUGINS`;
 - the installed runtime matches the checkout with `plugin_dev.py status`;
 - Binary Ninja's log has no Python import or Qt registration error;
-- the host is Binary Ninja 5.x with PySide6/Qt6.
+- the host has Binary Ninja's PySide6/Qt6 desktop UI.
 
 `plugin_dev.py status` reports three kinds of drift: manifest files that are
 missing, manifest files whose content changed, and known obsolete root modules
@@ -114,6 +114,13 @@ catalog does not prove that the current account can run it.
 Discovery first fetches Ollama's public catalog, then falls back to
 `<configured ollama executable> list`.
 
+The public fetch uses a 10-second network timeout and a 1 MB response cap;
+the local fallback has a 10-second deadline and a 1 MB output cap. Applying a
+different Ollama executable supersedes the old
+discovery; late results from it are discarded. The field remains editable
+while the asynchronous worker runs. Closing the sidebar cancels local fallback
+work; an already-running public fetch ends under its existing timeout.
+
 Check the Settings status message, then verify:
 
 ```powershell
@@ -128,7 +135,10 @@ editable; enter a known cloud tag manually and apply settings.
 
 ## A request times out
 
-The timeout covers the entire provider process. Increase
+The deadline starts before process creation and remains checked during stdin
+submission, output streaming, and process exit, including when both output
+pipes have closed. A blocked OS process-creation call cannot be preempted, and
+cleanup can add bounded waits after the deadline. Increase
 `axioAnalyst.timeoutSeconds` in Settings only after checking that the CLI is not
 waiting for an interactive login, permission prompt, model download, or other
 input that the supervised process cannot answer.
@@ -144,7 +154,8 @@ Run the same CLI version in a terminal and inspect whether its structured
 output format changed. Axio Analyst currently expects:
 
 - Claude Code JSON, event arrays, or JSON Lines with a final result;
-- Codex JSON Lines with a completed agent message;
+- Codex JSON Lines with a final agent message, `turn.completed`, and no
+  `error` or `turn.failed` event;
 - Ollama text on stdout.
 
 Capture only a sanitized structural sample when filing an issue. Remove
@@ -159,15 +170,27 @@ These differences are provider behavior, not three identical token streams.
 
 While output streams, the transcript follows the live tail only when it was
 already near the bottom. Manually scrolling upward keeps the reading position.
+Live insertion is sanitized literal text, capped at 64,000 characters with a
+visible notice. The raw response remains available for terminal rendering and
+export; Markdown is rendered at completion, failure, or cancellation, so live
+Markdown punctuation may look literal while the request runs.
 When the request completes, the transcript moves to the beginning of the new
 provider response so a long answer does not leave only its final lines visible.
 
 ## Stop does not return immediately
 
-Cancellation asks the provider process to terminate and waits up to two
-seconds before killing it. A child process or provider wrapper may therefore
-take a short time to disappear. The sidebar retains any partial text and marks
-the request cancelled.
+Cancellation enters process-tree cleanup, with up to two seconds before kill
+escalation and another two seconds waiting after the kill. POSIX cleanup targets
+the request's process group; Windows uses a kill-on-close Job Object and still
+requires platform validation. Descendants that escape the group or precede
+Windows job attachment are not proven contained. See
+[the lifecycle limits](providers.md#shared-process-contract).
+
+Context collection checks cancellation between host operations, but a single
+Binary Ninja analysis/property call cannot be preempted. The sidebar retains
+partial text and marks the request cancelled. If secondary comparison work is
+cancelled after the primary finished, its completed result, findings, and usage
+are retained.
 
 ## Markdown appears unsafe or incorrectly formatted
 
@@ -177,6 +200,9 @@ markup. Generic links are not opened by the transcript. Only address anchors
 constructed and validated by Axio Analyst may navigate inside Binary Ninja. If
 a formatting change bypasses this behavior, stop using that build and report it
 as a security issue.
+
+HTML disabling does not establish a Markdown image/resource-loading policy;
+local and remote resource behavior still requires separate validation.
 
 Fenced code blocks wrap instead of scrolling the transcript sideways, and they
 render `<`, `>`, and `&` literally. Seeing `&lt;`, `&gt;`, or `&amp;` inside a
@@ -190,13 +216,21 @@ The primary function requires HLIL. Selection context also requires a non-empty
 address selection whose HLIL instruction addresses fall inside the selected
 range. Caller/callee discovery is direct and bounded; indirect calls or
 unresolved targets may produce no item. Strings and imports are derived from
-data references emitted by instructions in the primary function, so values
-without a resolvable Binary Ninja string/import symbol are omitted.
+data references (strings) and data/code references (imports) emitted by
+instructions in the primary function, so values without a resolvable Binary
+Ninja string/import symbol are omitted.
 
 The configured limit is shared by all items. If a later item is absent, inspect
 the character total and truncation marker, then reduce other packs or increase
 the limit deliberately. The preview is a snapshot, not a live editor; choose
 **Build preview** again after changing the selection or pack checkboxes.
+Extraction also has a 100,000-instruction ceiling per HLIL pass and a
+4,096-step budget per neighbour search or reference pack. A visible partial
+notice means the search stopped before exhausting all candidates, even if no
+matching value was found. Relevant types use only the same enabled three-caller
+and five-callee lists; with Types alone, only the primary type is supplied.
+Settings and binary changes invalidate previews. Binary replacement cancels
+and detaches analysis so late callbacks cannot modify the new conversation.
 
 ## An address citation does not navigate
 
@@ -214,11 +248,17 @@ a sampled content fingerprint, so materially changed/rebased contents can map
 to a different record. Disabling the setting stops loading and saving but does
 not delete existing data; re-enable it or use **Clear** while the matching
 binary is open.
+The fingerprint is sampled rather than a full-file digest. Binaries with the
+same span that differ only outside sampled regions can share a record; treat
+restored history as potentially belonging to such an alias.
 
 Malformed, unknown-schema, or oversized records are rejected rather than
 partially loaded. The status line reports the local error. Do not hand-edit a
 record containing sensitive transcript text for a bug report; reproduce with
 the demo binary instead.
+Schema 2 reads schema 1 and stores unverified findings with bounded supplied
+context excerpts. Records and Markdown exports may therefore contain sensitive
+analysis text even though complete context snapshots and credentials are omitted.
 
 ## Provider comparison shows one failure
 

@@ -18,6 +18,8 @@ quick start; these documents are the source of truth for detailed behavior.
 | [GUI verification](gui-verification.md) | Dated real-host evidence, deferred interaction checks, fixture launch safety, and the current application-updater observation. |
 | [Troubleshooting](troubleshooting.md) | Startup, sidebar, Binary Ninja updater, provider, model discovery, timeout, rendering, and recovery diagnostics. |
 | [Current handoff](handoff.md) | Dated implementation, live-install state, verification evidence, protected boundaries, and next work. |
+| [October 9 change set](change-set-2026-10-09.md) | Release-readiness source fixes, regression evidence, unchanged version, and open acceptance/security gates. |
+| [September 5 change set](change-set-2026-09-05.md) | Historical structured-findings/schema-2 implementation and dated native cancellation/persistence receipts. |
 | [Extraction history](history.md) | Provenance of the standalone repository, naming transition, and package migration. |
 
 Repository-level policy documents remain at the root:
@@ -41,3 +43,5 @@ Repository-level policy documents remain at the root:
   values, or provider transcripts in documentation.
 - A handoff is a dated operational snapshot. Refresh it when repository,
   installation, verification, or blocker state changes materially.
+- Keep dated verification receipts attached to the source and environment they
+  exercised. New source tests do not establish a live installation or release.

@@ -17,6 +17,7 @@ MARKDOWN_FEATURES = (
 )
 
 ASSISTANT_ROLE = "Axio Analyst"
+MAX_LIVE_RESPONSE_CHARS = 64_000
 
 
 @dataclass
@@ -34,6 +35,10 @@ class Transcript:
         self.browser = browser
         self.messages: list[ChatMessage] = []
         self.active_index: Optional[int] = None
+        self._stream_range: Optional[tuple[int, int]] = None
+        self._stream_chunks: list[str] = []
+        self._live_chars = 0
+        self._live_capped = False
 
     def reset(self) -> None:
         """Leave the conversation genuinely empty.
@@ -43,6 +48,7 @@ class Transcript:
         """
         self.messages = []
         self.active_index = None
+        self._stream_chunks.clear()
         self.render(force_bottom=True)
 
     def append(
@@ -61,15 +67,40 @@ class Transcript:
         return len(self.messages) - 1
 
     def start_response(self, meta: str) -> None:
-        self.active_index = self.append("Axio Analyst", "", meta)
+        self._stream_chunks.clear()
+        self._live_chars = 0
+        self._live_capped = False
+        self.active_index = len(self.messages)
+        self.append("Axio Analyst", "", meta)
 
     def stream(self, chunk: str) -> bool:
         if self.active_index is None or not chunk:
             return False
         if self.active_index >= len(self.messages):
             return False
-        self.messages[self.active_index].body += chunk
-        self.render()
+        first_chunk = not self._stream_chunks
+        self._stream_chunks.append(chunk)
+        available = max(0, MAX_LIVE_RESPONSE_CHARS - self._live_chars)
+        preview = sanitize_markdown(chunk[:available])
+        self._live_chars += min(len(chunk), available)
+        if len(chunk) > available and not self._live_capped:
+            preview += f"\n\n[Live preview limited to {MAX_LIVE_RESPONSE_CHARS:,} characters; full text retained.]"
+            self._live_capped = True
+        if self._stream_range is not None and (preview or first_chunk):
+            scrollbar = self.browser.verticalScrollBar()
+            previous_value, previous_maximum = scrollbar.value(), scrollbar.maximum()
+            start, end = self._stream_range
+            cursor = QtGui.QTextCursor(self.browser.document())
+            cursor.setPosition(start if first_chunk else end)
+            if first_chunk:
+                cursor.setPosition(end, QtGui.QTextCursor.MoveMode.KeepAnchor)
+                cursor.removeSelectedText()
+            # Partial Markdown is literal text; parse it once on completion.
+            cursor.insertText(preview, QtGui.QTextCharFormat())
+            self._stream_range = (start, cursor.position())
+            scrollbar.setValue(restored_scroll_value(
+                previous_value, previous_maximum, scrollbar.maximum(), False,
+            ))
         return True
 
     def complete(
@@ -82,14 +113,9 @@ class Transcript:
     ) -> None:
         completed_index: Optional[int] = None
         if self.active_index is None:
-            self.append(
-                "Axio Analyst",
-                body,
-                meta,
-                evidence,
-                unresolved_evidence,
-                findings,
-            )
+            self.messages.append(ChatMessage(
+                "Axio Analyst", body, meta, evidence, unresolved_evidence, findings,
+            ))
         else:
             completed_index = self.active_index
             message = self.messages[self.active_index]
@@ -98,8 +124,9 @@ class Transcript:
             message.evidence = evidence
             message.unresolved_evidence = unresolved_evidence
             message.findings = findings
-            self.render(focus_index=completed_index)
         self.active_index = None
+        self._stream_chunks.clear()
+        self.render(focus_index=completed_index)
 
     def load(self, messages: tuple[ConversationMessage, ...]) -> None:
         self.messages = [
@@ -114,24 +141,26 @@ class Transcript:
             for message in messages
         ]
         self.active_index = None
+        self._stream_chunks.clear()
         self.render(force_bottom=True)
 
     def snapshot(self) -> tuple[ConversationMessage, ...]:
         return tuple(
             ConversationMessage(
                 role=message.role,
-                body=message.body,
+                body="".join(self._stream_chunks) if index == self.active_index else message.body,
                 meta=message.meta,
                 evidence=message.evidence,
                 unresolved_evidence=message.unresolved_evidence,
                 findings=message.findings,
             )
-            for message in self.messages
+            for index, message in enumerate(self.messages)
         )
 
     def fail(self, detail: str) -> None:
         if self.active_index is not None:
             active = self.messages[self.active_index]
+            active.body = "".join(self._stream_chunks)
             if active.body:
                 active.body += f"\n\n---\n\n**Request failed:** {detail}"
             else:
@@ -140,17 +169,20 @@ class Transcript:
         else:
             self.messages.append(ChatMessage("Request failed", detail))
         self.active_index = None
+        self._stream_chunks.clear()
         self.render(force_bottom=True)
 
     def cancel(self) -> None:
         if self.active_index is not None:
             active = self.messages[self.active_index]
+            active.body = "".join(self._stream_chunks)
             if not active.body:
                 active.body = "_Request cancelled before a response was received._"
             else:
                 active.body += "\n\n_Request cancelled._"
-            self.render(force_bottom=True)
         self.active_index = None
+        self._stream_chunks.clear()
+        self.render(force_bottom=True)
 
     def _relax_code_blocks(
         self,
@@ -223,6 +255,7 @@ class Transcript:
         force_bottom: bool = False,
         focus_index: Optional[int] = None,
     ) -> None:
+        self._stream_range = None
         scrollbar = self.browser.verticalScrollBar()
         previous_value = scrollbar.value()
         previous_maximum = scrollbar.maximum()
@@ -259,11 +292,16 @@ class Transcript:
                 header if message.role == ASSISTANT_ROLE else speaker_header,
             )
             cursor.insertBlock()
-            body = message.body or "_Receiving response..._"
+            body = (
+                "".join(self._stream_chunks)
+                if index == self.active_index else message.body
+            ) or "_Receiving response..._"
             body_start = cursor.position()
             cursor.insertMarkdown(
                 sanitize_markdown(body.strip()), MARKDOWN_FEATURES
             )
+            if index == self.active_index:
+                self._stream_range = (body_start, cursor.position())
             self._relax_code_blocks(body_start, cursor.position(), palette)
             self._insert_footer(cursor, message, meta_format, evidence_format)
 

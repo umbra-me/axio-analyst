@@ -1,10 +1,50 @@
 # Axio Analyst handoff
 
-For the September 5 implementation and its remaining gates, see
-[the current change set](change-set-2026-09-05.md). Earlier verification entries
-below apply to their recorded revisions, not automatically to this change.
+For the current source fixes and remaining gates, see
+[the October 9 change set](change-set-2026-10-09.md). The
+[September 5 change set](change-set-2026-09-05.md) records the earlier findings
+implementation and live receipts. Earlier verification entries below apply to
+their recorded revisions, not automatically to the current source.
 
-Last updated: 2026-08-10 (third pass: real-host GUI verification)
+Last updated: 2026-10-09 (release-readiness source fixes and documentation complete)
+
+## Current continuation state
+
+The release-readiness audit fixes are complete, with implementation, regression
+tests, and documentation in one local change set. The baseline before these
+fixes is `9945d84530025139958aad55226c170a18f430f3`; use `git log -1` to inspect
+the current local commit. Version remains `0.9.0`, with changes under Unreleased.
+No live install, provider inference, tag, push, release, or submission was
+performed for this phase.
+
+The patch supervises blocked stdin and post-EOF waits, bounds queued output,
+cleans up process groups/jobs, rejects failed Codex turns, binds request/preview
+callbacks to their binary and generation, incrementally inserts streamed text,
+collects bounded HLIL/neighbourhood context, bounds Ollama list discovery, and
+preserves a completed primary result when comparison is cancelled. Regression
+tests cover these paths with harmless children, host fakes, and optional native
+Qt widgets. See [development.md](development.md#local-verification) for commands.
+The candidate review also led to fallback kill/wait on cleanup errors, bounded
+nonmatching searches with visible notices, chunk accumulation with a 64,000-
+character live preview, and discovery supersession after executable changes.
+
+On October 9, the stock-Python suite ran 130 tests with nine optional Qt tests
+skipped; the bundled-Qt run passed all 130. Full compileall, metadata JSON,
+diff whitespace, and relative documentation links passed. The native Qt
+tests used unshown Qt 6.11.1 Cocoa widgets and did not launch Binary Ninja.
+
+Codex snapshot-only confinement is still unproven. Windows Job Object behavior
+and live Binary Ninja acceptance remain unverified for this patch. The sampled
+conversation identity can alias binaries that differ outside sampled regions.
+These limits are explicit in [providers.md](providers.md) and
+[configuration.md](configuration.md). The next release-readiness phase is a
+manual live-verification checklist and observed receipts, subject to separate
+authorization for installation/provider dispatch. Do not infer live acceptance
+from this local source checkpoint. These release-readiness phase numbers are
+separate from the future product phases in [roadmap.md](roadmap.md).
+
+The remaining sections retain historical implementation/installation evidence.
+The latest live receipt is September 5; October source tests do not refresh it.
 
 ## Repository identity
 
@@ -15,8 +55,8 @@ Last updated: 2026-08-10 (third pass: real-host GUI verification)
 - Default branch: `main`
 - Licence: MIT
 - Source version: `0.9.0`
-- Published source version: `0.9.0`
-- Last live-installed version: `0.9.0`
+- Last recorded published source version: `0.9.0`
+- Last recorded live-installed version: `0.9.0` (September 5 receipt)
 
 This standalone repository is the product source of truth. A separate personal
 Binary Ninja configuration repository may mirror runtime files for workstation
@@ -33,7 +73,8 @@ Version `0.9.0` extends the read-only workflow with:
   per-item/bundle truncation;
 - validated internal navigation for `0x` evidence citations and inert unresolved
   or generic links;
-- off-by-default schema-version-1 local conversation restoration, bounded to
+- off-by-default schema-version-2 local conversation restoration (schema 1
+  remains readable), bounded to
   200 messages/8 MB, with atomic replacement, Clear deletion, and Markdown
   export;
 - a path-free BinaryView content fingerprint for transcript association;
@@ -111,15 +152,16 @@ Preserve these properties:
   disabled;
 - raw provider HTML is inerted by the Markdown parser, generic links are inert,
   and restored evidence is revalidated rather than trusted from disk;
-- conversation persistence is off by default and excludes prompts, context
-  snapshots, paths, credentials, and raw binary bytes;
+- conversation persistence is off by default and excludes complete context
+  snapshots, paths, credentials, and raw binary bytes; message text and
+  bounded supplied context excerpts in unverified findings are sensitive;
 - no BNDB mutation is implemented.
 
 Future HTTP/OAuth adapters still require an OS credential broker. Future
 Binary Ninja writes still require validated proposed operations, a visible
 review diff, one undoable transaction, and an audit record.
 
-## Verification snapshot
+## Historical verification snapshot — August 10
 
 Source-tree checks completed again on 2026-08-10 after the live GUI pass:
 
@@ -176,16 +218,16 @@ than run headless. It covers 260-560 pixels including the suggestion empty
 state, the composer scope chip and its `+N` disclosure, the one-line answer
 footer, and expanded/collapsed Settings sections.
 
-Still unverified by hand in the redesigned runtime: narrow-width tab focus and
+At that checkpoint, still unverified by hand in the redesigned runtime: narrow-width tab focus and
 `Ctrl+Enter`; suggestion/provider dispatch; status reveal and auto-hide;
 streaming, cancellation, evidence navigation, comparison, export, persistence,
 Clear deletion, restart, live theme switching, inactive mark tint, and the
-About command. No provider was invoked during the latest pass because the test
+About command. No provider was invoked during that pass because the test
 did not have fresh authorization to send the fixture context externally.
 
-## Current live-install state
+## Historical live-install state — August 10
 
-The redesigned runtime is installed in the confirmed Binary Ninja user plugin
+The redesigned runtime was installed in the confirmed Binary Ninja user plugin
 directory with the user's explicit permission. `plugin_dev.py status` reports
 `Axio Analyst is current` and the installed metadata reports
 `Axio Analyst 0.9.0`. The install added one file, `ui/branding.py`, and
@@ -197,7 +239,7 @@ Verification and command-line probe instances started specifically for these
 checks were closed afterward. Pre-existing user Binary Ninja sessions were
 inventoried and left running.
 
-Binary Ninja's separate Windows application updater currently reports
+Binary Ninja's separate Windows application updater then reported
 **Update Failed: Updater is not valid.** The pending cache's content-addressed
 payload hashes match, and its `update.exe` is identical to the installed copy;
 both have valid Vector 35 Authenticode signatures. The plugin still registers
@@ -214,7 +256,7 @@ user directory; it contains licences, settings, symbols, themes, and unrelated
 plugins. Do not stop existing Binary Ninja sessions merely to refresh the
 development copy; coordinate a normal restart with the user.
 
-## Published state and next steps
+## Historical publication notes and remaining product gates
 
 The `0.9.0` implementation and its documentation were published as separate
 logical commits. The redesign that follows it was published on `main` as four
@@ -225,7 +267,7 @@ changes sit under `Unreleased` in the changelog; the source version is still
 `0.9.0` and no tag was created. The Sidekick inventory is reference research;
 it does not imply code reuse or a compatibility commitment.
 
-This third documentation pass adds the dated real-host report, replaces stale
+The August third documentation pass added the dated real-host report, replaced stale
 manual-check claims with the completed/deferred split, and records the separate
 Binary Ninja updater failure and supported recovery path. It changes no runtime
 module or plugin metadata.
@@ -247,7 +289,9 @@ Next product and verification steps:
 
 Remaining product phases are direct HTTP/credential brokerage, structured
 claim provenance, portable workspaces, indexing/tool brokerage, and reviewable
-BNDB transformations. Their gates remain in `roadmap.md`.
+BNDB transformations. Basic unverified structured findings have since landed;
+claim adjudication and a provenance graph remain future work. These product
+gates remain in `roadmap.md`.
 
 ## Resume commands
 

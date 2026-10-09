@@ -74,9 +74,12 @@ class ContextPreviewTask(BackgroundTaskThread):
                 self.max_context_chars,
                 self.options,
                 self.selection,
+                is_cancelled=lambda: self.cancelled,
             )
             if not self.cancelled:
                 _dispatch(self.on_complete, bundle)
+        except ProviderCancelled:
+            return
         except Exception as exc:
             _dispatch(self.on_error, str(exc))
 
@@ -146,6 +149,7 @@ class AnalyzeFunctionTask(BackgroundTaskThread):
                 self.config.max_context_chars,
                 self.context_options,
                 self.selection,
+                is_cancelled=lambda: self.cancelled,
             )
             _dispatch(self.on_context, context)
             if self.cancelled:
@@ -160,8 +164,6 @@ class AnalyzeFunctionTask(BackgroundTaskThread):
 
             results: list[ProviderResult] = []
             for index, provider_config in enumerate(provider_configs):
-                if self.cancelled:
-                    raise ProviderCancelled("Request cancelled before dispatch.")
                 label = BACKEND_LABELS.get(
                     provider_config.backend,
                     provider_config.backend,
@@ -169,6 +171,8 @@ class AnalyzeFunctionTask(BackgroundTaskThread):
                 progress = 35 if index == 0 else 68
                 self._set_progress(f"Starting {label}", progress)
                 try:
+                    if self.cancelled:
+                        raise ProviderCancelled("Request cancelled before dispatch.")
                     result = analyze(
                         context,
                         self.question,
@@ -177,7 +181,14 @@ class AnalyzeFunctionTask(BackgroundTaskThread):
                         on_stream=self._stream if index == 0 else None,
                     )
                 except ProviderCancelled:
-                    raise
+                    if not results:
+                        raise
+                    results.append(ProviderResult(
+                        text="", backend=provider_config.backend, model=provider_config.model,
+                        reasoning_effort=provider_config.reasoning_effort,
+                        error="Request cancelled.", cancelled=True,
+                    ))
+                    break
                 except ProviderError as exc:
                     if len(provider_configs) == 1:
                         raise

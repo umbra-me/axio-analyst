@@ -1,10 +1,26 @@
 # Binary Ninja GUI verification
 
-This page records the latest real-host verification for Axio Analyst. It
-separates checks completed without provider dispatch from checks that require
-an explicitly authorized provider or local test harness.
+This page indexes dated real-host verification for Axio Analyst. Historical
+receipts apply to their recorded source, not automatically to later changes.
 
 ## Latest result
+
+The latest recorded real-host checks are from **2026-09-05**, using Binary Ninja
+Personal `6.1.10608-dev` on macOS and the bundled Mach-O demo. The
+[September 5 receipt](change-set-2026-09-05.md) records an Ollama response with
+unverified findings, evidence navigation, settings surviving restart, and
+absence of conversation restore while history was Off. Its follow-up records
+cancellation **before output** and restoration of that cancelled conversation
+after restart, then history returned to Off.
+
+It does not prove provider switching, Claude/Codex/Compare interaction,
+mid-stream cancellation, or successful-response persistence. Those remain
+deferred, along with narrow keyboard traversal and the other unobserved cases
+below. The October 9 Phase 2 source changes have **not** been installed or
+verified in the live Binary Ninja GUI. Native Qt transcript unit tests are
+separate from host acceptance.
+
+## Earlier non-network shell receipt
 
 Date: 2026-08-10
 
@@ -19,7 +35,7 @@ The Binary Ninja log contained
 `Axio Analyst v0.9.0: plugin registration complete.` with no registration
 error or Python traceback.
 
-## Completed live checks
+### Completed live checks on August 10
 
 | Area | Evidence |
 | --- | --- |
@@ -37,9 +53,10 @@ The stock-Python suite also passed 55 tests, `compileall` completed, plugin
 metadata parsed, and `plugin_dev.py status` reported the installed runtime
 current.
 
-## Deferred live checks
+### Deferred at the August 10 checkpoint
 
-The following items were not claimed as passed in this run:
+The following items were not claimed as passed in that run. Consult the dated
+September 5 receipt above for the narrowly completed subset:
 
 - narrow-dock keyboard focus traversal and `Ctrl+Enter` submission;
 - suggestion dispatch, streaming, progress, elapsed time, cancellation, and

@@ -47,7 +47,8 @@ access: granted
 signal: critical (26)
 ```
 
-Open `build/Release/axio_analyst_demo.exe` in Binary Ninja. The `build/`
+Open the generated executable in Binary Ninja: `build/Release/axio_analyst_demo.exe`
+on Windows or `build/axio_analyst_demo` on macOS/Linux. The `build/`
 directory is intentionally ignored because the executable is a generated local
 test artifact.
 
@@ -74,17 +75,23 @@ cmake --build build --config Release --target clean
 .\build.ps1
 ```
 
-For a release smoke test, open the `AX` sidebar and confirm its header version
-matches `plugin.json`, the Settings introduction repeats that version, and the
+For a release smoke test, open the Axio Analyst sidebar using its split-diamond
+mark and confirm the overflow-menu version matches `plugin.json`, the Settings
+introduction repeats that version, and the
 Binary Ninja log contains the versioned registration message. This validates
 host loading and widget construction without sending the fixture to a provider.
 Provider requests remain a separate, explicit test action.
 
-The 2026-08-10 live pass verified the registration log, resting sidebar,
+The historical 2026-08-10 live pass verified the registration log, resting sidebar,
 function switching, a one-item/3,275-character primary preview, an
 eight-item/14,195-character all-pack preview, Settings summaries, and no BNDB
 creation. See [`docs/gui-verification.md`](../../docs/gui-verification.md) for
-the complete evidence and deferred interaction checks.
+the complete evidence and deferred interaction checks. The latest live receipt
+is September 5 on the macOS fixture and includes a limited Ollama flow,
+pre-output cancellation, and cancelled-conversation restoration. The
+[October 9 source fixes](../../docs/change-set-2026-10-09.md) still require a
+fresh installation and live GUI pass; fixture questions below are suggestions,
+rather than records of completed provider tests.
 
 Useful Axio Analyst questions include:
 
@@ -120,4 +127,5 @@ individual functions.
 
 Generated files stay under `build/`. To rebuild from scratch, remove only that
 exact generated directory after closing the demo process, then rerun
-`build.ps1`. Never commit the generated executable or CMake build tree.
+`build.ps1` on Windows or `build.sh` on macOS/Linux. Never commit the generated
+executable or CMake build tree.

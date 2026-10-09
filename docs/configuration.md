@@ -50,7 +50,20 @@ the primary function normally receives up to 60 percent of
 the combined budget (with a 1,000-character floor), and each neighbour receives
 at most 8,000 characters so later items have a chance to fit. The deterministic
 policy preserves item order, deduplicates exact repeats, and labels every
-truncation.
+truncation. Relevant types use only the same enabled, deduplicated caller/callee
+lists (three callers and five callees by default). With only Types enabled,
+only the primary function type is included. HLIL formatting stops at the item
+budget; selection collection can scan later addresses without formatting the
+unselected instructions. Each HLIL pass also inspects at most 100,000
+instructions; a selection beyond that ceiling is marked truncated rather than
+reported as an empty complete result. Each caller/callee search and each
+string/import pack has a 4,096-step traversal budget. Instruction/call-site,
+reference/target, and candidate-function visits consume those steps; failed
+lookups are deduplicated too. Imports share their budget across data and code
+targets. Exhausting a search adds a visible truncation notice within the item
+count limit, so these packs do not promise exhaustive results for large
+functions. Strings/import names are sliced before decoding and NUL removal;
+partial values are labelled. Host analysis calls themselves are not preemptible.
 
 Current-function truncation ends with:
 
@@ -64,6 +77,9 @@ provider the item count, total characters, and bundle truncation state.
 truncation before dispatch. Every Ask/Explain action rebuilds and freezes a new
 snapshot from the captured selection and options. Increasing the limit or
 enabling packs sends more binary-derived text and may increase latency or usage.
+Changing functions, pack choices, settings, or the binary invalidates the old
+preview and rejects its late callbacks. Replacing the binary also cancels and
+detaches the active analysis before loading the replacement conversation.
 
 Comparison is off by default and lives in the header overflow menu under
 **Compare with**, alongside **Explain this function**, **Export conversation**,
@@ -83,9 +99,11 @@ composer, and the status line below it reveals itself only while a request runs
 or immediately after a notice — an export, an evidence navigation, a restore,
 or a failure — then hides again after a few seconds.
 
-The timeout covers process startup, stdin submission, streaming, and process
-completion. Cancellation terminates the child process, waits briefly, and
-kills it only if graceful termination does not complete.
+The deadline starts before process creation and covers stdin submission,
+streaming, and waiting for exit even after both output pipes close. The OS
+process-creation call cannot be preempted. Cancellation and failures enter
+process-tree cleanup, which may add up to two seconds before escalation and
+two seconds after killing. See [platform limits](providers.md#shared-process-contract).
 
 ## Ollama Cloud discovery
 
@@ -95,19 +113,27 @@ Selecting Ollama Cloud or choosing **Refresh** starts asynchronous discovery:
    response limit.
 2. Convert catalog entries to runnable `:cloud` or `-cloud` tags.
 3. If the public request fails or contains no usable entries, run
-   `<ollama executable> list` and keep only registered cloud tags.
+   `<ollama executable> list` on a worker with a 10-second deadline and 1 MB
+   combined-output cap; keep only registered cloud tags. Closing the sidebar
+   cancels this child and rejects queued discovery callbacks.
 4. If both methods fail, preserve the editable field so a model can be entered
    manually.
 
 The public catalog request sends no credentials, function context, binary
 metadata, or configured model. Discovery runs separately from analysis and
 does not block the Binary Ninja GUI thread.
+Applying a different Ollama executable cancels and supersedes discovery for
+the prior executable. Old catalog/list callbacks cannot update the new choices.
+An already-running public HTTP fetch finishes under its existing timeout but
+its stale result is discarded.
 
 ## Storage and secret handling
 
 Binary Ninja stores user settings in its user directory. The plugin stores no
-API keys, OAuth tokens, provider cookies, full prompts, context snapshots, or
-binary bytes. Executable paths and selected model names may be sensitive on
+API keys, OAuth tokens, provider cookies, complete context snapshots, or binary
+bytes. Optional stored/exported findings do contain bounded supplied context
+excerpts, and message bodies can contain user questions and provider text.
+Executable paths and selected model names may be sensitive on
 shared machines, so do not commit a populated Binary Ninja `settings.json`.
 
 Conversation persistence is off by default. When enabled, schema-version-2 (with schema-1 read compatibility)
@@ -126,6 +152,10 @@ record to 8 MB. Saves use same-directory atomic replacement and request owner-
 only permissions where supported. **Clear** deletes only the exact current
 fingerprint record. Disabling persistence stops future load/save but deliberately
 does not silently delete an existing record; use **Clear** for deletion.
+This identity is sampled, not a full-file hash. Same-span binaries differing
+only in unsampled regions can alias and load, replace, or clear the same record.
+The current format is retained; use persistence only where that association
+limit is acceptable.
 
 **Export** is available regardless of persistence. It writes the visible
 conversation as Markdown only after the user chooses a destination. Provider
@@ -136,5 +166,5 @@ No `axioAnalyst.*` key stores the plugin version. Upgrading the plugin changes
 runtime files and metadata without rewriting the user's provider selection,
 executable paths, request limits, persistence preference, or credentials.
 
-Schema 2 findings additionally persist bounded supplied context excerpts and
-context hashes with provider/model/version metadata. See [the change set](change-set-2026-09-05.md).
+See [the change set](change-set-2026-09-05.md) for schema-2 findings and its
+dated verification receipts.

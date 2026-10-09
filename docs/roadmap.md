@@ -1,8 +1,9 @@
 # Axio Analyst roadmap
 
-For the September 5 implementation and its remaining gates, see
-[the current change set](change-set-2026-09-05.md). Earlier verification entries
-below apply to their recorded revisions, not automatically to this change.
+Current source fixes and verification gates are recorded in
+[the October 9 change set](change-set-2026-10-09.md). The
+[September 5 change set](change-set-2026-09-05.md) retains earlier structured
+findings and live receipts; those observations do not verify the October fixes.
 
 The current architecture and security boundaries are documented in
 [architecture.md](architecture.md). This document owns future product scope so
@@ -43,7 +44,7 @@ tree, adding manifest-aware migration, and exposing one validated version
 through Binary Ninja. Version `0.9.0` adds the transparent daily-assistant
 features without crossing the BNDB mutation or credential boundaries.
 
-Implemented through `0.9.0`:
+Implemented in the current `0.9.0` source, including Unreleased changes:
 
 - Explain or ask about the current function.
 - Address-labelled current-function HLIL plus opt-in selection, direct
@@ -57,9 +58,9 @@ Implemented through `0.9.0`:
   with a suggestion-led empty state, a self-hiding status line, a
   progressively disclosed Settings surface, an original painted product mark,
   and a shared action-glyph set.
-- Streamed Markdown with provider HTML disabled at the parser, wrapped code
-  blocks, progress, elapsed time, and optional bounded local transcript
-  restoration, deletion, and Markdown export.
+- Bounded literal-text streaming previews followed by HTML-disabled terminal
+  Markdown, wrapped code blocks, progress, elapsed time, and optional bounded
+  local transcript restoration, deletion, and Markdown export.
 - Validated internal navigation for address citations, with unresolved-address
   disclosure and no generic external-link opening.
 - Optional two-provider comparison using one frozen context snapshot.
@@ -78,7 +79,9 @@ Implemented through `0.9.0`:
 - Model suggestions do not guarantee account access.
 - Context packs remain a direct bounded neighbourhood, not a recursive or
   whole-program investigation/index.
-- Evidence is address-linked but not yet a structured claim/provenance graph.
+- Findings carry bounded claims, cited addresses, supplied excerpts, context
+  hashes, and provider metadata with explicit unverified status. Claim
+  adjudication, automatic stale-state UI, and a provenance graph remain future work.
 - Local transcript persistence is intentionally machine-local, off by default,
   and not a portable collaborative workspace.
 - Ollama CLI output does not expose token or cost accounting through this
@@ -91,13 +94,18 @@ Implemented through `0.9.0`:
   inline rather than behind a detail surface.
 - There is no proposed Binary Ninja transaction schema.
 - Codex exposes completed agent messages rather than token-level deltas.
-- CLI adapters cannot inspect arbitrary files or use unrestricted tools.
+- Codex snapshot-only filesystem/tool confinement is not established by its
+  current flags; [the provider contract](providers.md#codex) records the open gate.
+- Source tests do not establish live Binary Ninja acceptance, Windows process
+  cleanup, or a Markdown image/resource-loading policy. Sampled conversation
+  fingerprints can alias binaries differing outside sampled regions.
 
 ## Remaining Phase 1 work
 
 - OpenAI-compatible and Anthropic API adapters.
 - Environment/credential-store API keys and an OAuth token broker.
-- A structured claim/evidence schema beyond address extraction.
+- Verified claim adjudication and a provenance graph beyond the implemented
+  unverified finding records.
 - Portable workspace import/export with explicit migration and retention
   controls. Credentials remain outside every workspace schema.
 - Provider-specific cost configuration where the CLI does not report cost.

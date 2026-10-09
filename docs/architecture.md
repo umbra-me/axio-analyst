@@ -42,6 +42,7 @@ import the provider-neutral packages without a Binary Ninja installation.
 | `application/analyze.py` | Build a request, invoke an injected provider, and normalize timing/character usage. |
 | `application/conversations.py` | Versioned bounded transcript schema, atomic JSON store, and Markdown export. |
 | `providers/process.py` | Bounded subprocess supervision, pipe draining, timeout, and cancellation. |
+| `providers/process_tree.py` | POSIX process-group and Windows Job Object cleanup using the standard library. |
 | `providers/streaming.py` | Incremental JSONL decoding and terminal-sequence removal. |
 | `providers/claude.py` | Claude Code command, parser, streaming, and result normalization. |
 | `providers/codex.py` | Codex command, parser, streaming, and result normalization. |
@@ -103,13 +104,17 @@ source path.
 | Local JSON replacement/export | `application/conversations.py`, `ui/sidebar.py` | Qt main thread after bounded serialization/user action |
 | Provider inference | `providers/` | Supervised child process |
 | Child stdout/stderr reads | `providers/process.py` | Two daemon reader threads per request |
+| Child stdin submission | `providers/process.py` | One daemon writer thread per request |
 | Stream/progress UI dispatch | `host/task.py` | Coalesced, then `execute_on_main_thread` |
 | Ollama public catalog fetch | `providers/ollama.py`, `host/model_discovery.py` | Dedicated daemon thread |
-| Ollama local fallback discovery | `host/model_discovery.py` | Asynchronous Qt `QProcess` |
+| Ollama local fallback discovery | `host/model_discovery.py` | Daemon worker using the shared CLI supervisor, with a 10-second/1 MB limit |
 
 No Qt widget may be updated directly from a provider, reader, catalog, or
 Binary Ninja background thread. Callback dispatch tolerates a sidebar being
-destroyed while a request finishes.
+destroyed while a request finishes. Request and preview callbacks also capture
+a generation and BinaryView identity. Replacing the binary detaches and cancels
+old work before loading the new transcript, so late results cannot navigate or
+persist against the replacement binary. Applying settings invalidates previews.
 
 ## Failure containment
 
@@ -118,9 +123,23 @@ destroyed while a request finishes.
 - Expected provider failures use `ProviderError`; cancellation has its own
   `ProviderCancelled` path and is not presented as an unexpected crash.
 - The shared process runner limits combined stdout/stderr to 8 MB and bounds
-  displayed nonzero-exit diagnostics to 2,000 characters.
+  displayed nonzero-exit diagnostics to 2,000 characters. Reader-side counting
+  and a 64-chunk queue bound buffered output even while stdin is blocked.
+  Deadlines remain active after both output pipes close.
+- Context collection renders budget-sized HLIL prefixes lazily, checks
+  cancellation between host operations, and uses the same limited caller/callee
+  lists for neighbourhood text and relevant types. Selection is collected in a
+  separate pass so a later selected instruction survives primary truncation.
+  HLIL passes inspect at most 100,000 instructions; neighbourhood and reference
+  searches inspect at most 4,096 candidate steps per search/pack and disclose
+  exhaustion. Host strings/bytes are sliced before decoding and NUL stripping.
+  A single Binary Ninja analysis/property call or instruction conversion cannot
+  be preempted; these are output/iteration bounds, not a host-analysis deadline.
 - Sidebar destruction stops elapsed-time tracking and cancels an active task.
-  Late callbacks check widget liveness.
+  Late callbacks check widget liveness, request generation, and binary identity.
+- Streaming retains raw chunks without growing-prefix copies and inserts only
+  the first 64,000 characters into the live preview, with a visible notice.
+  Completion/failure/cancellation performs one canonical Markdown render.
 - The transcript imports Markdown with `QTextDocument.MarkdownNoHTML`, so the
   parser never emits an HTML block or span and a provider tag can only appear
   as inert literal text. This replaces source-string escaping, which leaked
@@ -130,7 +149,7 @@ destroyed while a request finishes.
 - Conversation filenames are validated SHA-256 hex identifiers, records are
   capped at 200 messages and 8 MB, and saves use an atomic same-directory
   replacement with restrictive permissions where the OS supports them.
-- Comparison failures are contained per provider so one successful result can
+- Comparison failures and secondary cancellation are contained per provider so one successful result can
   still be inspected; single-provider failures retain the normal error path.
 
 ## Provider and authentication boundary
@@ -141,8 +160,11 @@ while `providers/process.py` owns the shared execution safety behavior.
 
 The adapters delegate authentication to their installed CLI. They do not open
 credential files. Prompts are written over stdin, temporary work occurs in a
-dedicated directory, and provider tools or persistence are disabled where the
-CLI exposes those controls.
+unique temporary directory, and provider tools or persistence are disabled
+where the CLI exposes those controls. Codex snapshot-only confidentiality
+remains unproven; see [the provider contract](providers.md#codex). Process-tree
+cleanup and its platform limits are described in
+[the shared process contract](providers.md#shared-process-contract).
 
 Future native HTTP adapters must keep API keys in environment variables or an
 OS credential store, never in tracked files, Binary Ninja settings, BNDBs, or
