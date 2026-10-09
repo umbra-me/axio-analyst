@@ -6,6 +6,20 @@ breaking changes must still be documented with migration instructions.
 
 ## Unreleased
 
+No additional changes recorded.
+
+## 0.9.1 - pending release
+
+Version selected on October 10 for the accumulated changes below. This is a
+prepared source candidate, not a tagged or published release. The actual release
+date remains pending acceptance and publication approval. See the
+[release notes draft](docs/release-notes-draft.md) and
+[release preparation](docs/release-preparation.md) for verification evidence,
+open gates, and future tag/push commands.
+- October 9 presentation draft: Put the README pitch, quick start, and features
+  first; summarize the security model; add pending real screenshot/GIF slots
+  and a [capture plan](docs/capture-plan.md). Align the maintainer and copyright
+  with Kian (Zenco), without claiming new GUI results.
 - October 9: Release-readiness source fixes and regression coverage, without a
   version bump or new live GUI receipt. See the [change set](docs/change-set-2026-10-09.md)
   for completed source checks and remaining confinement/platform/host gates.

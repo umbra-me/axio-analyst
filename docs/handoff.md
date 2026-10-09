@@ -6,7 +6,7 @@ For the current source fixes and remaining gates, see
 implementation and live receipts. Earlier verification entries below apply to
 their recorded revisions, not automatically to the current source.
 
-Last updated: 2026-10-09 (source fixes committed; manual verification plan prepared)
+Last updated: 2026-10-10 (Phase 5 release preparation; version 0.9.1 selected)
 
 ## Current continuation state
 
@@ -15,8 +15,22 @@ documentation are in local commit `259b81fb9549f2f0767be97b6499b1443386128b`.
 The baseline before these fixes is `9945d84530025139958aad55226c170a18f430f3`.
 The Phase 3 [manual verification plan](manual-verification.md) and
 [results template](manual-verification-results-template.md) are now prepared;
-no new live results have been reported. Version remains `0.9.0`, with changes
-under Unreleased.
+no new live results have been reported. The maintainer selected `0.9.1` on
+October 10; metadata and current guidance now describe that prepared candidate,
+with a pending-release changelog entry.
+
+The Phase 4 presentation puts the README pitch, quick start, and features
+first, summarizes the security model with its open gates, and adds pending real
+capture slots plus [a sized screenshot/GIF plan](capture-plan.md). README,
+`plugin.json` author/license text, and `LICENSE` now identify Kian (Zenco).
+No screenshots/GIF or live acceptance were produced in the presentation phase.
+The user requested continuation after presentation review. Phase 5 now has
+[draft release notes](release-notes-draft.md) and
+[release preparation with future tag/push commands](release-preparation.md).
+`0.9.1` is selected and metadata reports it. The commands were written, not
+executed. Community-plugin packaging review is the next phase; live acceptance
+still needs the user's receipts.
+
 No live install, provider inference, tag, push, release, or submission was
 performed for this phase.
 
@@ -35,6 +49,12 @@ On October 9, the stock-Python suite ran 130 tests with nine optional Qt tests
 skipped; the bundled-Qt run passed all 130. Full compileall, metadata JSON,
 diff whitespace, and relative documentation links passed. The native Qt
 tests used unshown Qt 6.11.1 Cocoa widgets and did not launch Binary Ninja.
+
+On October 10, the `0.9.1` preparation passed the stock suite again: 121 passes
+and nine optional Qt skips. Compileall, metadata/runtime-version and license
+parity, 129 relative documentation file links, whitespace, and syntax of the
+future tag/push commands passed. Runtime Python, tools and tests are unchanged
+by this preparation; no new live host result is implied.
 
 Codex snapshot-only confinement is still unproven. Windows Job Object behavior
 and live Binary Ninja acceptance remain unverified for this patch. The sampled
@@ -58,7 +78,7 @@ The latest live receipt is September 5; October source tests do not refresh it.
 - Repository: `https://github.com/umbra-me/axio-analyst`
 - Default branch: `main`
 - Licence: MIT
-- Source version: `0.9.0`
+- Source version: `0.9.1` (prepared candidate; not tagged/published)
 - Last recorded published source version: `0.9.0`
 - Last recorded live-installed version: `0.9.0` (September 5 receipt)
 
@@ -68,7 +88,8 @@ synchronization, but product code and maintained documentation belong here.
 
 ## Implemented source scope
 
-Version `0.9.0` extends the read-only workflow with:
+The read-only workflow introduced in `0.9.0`, with the accumulated candidate
+changes, includes:
 
 - exact context preview and a frozen per-request snapshot;
 - primary-function HLIL by default plus opt-in selection, three direct callers,
@@ -85,16 +106,18 @@ Version `0.9.0` extends the read-only workflow with:
 - qualitative two-provider comparison over exactly one frozen prompt;
 - measured latency/character accounting plus provider-reported Claude and
   Codex token/cache metadata and Claude cost metadata;
-- updated source metadata and Binary Ninja version surfaces for `0.9.0`.
+- one metadata version source for all Binary Ninja version surfaces, now
+  prepared as `0.9.1`.
 
 The existing Claude Code, Codex, and Ollama Cloud adapters remain supervised,
 stdin-only, credential-neutral, cancellable, and bounded. No code path mutates
 names, types, comments, analysis, or BNDB state.
 
-## Unreleased work on top of 0.9.0
+## Candidate work on top of 0.9.0
 
 The sidebar was redesigned and the product acquired an original mark. The
-version is unchanged; these entries sit under `Unreleased` in the changelog.
+version was unchanged during that work; it is now `0.9.1` for the prepared
+candidate, with a pending-release changelog entry.
 
 - `ui/branding.py` paints the Axio Analyst mark (a split diamond: one bounded
   context read more than one way) and a thirteen-glyph action set on a shared

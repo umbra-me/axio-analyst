@@ -3,7 +3,8 @@
 ## Supported version
 
 Axio Analyst is pre-release. Only the latest development version on `main` is
-currently supported. The current source version is `0.9.0`. A versioned
+currently supported. The current source version is `0.9.1` (release preparation,
+not yet tagged or published). A versioned
 support table will be added when tagged releases begin.
 
 ## Reporting a vulnerability
@@ -42,7 +43,7 @@ sensitive, untrusted data crossing distinct boundaries:
    a bounded JSON record is stored under Binary Ninja's user directory using a
    path-free content fingerprint, never a provider credential or source path.
 
-Version `0.9.0` does not write to the BNDB. Its package split is also a trust
+The current source does not write to the BNDB. Its package split is also a trust
 boundary: `core/` and `application/` cannot
 import Binary Ninja, Qt, subprocess, or network modules, and `providers/`
 cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.

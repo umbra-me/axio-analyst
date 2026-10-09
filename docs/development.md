@@ -220,6 +220,10 @@ under **Arguments** and defines `-l, --debug-log <file>` as **Log output to
 
 ## Release checklist
 
+The current [release preparation](release-preparation.md) records the pending
+version choice, draft notes, open gates and exact future tag/push commands.
+It does not authorize or establish publication.
+
 1. Decide the semantic version and update `plugin.json`, the single runtime
    version source.
 2. Move relevant `CHANGELOG.md` entries from Unreleased to a dated version.

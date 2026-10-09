@@ -23,8 +23,9 @@ separate from host acceptance.
 ## Candidate manual plan — October 9
 
 The [manual verification plan](manual-verification.md) gives steps, expected
-results, and evidence to record for the deferred cases on source commit
-`259b81fb9549f2f0767be97b6499b1443386128b`. Use the
+results, and evidence to record for the deferred cases. Its runtime baseline is
+`259b81fb9549f2f0767be97b6499b1443386128b`; the October 10 update expects the
+prepared `0.9.1` metadata and requires a fresh candidate identity in G00. Use the
 [unfilled results template](manual-verification-results-template.md) for separate
 provider, cancellation, and restart observations. Preparation of this plan is
 not a live test result. No new GUI receipt has been reported for this candidate.

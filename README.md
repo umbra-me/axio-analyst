@@ -1,286 +1,137 @@
 # Axio Analyst
 
-Current source changes and verification gates: [October 9 change set](docs/change-set-2026-10-09.md).
+Axio Analyst brings provider-neutral AI assistance into Binary Ninja for reverse
+engineers investigating functions and checking hypotheses. Inspect a bounded,
+address-labelled context snapshot, then ask Claude Code, Codex, or Ollama Cloud
+to explain it or compare their answers. The plugin stays read-only, keeps extra
+context and local history opt-in, and leaves authentication with your installed
+CLI.
 
-Axio Analyst is a provider-neutral analysis workspace for Binary Ninja. It
-builds an inspectable, bounded context snapshot around the function under the
-cursor, sends that snapshot to a supervised Claude Code, Codex, or Ollama Cloud
-command-line harness, and renders the response in a native Binary Ninja
-sidebar.
+## Quick start
 
-The current `0.9.0` release remains read-only. It is useful for
-explaining functions, tracing values, recovering algorithms, and identifying
-areas that need deeper investigation. It does not rename symbols, change
-types, add comments, or otherwise modify the Binary Ninja database (BNDB).
+You need Binary Ninja's Qt6 desktop UI and at least one supported, authenticated
+provider CLI. The plugin uses Binary Ninja's bundled Python/PySide6 and adds no
+third-party runtime dependencies.
 
-## Highlights
+1. Install this repository as `axio_analyst` in your Binary Ninja user plugin
+   folder using the [platform-specific source-install commands](docs/setup.md#source-installation).
+   For a separate checkout, use the [development installer](docs/setup.md#development-installation).
+2. Authenticate Claude Code, Codex, or Ollama outside Binary Ninja. Choose a
+   provider approved for the material you will send; read the
+   [Codex confinement limitation](docs/providers.md#codex) before using that adapter.
+3. Restart Binary Ninja, open an analyzed binary, and choose **Plugins > Axio
+   Analyst > Open sidebar**. The harmless [demo fixture](samples/demo/README.md)
+   is a useful first target.
+4. Open **Settings**, select Provider, Model, and Reasoning, check the executable
+   path, and choose **Apply**. Place the cursor in a function, open the composer's
+   scope chip, and choose **Build preview** to inspect the context.
+5. Choose a suggested question, type your own and press `Ctrl+Enter`, or use
+   **More actions > Explain this function**. Check the answer against its cited
+   IL addresses; provider output is unverified analysis.
 
-- Native **Axio Analyst** sidebar whose resting layout is one header row and one
-  composer, with a suggestion-led empty state, a dedicated request-context
-  workspace, an original painted mark, and a matching glyph set.
-- **Explain** for a structured current-function summary and **Ask** for custom
-  questions (`Ctrl+Enter` submits from the prompt editor).
-- Exact context preview plus opt-in selection, direct caller/callee, referenced
-  string/import, and relevant-type packs under one deterministic total cap.
-- Address citations become validated internal navigation targets; unknown
-  addresses remain inert and are labelled unresolved.
-- Unverified structured findings retain bounded claims, cited addresses,
-  supplied context excerpts, and provider/context provenance.
-- Optional, off-by-default local conversation restoration keyed by a path-free
-  content fingerprint, with explicit deletion and Markdown export.
-- Optional comparison of the active provider with one other configured
-  provider using the same frozen context snapshot.
-- Per-result latency and character accounting, plus token/cache/cost metadata
-  when a provider exposes it.
-- Claude Code (`claude -p`), Codex (`codex exec`), and Ollama Cloud
-  (`ollama run`) behind one provider-neutral interface.
-- Editable model selection and provider-specific reasoning effort.
-- Dynamic Ollama Cloud catalog discovery with `ollama list` as an offline
-  fallback.
-- Bounded literal-text previews while streaming, followed by HTML-disabled
-  Markdown at completion, with wrapped code blocks and stable manual scrolling.
-- Background process execution, concurrent stdout/stderr draining, elapsed
-  time, phase progress, timeout enforcement, and cancellation.
-- Explicit bounded context disclosure and read-only BNDB integration.
-- Installed version visibility in the sidebar overflow menu, Settings page, log, and
-  **Plugins > Axio Analyst > About Axio Analyst**.
+The send control becomes **Stop** during a request. Every request rebuilds and
+freezes its own context from the captured selection/options; a prior preview
+does not lock later host analysis state.
 
-## Requirements
+## Features
 
-- Binary Ninja 5.x or 6.x with its Qt6 UI. Historical host checks used
-  `5.4.10350-dev` on Windows and `6.1.10608-dev` on macOS; the October 9
-  source changes still require live host acceptance.
-- The Python runtime embedded in Binary Ninja; the plugin has no third-party
-  Python dependencies beyond Binary Ninja and its bundled PySide6 modules.
-- At least one supported provider CLI installed, authenticated, and available
-  on `PATH`, or configured by absolute executable path:
-  - Claude Code
-  - Codex CLI
-  - Ollama CLI with Ollama Cloud access
+- **Choose your provider.** Claude Code, Codex, and Ollama Cloud share one
+  analysis interface, with editable models and provider-specific reasoning.
+- **Inspect the context.** Address-labelled primary-function HLIL is included
+  by default. Selection, up to three direct callers, five direct callees, twenty
+  referenced strings/imports each, and relevant types are opt-in under one
+  combined context-item character cap, with visible truncation.
+- **Follow evidence.** Validated address citations navigate inside Binary Ninja;
+  invalid addresses and ordinary provider links remain inert.
+- **Keep claims reviewable.** Unverified findings retain bounded claims, supplied
+  context excerpts, a context hash, and provider/version metadata.
+- **Compare answers.** Run the active provider and one alternative sequentially
+  over one frozen prompt, with separate results and usage summaries. This is
+  qualitative comparison, rather than a benchmark.
+- **Stay in the native workspace.** A compact sidebar provides context preview,
+  progress, cancellation, a bounded literal-text streaming preview, and
+  HTML-disabled terminal Markdown with wrapped code blocks.
+- **Control local history.** Conversations stay in memory by default. Optional
+  bounded restoration, explicit Clear deletion, and Markdown export are available.
+- **See available accounting.** Measured duration and character counts are
+  supplemented by token/cache/cost fields only when the provider reports them.
 
-Axio Analyst never reads provider credential files. Authentication remains
-owned by the selected CLI.
+## Security model
 
-## Install from source
+The plugin does not rename symbols, change types, add comments, or write to the
+BNDB. Its explicit prompt contains the binary's base filename, function metadata,
+bounded selected context, and your question. Full source paths and whole binaries
+are omitted; prompts go through stdin, and the plugin never reads provider
+credential files. Local history is Off by default; saved/exported findings can
+contain sensitive supplied context excerpts.
 
-Binary Ninja loads manually installed Python plugins from a directory under
-its user plugin folder. The directory must be named `axio_analyst` and contain
-this repository's root `__init__.py`.
+Provider output remains untrusted. HTML is disabled at Markdown import, and only
+validated internal address links can navigate. CLI/provider retention is governed
+by that provider. Codex's read-only sandbox and disabled shell/image/web tools
+do **not** establish snapshot-only confidentiality; Markdown image/resource
+loading and platform-specific cleanup also have remaining verification gates.
+Use providers approved for your analysis material.
 
-Windows PowerShell:
+Read the [architecture and data boundaries](docs/architecture.md),
+[security policy](SECURITY.md), and [exact provider contracts](docs/providers.md).
 
-```powershell
-git clone https://github.com/umbra-me/axio-analyst.git `
-  "$env:APPDATA\Binary Ninja\plugins\axio_analyst"
-```
+## Screenshots and walkthrough
 
-macOS:
+Real captures are pending. These slots will show the public demo fixture after
+the corresponding manual checks are recorded; no mock output is presented as a
+completed run.
 
-```bash
-git clone https://github.com/umbra-me/axio-analyst.git \
-  "$HOME/Library/Application Support/Binary Ninja/plugins/axio_analyst"
-```
+| Capture slot | Planned view | Target asset |
+| --- | --- | --- |
+| Screenshot pending | A completed function explanation beside the native HLIL, with valid evidence and an unverified finding footer. | `docs/media/sidebar-explanation.png` |
+| Screenshot pending | The Request context workspace with a readable exact preview, enabled packs, counts, and truncation disclosure. | `docs/media/context-preview.png` |
+| Screenshot pending | Two labelled provider results from a completed comparison over the public demo. | `docs/media/provider-comparison.png` |
+| GIF pending | Inspect the preview, submit a question, then show the actual response and one validated address navigation. | `docs/media/inspect-explain.gif` |
 
-Linux:
-
-```bash
-git clone https://github.com/umbra-me/axio-analyst.git \
-  "$HOME/.binaryninja/plugins/axio_analyst"
-```
-
-Restart Binary Ninja after installation or upgrade. Python plugins already
-loaded by the current process are not hot-reloaded safely.
-
-For development from a separate checkout, use the bounded copier described in
-[Setup and installation](docs/setup.md). It copies only the runtime files and
-can report drift without changing the Binary Ninja user directory. Upgrades
-from the former flat development layout can use its explicit
-`--prune-obsolete` migration flag while Binary Ninja is closed; arbitrary
-destination-only files are never removed.
-
-## Versioning
-
-`plugin.json` is the single source of truth for the semantic version. The
-runtime validates and reads that value through `core/version.py`; there is no
-second hard-coded Python version to synchronize. The installed version appears
-in Binary Ninja's plugin metadata, the sidebar overflow menu, Settings page, About
-command, and registration log.
-
-For a development copy, verify that every manifest-owned installed file and
-the metadata version match the checkout:
-
-```powershell
-python tools/plugin_dev.py status `
-  --plugins-dir "$env:APPDATA\Binary Ninja\plugins"
-```
-
-## First request
-
-1. Authenticate one supported CLI outside Binary Ninja.
-2. Start Binary Ninja and open a binary with analyzed functions.
-3. Open **Axio Analyst** from the right sidebar or choose
-   **Plugins > Axio Analyst > Open sidebar**.
-4. Open **Settings**, select the provider, model, and reasoning effort, verify
-   the executable path, and choose **Apply settings**.
-5. Place the cursor inside a function.
-6. Choose one of the suggested questions, or type your own and press
-   `Ctrl+Enter` (or the send glyph). **Explain this function** is also in the
-   header overflow menu once a conversation is under way.
-
-The sidebar header names the current function and its start address. Until the
-conversation starts, the space below shows the function, its architecture, the
-provider and model that will run, and four suggested questions — so what will
-happen is visible before anything is sent.
-
-The composer is one control. The scope chip at its lower left names the request
-scope and always shows the pack count: it reads `parse_record` when only the
-current function will be sent and `parse_record +N` once N opt-in packs are
-enabled, eliding the function name rather than the count when the dock is
-narrow. Choosing it opens the dedicated context workspace, where packs are
-enabled and **Build preview** inspects the exact snapshot. Every request
-rebuilds and freezes that snapshot before provider dispatch, so later cursor
-movement cannot silently change it.
-
-The send glyph submits and becomes **Stop** while a request runs. Progress is a
-thin line above the composer, and a status line appears beneath it only while
-there is something to report — request phase, elapsed time, or the result of an
-export, navigation, or restore — then hides itself again. **Explain this
-function**, **Compare with**, **Export conversation**, and **Clear
-conversation** live in the header's overflow menu, which also reports the
-installed version. A completed response opens at its beginning so the first
-result is immediately readable.
-
-The plugin also registers these menu commands:
-
-- **Plugins > Axio Analyst > Explain current function**
-- **Plugins > Axio Analyst > Ask about current function...**
-- **Plugins > Axio Analyst > Open sidebar**
-- **Plugins > Axio Analyst > About Axio Analyst**
-
-The Explain and Ask commands use Binary Ninja's plain-text report surface. The
-sidebar keeps its conversation in memory by default. Enable **Restore
-conversations for this binary** in Settings to store a bounded transcript under
-Binary Ninja's user directory. The header's overflow menu holds **Clear
-conversation**, which deletes that binary's stored transcript, and **Export
-conversation**, which writes the visible conversation as Markdown to a
-user-selected path.
-
-## Provider behavior
-
-| Provider | Process | Authentication | Streaming behavior |
-| --- | --- | --- | --- |
-| Claude Code | `claude -p` | Existing CLI OAuth or API-key session | Partial-message text deltas |
-| Codex | `codex exec` | Existing CLI OAuth or API-key session | Lifecycle updates and completed agent message |
-| Ollama Cloud | `ollama run` | Existing `ollama signin` session | Raw response chunks |
-
-Claude Code runs without tools, Chrome integration, slash commands, or session
-persistence. Codex runs ephemerally in a read-only sandbox, ignores user
-rules/configuration, and disables shell/image tools and web search. These flags
-do not establish snapshot-only confidentiality; see the open gate in the
-[Codex contract](docs/providers.md#codex). Ollama disables prompt history for
-the child process and hides thinking output. See [Provider contracts](docs/providers.md) for exact
-arguments, parsing rules, limits, and failure behavior.
-
-## What is sent
-
-A request always contains:
-
-- the binary's base filename, not its full path;
-- architecture and platform names;
-- the primary function's name, start address, rendered type, and
-  address-labelled HLIL;
-- the question and a fixed reverse-engineering instruction.
-
-When explicitly selected in the Context panel, the same bounded snapshot can
-also contain:
-
-- address-labelled HLIL inside the current selection;
-- up to three direct callers and five direct callees;
-- up to twenty referenced strings and twenty referenced imports;
-- relevant function type declarations.
-
-The configured character limit applies to the combined context-item text,
-excluding prompt instructions, metadata, and the user question. Per-function
-caps keep one neighbour from consuming the context budget. Extraction also has
-instruction/candidate traversal ceilings with visible truncation notices. The
-exact item list, content, size, and truncation state are visible before dispatch.
-
-No request is sent until the user chooses **Ask** or **Explain**. Prompts are
-written through stdin rather than included in the process command line.
-Provider output is untrusted analysis: confirm important claims against the
-cited IL addresses before relying on them.
-
-## Documentation
-
-- [Documentation index](docs/README.md)
-- [Setup and installation](docs/setup.md)
-- [Configuration reference](docs/configuration.md)
-- [Provider contracts](docs/providers.md)
-- [Architecture](docs/architecture.md)
-- [Roadmap](docs/roadmap.md)
-- [Sidekick capability inventory](docs/sidekick-capability-inventory.md)
-- [Development and release guide](docs/development.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Current handoff](docs/handoff.md)
-- [Extraction history](docs/history.md)
-- [Security policy](SECURITY.md)
-- [Contributing](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
-
-## Development verification
-
-The provider, prompt, parser, installer, and rendering layers are testable with
-stock Python and do not require importing Binary Ninja:
-
-```powershell
-python -m unittest discover -s tests -t .
-python -m compileall -q __init__.py application core host providers ui tools tests
-python -c "import json,pathlib; json.loads(pathlib.Path('plugin.json').read_text(encoding='utf-8'))"
-```
-
-A real Binary Ninja GUI launch is still required to prove sidebar registration
-and Qt behavior because a personal Binary Ninja licence does not expose
-`binaryninjaui` to ordinary headless Python.
-
-On October 9, 130 tests were discovered: stock Python passed 121 and skipped
-nine optional Qt tests; the bundled-Qt run passed all 130. These checks cover
-source behavior and unshown native Qt widgets, rather than live host acceptance.
-The latest live receipt is September 5 on Binary Ninja Personal `6.1.10608-dev`:
-a limited Ollama flow, evidence navigation, restart, pre-output cancellation,
-and cancelled-conversation restoration passed. The October source changes have
-not been installed or checked in the live GUI. See the dated
-[GUI verification index](docs/gui-verification.md) for the remaining cases.
-
-The harmless C++ reversing fixture lives in [`samples/demo`](samples/demo).
-On Windows with CMake and the MSVC toolchain, run:
-
-```powershell
-Push-Location samples/demo
-.\build.ps1
-.\build\Release\axio_analyst_demo.exe --demo
-Pop-Location
-```
-
-On macOS or Linux with CMake and a C++17 compiler:
-
-```sh
-(cd samples/demo && ./build.sh && ./build/axio_analyst_demo --demo)
-```
-
-When launching the fixture through `binaryninja.exe`, pass it as a positional
-file argument. Binary Ninja's built-in help defines
-`-l, --debug-log <file>` as the log destination; it is not the option for
-opening the fixture. The exact safe command and recovery note are in the
-[demo guide](samples/demo/README.md).
+The [capture plan](docs/capture-plan.md) specifies sizes, framing, steps, captions,
+and the receipt required for each slot. Capture locally from the running plugin;
+retain provider labels, unverified status, and relevant limitations.
 
 ## Project status
 
-Version `0.9.0` implements the bounded context, evidence navigation, optional
-local transcript, provider comparison, and usage-accounting milestone. Direct
-HTTP providers, credential-store and OAuth brokerage, reviewable BNDB changes,
-indexing, and agent tools remain roadmap work. Current boundaries are
-documented in [Architecture](docs/architecture.md), with delivery phases in
-[Roadmap](docs/roadmap.md).
+Source version is `0.9.1`, prepared as a release candidate with no tag or
+published release. The [release preparation](docs/release-preparation.md)
+records the pending gates and draft notes. The
+[October 9 change set](docs/change-set-2026-10-09.md) records source fixes and
+local regression evidence. Stock Python passed 121 tests with nine optional Qt
+tests skipped; the bundled-Qt run passed all 130. Those source/widget checks do
+not establish live Binary Ninja acceptance of the current changes.
+
+The latest live receipt is still September 5. New observations are awaiting the
+[manual verification plan](docs/manual-verification.md) and
+[results template](docs/manual-verification-results-template.md); see the
+[GUI verification index](docs/gui-verification.md) for completed and deferred
+cases. Codex confinement, Windows cleanup, and Markdown resource behavior remain
+open gates. No release-ready claim is made from the presentation changes.
+
+Direct HTTP providers, credential/OAuth brokerage, indexing, agent tools, and
+reviewable BNDB transformations remain [roadmap work](docs/roadmap.md).
+
+## Documentation and development
+
+- [Documentation index](docs/README.md)
+- [Setup, upgrades, and removal](docs/setup.md)
+- [Settings, context limits, and local storage](docs/configuration.md)
+- [Provider commands and errors](docs/providers.md)
+- [Development checks and release procedure](docs/development.md)
+- [Release preparation and draft notes](docs/release-preparation.md)
+- [Harmless demo build and function guide](samples/demo/README.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Current handoff](docs/handoff.md)
+- [Changelog](CHANGELOG.md) and [contributing](CONTRIBUTING.md)
+
+`plugin.json` is the single semantic-version source. Exact verification commands,
+installer drift checks, and sample build instructions live in the linked guides.
+
+## Maintainer and license
+
+Maintained by **Kian (Zenco)** — [GitHub](https://github.com/notzenco) ·
+[kian.pw](https://kian.pw).
 
 Axio Analyst is independently implemented and is not affiliated with or based
 on proprietary Binary Ninja Sidekick code, prompts, or data. It is available

@@ -1,7 +1,10 @@
 # Manual Binary Ninja verification
 
-Prepared: 2026-10-09. Target runtime source commit:
-`259b81fb9549f2f0767be97b6499b1443386128b`, version `0.9.0`.
+Prepared: 2026-10-09; updated 2026-10-10 for the `0.9.1` release candidate.
+Runtime implementation baseline:
+`259b81fb9549f2f0767be97b6499b1443386128b` (then `0.9.0`). Release preparation
+changes metadata to `0.9.1` and Kian (Zenco); it does not change runtime Python.
+Record the actual candidate commit and installed hashes in G00 before testing.
 
 This is a test plan. No case below has a new live result. Record your observations
 in [the results template](manual-verification-results-template.md); only dated,
@@ -16,8 +19,10 @@ The September receipts and October unit tests do not count as passes here.
 2. From the repository root, record `git rev-parse HEAD`, `git status --short`,
    and the version in `plugin.json`. Later documentation-only commits are valid
    for this plan if the command below shows no runtime/tool/metadata difference.
-   If it shows a runtime change, start a new receipt for that revision and review
-   the affected expectations before testing.
+   The `0.9.1` preparation has author/copyright/version metadata differences
+   from the baseline. Any difference requires a fresh receipt with the actual
+   candidate identity; review runtime differences before testing. Do not reuse
+   a historical receipt merely because runtime Python is unchanged.
 
    ```sh
    git diff 259b81fb9549f2f0767be97b6499b1443386128b HEAD -- __init__.py plugin.json application core host providers ui tools
@@ -83,7 +88,7 @@ The September receipts and October unit tests do not count as passes here.
    flows outside Binary Ninja. Use only models your account can run.
 
 **Expected:** installer status says `Axio Analyst is current`; registration has
-no import/sidebar traceback; all version surfaces say `0.9.0`; the fixture is
+no import/sidebar traceback; all version surfaces say `0.9.1`; the fixture is
 analyzed and requests are idle. Matching the version alone does not prove that
 the candidate's runtime files were installed.
 

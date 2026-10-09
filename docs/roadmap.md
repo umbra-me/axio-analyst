@@ -44,7 +44,7 @@ tree, adding manifest-aware migration, and exposing one validated version
 through Binary Ninja. Version `0.9.0` adds the transparent daily-assistant
 features without crossing the BNDB mutation or credential boundaries.
 
-Implemented in the current `0.9.0` source, including Unreleased changes:
+Implemented in the current `0.9.1` prepared source candidate:
 
 - Explain or ask about the current function.
 - Address-labelled current-function HLIL plus opt-in selection, direct
