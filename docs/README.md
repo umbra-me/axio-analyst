@@ -17,6 +17,9 @@ quick start; these documents are the source of truth for detailed behavior.
 | [Development and release guide](development.md) | Repository workflow, tests, extension points, manual GUI checks, and release procedure. |
 | [Release preparation](release-preparation.md) | Selected version, release-gate ledger, and future tag/push commands awaiting acceptance and authorization. |
 | [GitHub release notes draft](release-notes-draft.md) | Reviewable release text with source evidence, known limitations, and explicit pending status. |
+| [Community submission audit](community-submission-audit.md) | Current/legacy Vector 35 requirements, metadata and layout checks, compatibility gates, and catalog route. |
+| [Community submission draft](community-submission-draft.md) | Unsent issue text with release and observed-compatibility placeholders. |
+| [Walkthrough candidates](walkthrough-candidates.md) | Three public target options, proposed demonstrations, selection boundary, and unfilled post structure. |
 | [GUI verification](gui-verification.md) | Dated real-host evidence, deferred interaction checks, fixture launch safety, and the current application-updater observation. |
 | [Manual verification plan](manual-verification.md) | Candidate installation, precise deferred-case steps, expected results, and evidence to record in Binary Ninja Personal. |
 | [Verification results template](manual-verification-results-template.md) | Unfilled run identity, per-provider case ledger, observed receipts, and untested gates. |

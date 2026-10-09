@@ -4,7 +4,7 @@
   "author": "Kian (Zenco)",
   "type": ["ui", "helper"],
   "api": ["python3"],
-  "description": "Investigate bounded Binary Ninja context with provider-neutral AI.",
+  "description": "Read-only AI analysis with bounded context.",
   "longdescription": "Provides native Chat and Settings views with exact context preview, opt-in callers, callees, selections, strings, imports, and types, evidence navigation, optional local transcripts, provider comparison, usage metadata, sanitized Markdown, streaming progress, and supervised Claude Code, Codex, and Ollama Cloud harnesses. Does not modify the database.",
   "license": {
     "name": "MIT",

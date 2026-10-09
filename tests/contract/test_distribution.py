@@ -45,6 +45,39 @@ class TestRepositoryContract(unittest.TestCase):
         )
         self.assertIn("ui", metadata["type"])
 
+    def test_plugin_metadata_matches_submission_contract(self):
+        metadata = json.loads((REPO_ROOT / "plugin.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(metadata["pluginmetadataversion"], 2)
+        for name, maximum in (("name", 64), ("author", 128), ("version", 16)):
+            with self.subTest(field=name):
+                self.assertIsInstance(metadata[name], str)
+                self.assertTrue(metadata[name])
+                self.assertLessEqual(len(metadata[name]), maximum)
+        # Meet the legacy INFO guidance too, although the current validator
+        # permits descriptions up to 256 characters.
+        self.assertIsInstance(metadata["description"], str)
+        self.assertTrue(metadata["description"])
+        self.assertLess(len(metadata["description"]), 50)
+        for name, allowed in (
+            ("api", {"python3"}),
+            ("type", {"core", "ui", "architecture", "binaryview", "helper", "sync"}),
+            ("platforms", {"Darwin", "Linux", "Windows"}),
+        ):
+            with self.subTest(field=name):
+                self.assertIsInstance(metadata[name], list)
+                self.assertTrue(metadata[name])
+                self.assertTrue(all(isinstance(item, str) and item in allowed
+                                    for item in metadata[name]))
+        self.assertIs(type(metadata["minimumBinaryNinjaVersion"]), int)
+        self.assertGreaterEqual(metadata["minimumBinaryNinjaVersion"], 0)
+        self.assertIsInstance(metadata["longdescription"], str)
+        self.assertEqual(metadata["license"]["name"], "MIT")
+        license_text = (REPO_ROOT / "LICENSE").read_text(encoding="utf-8")
+        license_text = license_text.removeprefix("MIT License").strip()
+        self.assertEqual(" ".join(metadata["license"]["text"].split()),
+                         " ".join(license_text.split()))
+
     def test_sidebar_icon_is_the_painted_axio_mark(self):
         sidebar = (REPO_ROOT / "ui" / "sidebar.py").read_text(encoding="utf-8")
         branding = (REPO_ROOT / "ui" / "branding.py").read_text(encoding="utf-8")

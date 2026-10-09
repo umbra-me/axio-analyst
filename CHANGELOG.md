@@ -27,6 +27,9 @@ open gates, and future tag/push commands.
 
 ### Added
 
+- Add a community-submission requirements audit, unsent issue text, and three
+  public walkthrough candidates with unfilled result slots. Add a distribution
+  contract for metadata field limits, enums, build type, and license parity.
 - Add POSIX process-group and Windows kill-on-close Job Object cleanup using
   only the Python standard library; Windows behavior still requires validation.
 - Add harmless-child lifecycle tests, host-fake callback/context/discovery tests,
@@ -52,6 +55,9 @@ open gates, and future tag/push commands.
 
 ### Changed
 
+- Shorten plugin-manager description to 43 characters, satisfying both legacy
+  under-50 guidance and the current validator's limit. Preserve the advertised
+  build/platform fields as unverified compatibility gates pending live checks.
 - Keep streamed output as raw chunks, insert a literal live preview capped at
   64,000 characters with a visible notice, and render canonical Markdown once
   at completion, failure, or cancellation.

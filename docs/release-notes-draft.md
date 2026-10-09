@@ -58,6 +58,11 @@ metadata/runtime-version and license checks, relative documentation links,
 whitespace, and syntax checks of the future tag/push commands. Those commands
 were not executed. Runtime Python, tools and tests were unchanged by preparation.
 
+The subsequent metadata-submission contract brought the October 10 stock suite
+to 131 tests: 122 passes and nine optional Qt skips. The pinned Vector 35
+validator and an isolated 36-file copier install passed; these do not establish
+actual Extensions-manager installation or minimum-build/platform compatibility.
+
 The latest recorded real-host receipt is
 [September 5](https://github.com/umbra-me/axio-analyst/blob/main/docs/gui-verification.md).
 It predates the October fixes. The
@@ -81,8 +86,9 @@ is prepared; no new user observations have been reported.
 - Python cannot interrupt a blocked OS process-creation call or an individual
   Binary Ninja analysis/property call. Context limits cover item text, not
   prompt instructions, metadata or the question.
-- Binary Ninja community-plugin submission requirements have not yet been
-  audited for this candidate. Screenshots and the GIF remain pending captures.
+- The [community submission audit](community-submission-audit.md) passes metadata
+  validation and an isolated copier layout; minimum-build, platform and actual
+  manager acceptance remain open. Screenshots/GIF remain pending captures.
 
 See the [security policy](https://github.com/umbra-me/axio-analyst/blob/main/SECURITY.md),
 [provider contracts](https://github.com/umbra-me/axio-analyst/blob/main/docs/providers.md)

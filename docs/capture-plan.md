@@ -12,6 +12,12 @@ GUI receipt. Do not treat the September observations as proof of a later build.
 
 ## Common framing
 
+For a later Extensions-manager preview, embed completed images with full GitHub
+URLs; its preview shows only the first GIF frame. Keep the GitHub README's GIF
+and stills useful independently. These are current
+[Vector 35 display requirements](https://docs.binary.ninja/dev/plugins.html),
+not evidence that an asset was captured or accepted.
+
 - Export each still as a **1600 × 1000 px PNG**, with no scaling of the completed
   image. On a Retina display a capture may have twice the logical screen pixels;
   verify the exported file's pixel size and crop/recapture deliberately.

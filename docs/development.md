@@ -220,7 +220,7 @@ under **Arguments** and defines `-l, --debug-log <file>` as **Log output to
 
 ## Release checklist
 
-The current [release preparation](release-preparation.md) records the pending
+The current [release preparation](release-preparation.md) records the selected
 version choice, draft notes, open gates and exact future tag/push commands.
 It does not authorize or establish publication.
 

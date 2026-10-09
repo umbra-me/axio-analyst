@@ -6,7 +6,7 @@ For the current source fixes and remaining gates, see
 implementation and live receipts. Earlier verification entries below apply to
 their recorded revisions, not automatically to the current source.
 
-Last updated: 2026-10-10 (Phase 5 release preparation; version 0.9.1 selected)
+Last updated: 2026-10-10 (Phases 5–6 preparation; Phase 7 target choice pending)
 
 ## Current continuation state
 
@@ -28,8 +28,25 @@ The user requested continuation after presentation review. Phase 5 now has
 [draft release notes](release-notes-draft.md) and
 [release preparation with future tag/push commands](release-preparation.md).
 `0.9.1` is selected and metadata reports it. The commands were written, not
-executed. Community-plugin packaging review is the next phase; live acceptance
-still needs the user's receipts.
+executed. Presentation/release preparation is in local commit
+`eeb7e68db9400ed5da16d82a1daf2aa4967884c8`.
+
+Phase 6 has a [requirements audit](community-submission-audit.md) and
+[unsent issue draft](community-submission-draft.md). The old index is deprecated;
+current Vector 35 documentation directs release-plus-issue onboarding. The
+reviewed upstream validator passes; the description is 43 characters and a
+new distribution contract checks metadata/enum/build/license requirements.
+An isolated copier install matched all 36 runtime files and reported current.
+Minimum build `4911`, fresh platform support and actual Extensions-manager
+loading remain unverified; no metadata validation closes the source security
+or live-host gates.
+
+Phase 7 now has [three walkthrough candidates](walkthrough-candidates.md).
+cJSON is recommended for a small source-checkable parser; SQLite and a
+user-handled Mirai sample are alternatives. The target choice and specific
+walkthrough procedure remain pending. Only public documentation/sample-list
+metadata was read; no target binary was downloaded, built, executed or analyzed.
+Live acceptance still needs the user's receipts.
 
 No live install, provider inference, tag, push, release, or submission was
 performed for this phase.
@@ -50,11 +67,15 @@ skipped; the bundled-Qt run passed all 130. Full compileall, metadata JSON,
 diff whitespace, and relative documentation links passed. The native Qt
 tests used unshown Qt 6.11.1 Cocoa widgets and did not launch Binary Ninja.
 
-On October 10, the `0.9.1` preparation passed the stock suite again: 121 passes
+On October 10, the Phase 5 `0.9.1` preparation passed the stock suite: 121 passes
 and nine optional Qt skips. Compileall, metadata/runtime-version and license
 parity, 129 relative documentation file links, whitespace, and syntax of the
 future tag/push commands passed. Runtime Python, tools and tests are unchanged
-by this preparation; no new live host result is implied.
+by Phase 5; no new live host result is implied. After adding the Phase 6 metadata
+contract, the stock suite discovered 131 tests: 122 passed and nine optional
+Qt tests were skipped. No new bundled-Qt or Binary Ninja GUI run was performed.
+The post-change metadata validator, isolated copier layout, compileall, 142
+relative file links, whitespace and future-command syntax also passed.
 
 Codex snapshot-only confinement is still unproven. Windows Job Object behavior
 and live Binary Ninja acceptance remain unverified for this patch. The sampled
