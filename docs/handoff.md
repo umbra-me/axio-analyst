@@ -1,5 +1,15 @@
 # Axio Analyst handoff
 
+## Source publication update — 2026-10-14
+
+The owner authorized publication of the four preparation commits on `main`,
+through `da0b34d98fdb290b27e512e122e3de88b6af687f`; the remote head was
+verified. Earlier local/unpushed descriptions below are historical. This is
+source publication only: no release tag, host installation, community submission
+or workspace pin promotion was performed. Binary Ninja GUI registration,
+minimum-host/platform compatibility and the provider/rendering acceptance gates
+remain open; follow the existing release checklist before tagging a release.
+
 For the current source fixes and remaining gates, see
 [the October 9 change set](change-set-2026-10-09.md). The
 [September 5 change set](change-set-2026-09-05.md) records the earlier findings

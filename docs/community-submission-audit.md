@@ -1,5 +1,15 @@
 # Community extension submission audit
 
+## Source publication update — 2026-10-14
+
+The owner authorized publication of the four preparation commits on `main`,
+through `da0b34d98fdb290b27e512e122e3de88b6af687f`; the remote head was
+verified. Earlier local/unpushed descriptions below are historical. This is
+source publication only: no release tag, host installation, community submission
+or workspace pin promotion was performed. Binary Ninja GUI registration,
+minimum-host/platform compatibility and the provider/rendering acceptance gates
+remain open; follow the existing release checklist before tagging a release.
+
 Checked October 10, 2026 for release-readiness Phase 6. This is a source and
 packaging review; it does not establish plugin-manager installation or approval.
 
