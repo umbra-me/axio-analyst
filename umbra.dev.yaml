@@ -1,0 +1,15 @@
+schema_version: 1
+component: axio/analyst
+hosts: [macos, linux, windows]
+tools:
+  - {executable: python3, version: ">=3.13.7"}
+actions:
+  prepare: []
+  check:
+    - {executable: python3, arguments: [-m, unittest, discover, -s, tests, -t, .], cwd: .}
+    - {executable: python3, arguments: [-m, compileall, -q, __init__.py, application, core, host, providers, ui, tools, tests], cwd: .}
+  build: [{executable: python3, arguments: [tools/runtime_manifest.py, --check], cwd: .}]
+  release: [{executable: python3, arguments: [-m, unittest, discover, -s, tests, -t, .], cwd: .}]
+manual_gates:
+  - Binary Ninja and Qt6 sidebar registration require an authorized host installation and GUI walk.
+  - Provider checks require user-owned CLI credentials; source tests never establish provider acceptance.

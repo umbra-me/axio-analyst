@@ -1,5 +1,11 @@
 """Authoritative allowlist for the loadable Binary Ninja plugin."""
 
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
 RUNTIME_PACKAGE_ROOTS = ("application", "core", "host", "providers", "ui")
 
 OBSOLETE_RUNTIME_FILES = (
@@ -52,3 +58,37 @@ RUNTIME_FILES = (
     "ui/sidebar_view.py",
     "ui/transcript.py",
 )
+
+
+def check(root: Path) -> list[str]:
+    """Return manifest errors without importing any host-only modules."""
+    errors = [f"missing runtime file: {name}" for name in RUNTIME_FILES if not (root / name).is_file()]
+    errors.extend(
+        f"obsolete runtime file remains: {name}"
+        for name in OBSOLETE_RUNTIME_FILES
+        if (root / name).exists()
+    )
+    try:
+        json.loads((root / "plugin.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        errors.append(f"invalid plugin.json: {exc}")
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="validate the runtime file allowlist")
+    args = parser.parse_args()
+    if not args.check:
+        parser.error("--check is required")
+    errors = check(Path(__file__).resolve().parents[1])
+    if errors:
+        for error in errors:
+            print(error)
+        return 1
+    print(f"runtime manifest: {len(RUNTIME_FILES)} files present; metadata valid")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
