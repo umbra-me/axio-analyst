@@ -41,3 +41,10 @@
 - Provider prompts remain off process command lines; previews match frozen snapshots; no secrets, transcripts, or machine-local settings are tracked.
 
 Current source verification and release gates: [October 9 change set](docs/change-set-2026-10-09.md). Historical live receipts are indexed in `docs/gui-verification.md`; source tests do not refresh them.
+
+## Umbra CLI entry point
+
+Read [DEVELOPMENT.md](DEVELOPMENT.md) for this repository's exact Umbra CLI
+source actions and routed-preview availability. Use its stable component ID
+`axio/analyst`; installs remain in the owned recipe's install root. Preserve
+all existing native, provider, data, publication and production constraints.
