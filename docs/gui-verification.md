@@ -5,7 +5,19 @@ receipts apply to their recorded source, not automatically to later changes.
 
 ## Latest result
 
-The latest recorded real-host checks are from **2026-09-05**, using Binary Ninja
+The [October 16 isolated macOS receipt](gui-shell-2026-10-16.md) records that
+source revision `86985c3` loaded as Axio Analyst `0.9.1` in Binary Ninja
+Personal `6.1.10922-dev` and opened its sidebar on the public Mach-O fixture.
+A second isolated run on `6.1.10939-dev` records primary and bounded opt-in
+context previews. These are partial G00/G02/G03 observations, not a completed
+manual-plan run. Provider, persistence and restart cases remain open.
+
+The [October 18 documentation checks](gui-shell-2026-10-16.md#documentation-publication-checks-2026-10-18)
+confirm unchanged runtime/tool/metadata inputs since that GUI revision, the
+matching fixture hash and passing source checks. They did not launch Binary
+Ninja or refresh the historical GUI receipt.
+
+The earlier detailed real-host checks are from **2026-09-05**, using Binary Ninja
 Personal `6.1.10608-dev` on macOS and the bundled Mach-O demo. The
 [September 5 receipt](change-set-2026-09-05.md) records an Ollama response with
 unverified findings, evidence navigation, settings surviving restart, and
@@ -16,9 +28,9 @@ after restart, then history returned to Off.
 It does not prove provider switching, Claude/Codex/Compare interaction,
 mid-stream cancellation, or successful-response persistence. Those remain
 deferred, along with narrow keyboard traversal and the other unobserved cases
-below. The October 9 Phase 2 source changes have **not** been installed or
-verified in the live Binary Ninja GUI. Native Qt transcript unit tests are
-separate from host acceptance.
+below. The October 16 checks installed the recorded candidate only in isolated
+profiles; they did not run those detailed cases. Native Qt transcript
+unit tests are separate from host acceptance.
 
 ## Candidate manual plan — October 9
 
@@ -28,7 +40,8 @@ results, and evidence to record for the deferred cases. Its runtime baseline is
 prepared `0.9.1` metadata and requires a fresh candidate identity in G00. Use the
 [unfilled results template](manual-verification-results-template.md) for separate
 provider, cancellation, and restart observations. Preparation of this plan is
-not a live test result. No new GUI receipt has been reported for this candidate.
+not a live test result; the isolated checks above are the only new GUI receipt
+for this candidate.
 
 ## Earlier non-network shell receipt
 

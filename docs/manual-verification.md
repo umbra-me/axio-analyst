@@ -7,8 +7,12 @@ changes metadata to `0.9.1`, Kian (Zenco) and a shorter description; it does not
 change runtime Python.
 Record the actual candidate commit and installed hashes in G00 before testing.
 
-This is a test plan. No case below has a new live result. Record your observations
-in [the results template](manual-verification-results-template.md); only dated,
+This is a test plan. The [October 16 isolated receipt](gui-shell-2026-10-16.md#manual-plan-coverage)
+records plugin load/sidebar open within G00, a narrow context-cap Apply check
+within G02, and bounded preview paths within G03. It does not complete any
+full case below. The October 18 documentation checks do not refresh those
+live observations. Record new observations in
+[the results template](manual-verification-results-template.md); only dated,
 reported observations will be added to [GUI verification](gui-verification.md).
 The September receipts and October unit tests do not count as passes here.
 
