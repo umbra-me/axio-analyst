@@ -86,7 +86,7 @@ These are regression checks, not a latency benchmark or real-host acceptance.
 - HTML disabling is not a validated Markdown image/resource-loading policy.
 - Sampled conversation identities can alias binaries that differ only outside
   sampled regions. The existing format is retained; see
-  [storage limits](configuration.md#storage-and-secret-handling).
+  [storage limits](development/configuration.md#storage-and-secret-handling).
 - The updated plugin has not been installed or accepted in the live Binary
   Ninja GUI. Windows behavior, real signal wiring, provider switching/Compare,
   mid-stream cancellation, and successful-response persistence need observed

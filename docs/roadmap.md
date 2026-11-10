@@ -2,14 +2,14 @@
 
 Current source fixes and verification gates are recorded in
 [the October 9 change set](change-set-2026-10-09.md). The
-[September 5 change set](change-set-2026-09-05.md) retains earlier structured
+[September 5 change set](receipts/2026-09/change-set-2026-09-05.md) retains earlier structured
 findings and live receipts; those observations do not verify the October fixes.
 
 The current architecture and security boundaries are documented in
 [architecture.md](architecture.md). This document owns future product scope so
 aspirational behavior is not confused with the implemented release.
 
-The dated [Sidekick capability inventory](sidekick-capability-inventory.md)
+The dated [Sidekick capability inventory](references/sidekick-capability-inventory.md)
 documents the external reference product behind several long-term workflow
 ideas. It is research input, not an Axio Analyst compatibility commitment.
 

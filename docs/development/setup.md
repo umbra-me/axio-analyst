@@ -7,7 +7,7 @@ as a user plugin when a directory named `axio_analyst` containing the root
 ## Prerequisites
 
 1. Binary Ninja 5.x or 6.x with the Qt6 desktop UI. Historical GUI receipts are
-   indexed in [GUI verification](gui-verification.md); the October source fixes
+   indexed in [GUI verification](../gui-verification.md); the October source fixes
    still require a new live acceptance pass.
 2. Git for a source installation, or Python 3.10+ for the development copier.
 3. One supported provider CLI:
@@ -145,7 +145,7 @@ Analyst relies on that existing session and does not expose a sign-in form.
   runnable cloud tag.
 
 Before choosing Codex for sensitive context, read its
-[open confinement gate](providers.md#codex). The configured read-only sandbox
+[open confinement gate](../providers.md#codex). The configured read-only sandbox
 and disabled shell/image/web tools do not prove snapshot-only access.
 
 Use the Settings page to choose a model and reasoning effort. The model field
@@ -225,6 +225,6 @@ After restarting Binary Ninja:
 
 Use the C++ fixture in `samples/demo` when a harmless known binary is needed.
 The latest live receipt and deferred interaction checks are indexed in
-[`gui-verification.md`](gui-verification.md). The
-[October 9 source verification](change-set-2026-10-09.md) did not install or
+[`gui-verification.md`](../gui-verification.md). The
+[October 9 source verification](../change-set-2026-10-09.md) did not install or
 launch the updated plugin.

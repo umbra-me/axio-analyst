@@ -137,9 +137,9 @@ Host-fake and optional native Qt tests exercise source methods without proving
 Object cleanup also requires Windows validation. Manual GUI verification is
 required before a release.
 
-The [October 9 change set](change-set-2026-10-09.md) records the current local
+The [October 9 change set](../change-set-2026-10-09.md) records the current local
 source verification. Keep its results separate from the historical real-host
-receipts in [GUI verification](gui-verification.md).
+receipts in [GUI verification](../gui-verification.md).
 
 ## Manual GUI checklist
 
@@ -193,7 +193,7 @@ release checklist; it is not a record of completed observations.
 20. Confirm no symbol, type, comment, analysis, or BNDB state changed.
 
 The latest real-host receipt is September 5, indexed in
-[`gui-verification.md`](gui-verification.md). It records a limited Ollama flow,
+[`gui-verification.md`](../gui-verification.md). It records a limited Ollama flow,
 evidence navigation, pre-output cancellation and cancelled-history restoration.
 It does not establish acceptance of the October 9 patch, other providers,
 comparison, mid-stream cancellation, successful-response persistence, or narrow
@@ -220,7 +220,7 @@ under **Arguments** and defines `-l, --debug-log <file>` as **Log output to
 
 ## Release checklist
 
-The current [release preparation](release-preparation.md) records the selected
+The current [release preparation](../releases/release-preparation.md) records the selected
 version choice, draft notes, open gates and exact future tag/push commands.
 It does not authorize or establish publication.
 

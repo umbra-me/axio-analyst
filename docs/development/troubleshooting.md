@@ -62,7 +62,7 @@ Use this recovery order:
 
 Do not delete the update cache or reinstall Axio Analyst merely because this
 dialog appears. The 2026-08-10 observation recorded in
-[`gui-verification.md`](gui-verification.md#binary-ninja-application-updater)
+[`gui-verification.md`](../gui-verification.md#binary-ninja-application-updater)
 found matching content hashes and valid Vector 35 signatures on both updater
 executables, while Axio Analyst continued to load normally. That evidence makes
 the plugin an unlikely cause but does not identify the updater's internal
@@ -184,7 +184,7 @@ escalation and another two seconds waiting after the kill. POSIX cleanup targets
 the request's process group; Windows uses a kill-on-close Job Object and still
 requires platform validation. Descendants that escape the group or precede
 Windows job attachment are not proven contained. See
-[the lifecycle limits](providers.md#shared-process-contract).
+[the lifecycle limits](../providers.md#shared-process-contract).
 
 Context collection checks cancellation between host operations, but a single
 Binary Ninja analysis/property call cannot be preempted. The sidebar retains

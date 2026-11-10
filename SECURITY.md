@@ -58,7 +58,7 @@ cannot import Binary Ninja or Qt. Contract tests enforce those restrictions.
 - Current-function context by default; every additional pack is opt-in and has
   explicit item-count/per-function limits.
 - Extraction has explicit HLIL and candidate-traversal ceilings with visible
-  truncation; see [the configuration reference](docs/configuration.md#request-time-behavior).
+  truncation; see [the configuration reference](docs/development/configuration.md#request-time-behavior).
 - Prompts on stdin rather than process command lines.
 - No direct access to provider credential stores.
 - Claude Code tools, Chrome integration, slash commands, and session

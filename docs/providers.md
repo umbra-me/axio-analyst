@@ -137,7 +137,7 @@ so Axio Analyst displays measured duration and input/output character counts.
 
 Cloud model discovery is independent of request execution. It first uses the
 public Ollama catalog and falls back to `ollama list`; see
-[Configuration reference](configuration.md#ollama-cloud-discovery).
+[Configuration reference](development/configuration.md#ollama-cloud-discovery).
 
 ## Prompt contract
 

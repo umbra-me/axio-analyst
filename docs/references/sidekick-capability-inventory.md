@@ -4,8 +4,8 @@ This document inventories the publicly documented capabilities of Binary Ninja
 Sidekick so Axio Analyst product and architecture decisions can be made against
 a concrete reference. It describes Sidekick, not implemented Axio Analyst
 behavior. Axio Analyst's current behavior remains defined by
-[architecture.md](architecture.md), [configuration.md](configuration.md), and
-[roadmap.md](roadmap.md).
+[architecture.md](../architecture.md), [configuration.md](../development/configuration.md), and
+[roadmap.md](../roadmap.md).
 
 ## Research scope
 

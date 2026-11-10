@@ -14,8 +14,8 @@ provider CLI. The plugin uses Binary Ninja's bundled Python/PySide6 and adds no
 third-party runtime dependencies.
 
 1. Install this repository as `axio_analyst` in your Binary Ninja user plugin
-   folder using the [platform-specific source-install commands](docs/setup.md#source-installation).
-   For a separate checkout, use the [development installer](docs/setup.md#development-installation).
+   folder using the [platform-specific source-install commands](docs/development/setup.md#source-installation).
+   For a separate checkout, use the [development installer](docs/development/setup.md#development-installation).
 2. Authenticate Claude Code, Codex, or Ollama outside Binary Ninja. Choose a
    provider approved for the material you will send; read the
    [Codex confinement limitation](docs/providers.md#codex) before using that adapter.
@@ -88,14 +88,14 @@ completed run.
 | Screenshot pending | Two labelled provider results from a completed comparison over the public demo. | `docs/media/provider-comparison.png` |
 | GIF pending | Inspect the preview, submit a question, then show the actual response and one validated address navigation. | `docs/media/inspect-explain.gif` |
 
-The [capture plan](docs/capture-plan.md) specifies sizes, framing, steps, captions,
+The [capture plan](plans/capture-plan.md) specifies sizes, framing, steps, captions,
 and the receipt required for each slot. Capture locally from the running plugin;
 retain provider labels, unverified status, and relevant limitations.
 
 ## Project status
 
 Source version is `0.9.1`, prepared as a release candidate with no tag or
-published release. The [release preparation](docs/release-preparation.md)
+published release. The [release preparation](docs/releases/release-preparation.md)
 records the pending gates and draft notes. The
 [October 9 change set](docs/change-set-2026-10-09.md) records source fixes and
 local regression evidence. Stock Python passed 121 tests with nine optional Qt
@@ -103,8 +103,8 @@ tests skipped; the bundled-Qt run passed all 130. Those source/widget checks do
 not establish live Binary Ninja acceptance of the current changes.
 
 The latest live receipt is still September 5. New observations are awaiting the
-[manual verification plan](docs/manual-verification.md) and
-[results template](docs/manual-verification-results-template.md); see the
+[manual verification plan](docs/development/manual-verification.md) and
+[results template](docs/development/manual-verification-results-template.md); see the
 [GUI verification index](docs/gui-verification.md) for completed and deferred
 cases. Codex confinement, Windows cleanup, and Markdown resource behavior remain
 open gates. No release-ready claim is made from the presentation changes.
@@ -115,14 +115,14 @@ reviewable BNDB transformations remain [roadmap work](docs/roadmap.md).
 ## Documentation and development
 
 - [Documentation index](docs/README.md)
-- [Setup, upgrades, and removal](docs/setup.md)
-- [Settings, context limits, and local storage](docs/configuration.md)
+- [Setup, upgrades, and removal](docs/development/setup.md)
+- [Settings, context limits, and local storage](docs/development/configuration.md)
 - [Provider commands and errors](docs/providers.md)
-- [Development checks and release procedure](docs/development.md)
-- [Release preparation and draft notes](docs/release-preparation.md)
+- [Development checks and release procedure](docs/development/development.md)
+- [Release preparation and draft notes](docs/releases/release-preparation.md)
 - [Harmless demo build and function guide](samples/demo/README.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Current handoff](docs/handoff.md)
+- [Troubleshooting](docs/development/troubleshooting.md)
+- [Current handoff](plans/handoff.md)
 - [Changelog](CHANGELOG.md) and [contributing](CONTRIBUTING.md)
 
 `plugin.json` is the single semantic-version source. Exact verification commands,

@@ -103,7 +103,7 @@ The deadline starts before process creation and covers stdin submission,
 streaming, and waiting for exit even after both output pipes close. The OS
 process-creation call cannot be preempted. Cancellation and failures enter
 process-tree cleanup, which may add up to two seconds before escalation and
-two seconds after killing. See [platform limits](providers.md#shared-process-contract).
+two seconds after killing. See [platform limits](../providers.md#shared-process-contract).
 
 ## Ollama Cloud discovery
 
@@ -166,5 +166,5 @@ No `axioAnalyst.*` key stores the plugin version. Upgrading the plugin changes
 runtime files and metadata without rewriting the user's provider selection,
 executable paths, request limits, persistence preference, or credentials.
 
-See [the change set](change-set-2026-09-05.md) for schema-2 findings and its
+See [the change set](../receipts/2026-09/change-set-2026-09-05.md) for schema-2 findings and its
 dated verification receipts.

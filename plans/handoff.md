@@ -11,8 +11,8 @@ minimum-host/platform compatibility and the provider/rendering acceptance gates
 remain open; follow the existing release checklist before tagging a release.
 
 For the current source fixes and remaining gates, see
-[the October 9 change set](change-set-2026-10-09.md). The
-[September 5 change set](change-set-2026-09-05.md) records the earlier findings
+[the October 9 change set](../docs/change-set-2026-10-09.md). The
+[September 5 change set](../docs/receipts/2026-09/change-set-2026-09-05.md) records the earlier findings
 implementation and live receipts. Earlier verification entries below apply to
 their recorded revisions, not automatically to the current source.
 
@@ -23,8 +23,8 @@ Last updated: 2026-10-10 (Phases 5–6 preparation; Phase 7 target choice pendin
 The release-readiness audit fixes, regression tests, and reconciled behavior
 documentation are in local commit `259b81fb9549f2f0767be97b6499b1443386128b`.
 The baseline before these fixes is `9945d84530025139958aad55226c170a18f430f3`.
-The Phase 3 [manual verification plan](manual-verification.md) and
-[results template](manual-verification-results-template.md) are now prepared;
+The Phase 3 [manual verification plan](../docs/development/manual-verification.md) and
+[results template](../docs/development/manual-verification-results-template.md) are now prepared;
 no new live results have been reported. The maintainer selected `0.9.1` on
 October 10; metadata and current guidance now describe that prepared candidate,
 with a pending-release changelog entry.
@@ -35,8 +35,8 @@ capture slots plus [a sized screenshot/GIF plan](capture-plan.md). README,
 `plugin.json` author/license text, and `LICENSE` now identify Kian (Zenco).
 No screenshots/GIF or live acceptance were produced in the presentation phase.
 The user requested continuation after presentation review. Phase 5 now has
-[draft release notes](release-notes-draft.md) and
-[release preparation with future tag/push commands](release-preparation.md).
+[draft release notes](../docs/releases/release-notes-draft.md) and
+[release preparation with future tag/push commands](../docs/releases/release-preparation.md).
 `0.9.1` is selected and metadata reports it. The commands were written, not
 executed. Presentation/release preparation is in local commit
 `eeb7e68db9400ed5da16d82a1daf2aa4967884c8`.
@@ -67,7 +67,7 @@ callbacks to their binary and generation, incrementally inserts streamed text,
 collects bounded HLIL/neighbourhood context, bounds Ollama list discovery, and
 preserves a completed primary result when comparison is cancelled. Regression
 tests cover these paths with harmless children, host fakes, and optional native
-Qt widgets. See [development.md](development.md#local-verification) for commands.
+Qt widgets. See [development.md](../docs/development/development.md#local-verification) for commands.
 The candidate review also led to fallback kill/wait on cleanup errors, bounded
 nonmatching searches with visible notices, chunk accumulation with a 64,000-
 character live preview, and discovery supersession after executable changes.
@@ -90,13 +90,13 @@ relative file links, whitespace and future-command syntax also passed.
 Codex snapshot-only confinement is still unproven. Windows Job Object behavior
 and live Binary Ninja acceptance remain unverified for this patch. The sampled
 conversation identity can alias binaries that differ outside sampled regions.
-These limits are explicit in [providers.md](providers.md) and
-[configuration.md](configuration.md). The next release-readiness step is
+These limits are explicit in [providers.md](../docs/providers.md) and
+[configuration.md](../docs/development/configuration.md). The next release-readiness step is
 execution of the prepared manual checklist by the user, followed by dated
 reported receipts. No installation/provider dispatch was performed while writing
 the plan. Do not infer live acceptance from this local source checkpoint.
 These release-readiness phase numbers are
-separate from the future product phases in [roadmap.md](roadmap.md).
+separate from the future product phases in [roadmap.md](../docs/roadmap.md).
 
 The remaining sections retain historical implementation/installation evidence.
 The latest live receipt is September 5; October source tests do not refresh it.
@@ -261,7 +261,7 @@ Python traceback. The live non-network check confirmed:
   repository change.
 
 The exact evidence and remaining checks are maintained in
-[`gui-verification.md`](gui-verification.md). Binary Ninja does not hot-reload
+[`gui-verification.md`](../docs/gui-verification.md). Binary Ninja does not hot-reload
 Python plugins, so the check used a separate `-n` instance and closed only that
 instance afterward. Binary Ninja's own command-line help separately confirmed
 that `files` are positional arguments and `-l, --debug-log <file>` selects a
@@ -303,7 +303,7 @@ payload hashes match, and its `update.exe` is identical to the installed copy;
 both have valid Vector 35 Authenticode signatures. The plugin still registers
 and the installed runtime still reports current, so no evidence connects this
 failure to Axio Analyst. Follow
-[`troubleshooting.md`](troubleshooting.md#binary-ninja-reports-updater-is-not-valid)
+[`troubleshooting.md`](../docs/development/troubleshooting.md#binary-ninja-reports-updater-is-not-valid)
 and use a fresh eligible installer from Vector 35 if retrying the self-updater
 fails. The cache and application installation were not changed during this
 assessment.

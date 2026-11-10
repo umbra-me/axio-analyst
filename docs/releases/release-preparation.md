@@ -44,12 +44,12 @@ version and installed-file hashes before running its live checks.
 | Gate | Current evidence / required next step |
 | --- | --- |
 | Source regression checks | October 10 after the Phase 6 metadata contract: 122 stock-Python passes, nine optional Qt skips; compileall, metadata/runtime version, license parity, 142 relative file links, whitespace and future command syntax passed. October 9 separate bundled-Qt run: 130 passes. Rerun relevant checks if the candidate changes. |
-| Live install and host acceptance | No October candidate receipt. Run [G00–G18](manual-verification.md), record exact installed/source identity, and reconcile only reported observations into [GUI verification](gui-verification.md). |
-| Codex confidentiality | Open: read-only and shell/image/web flags do not prove snapshot-only isolation. Resolve the documented [provider gate](providers.md#codex) before claiming that boundary. |
+| Live install and host acceptance | No October candidate receipt. Run [G00–G18](../development/manual-verification.md), record exact installed/source identity, and reconcile only reported observations into [GUI verification](../gui-verification.md). |
+| Codex confidentiality | Open: read-only and shell/image/web flags do not prove snapshot-only isolation. Resolve the documented [provider gate](../providers.md#codex) before claiming that boundary. |
 | Windows cleanup and supported platforms | Windows Job Object behavior is untested. Establish the supported-platform evidence and record limitations. |
 | Markdown resources | HTML is disabled; image/resource-loading policy remains unvalidated. Resolve or explicitly scope this gate before acceptance. |
-| Community plugin packaging | [Phase 6 audit](community-submission-audit.md): metadata validator and isolated 36-file layout pass. Minimum-build/platform acceptance remain open before publication; actual manager installation needs a separate distribution receipt. Submission is an unsent draft. |
-| Presentation assets | [Real capture plan](capture-plan.md) prepared; no screenshots/GIF produced. |
+| Community plugin packaging | [Phase 6 audit](../../plans/community-submission-audit.md): metadata validator and isolated 36-file layout pass. Minimum-build/platform acceptance remain open before publication; actual manager installation needs a separate distribution receipt. Submission is an unsent draft. |
+| Presentation assets | [Real capture plan](../../plans/capture-plan.md) prepared; no screenshots/GIF produced. |
 | Publication authority | No tag, push, release or external submission authorized for execution. Show the final diff/draft and obtain the explicit yes required by the task. |
 
 The broader documented limits (sampled identities, escaped descendants,
@@ -68,8 +68,8 @@ python3 -c "import json,pathlib; json.loads(pathlib.Path('plugin.json').read_tex
 git diff --check
 ```
 
-Use [development.md](development.md#local-verification) for optional bundled-Qt
-checks and [manual-verification.md](manual-verification.md) for host installation
+Use [development.md](../development/development.md#local-verification) for optional bundled-Qt
+checks and [manual-verification.md](../development/manual-verification.md) for host installation
 and live receipts. Stock test skips must be recorded, not silently counted as
 passes. No new GUI result should be inferred from these commands.
 
