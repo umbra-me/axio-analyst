@@ -4,7 +4,7 @@ Prepared: 2026-10-09. All assets below are **pending real capture**. This plan
 creates no screenshot, provider response, or verification receipt.
 
 Use the harmless [demo fixture](../samples/demo/README.md) and the
-[manual verification plan](manual-verification.md). Capture the actual installed
+[manual verification plan](../docs/development/manual-verification.md). Capture the actual installed
 candidate after the relevant checks pass; record its source revision, installed
 status, Binary Ninja build, platform, CLI/model/effort, fixture SHA-256, function,
 context options, and date/time. The current runtime fixes still lack a new live

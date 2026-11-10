@@ -8,27 +8,27 @@ quick start; these documents are the source of truth for detailed behavior.
 
 | Document | Owns |
 | --- | --- |
-| [Setup and installation](setup.md) | Prerequisites, source and development installs, upgrades, removal, and first-run validation. |
-| [Configuration reference](configuration.md) | Every `axioAnalyst.*` setting, defaults, ranges, persistence, and UI behavior. |
+| [Setup and installation](development/setup.md) | Prerequisites, source and development installs, upgrades, removal, and first-run validation. |
+| [Configuration reference](development/configuration.md) | Every `axioAnalyst.*` setting, defaults, ranges, persistence, and UI behavior. |
 | [Provider contracts](providers.md) | Child-process commands, authentication boundary, input/output parsing, discovery, limits, and errors. |
 | [Architecture](architecture.md) | Current dependency boundaries, module responsibilities, threading, data flow, and security model. |
 | [Roadmap](roadmap.md) | Product end state, current limitations, and future delivery phases. |
-| [Sidekick capability inventory](sidekick-capability-inventory.md) | Dated, source-backed inventory of the Sidekick reference product, including analysis, UI, storage, permissions, automation, privacy, and implications for Axio. |
-| [Development and release guide](development.md) | Repository workflow, tests, extension points, manual GUI checks, and release procedure. |
-| [Release preparation](release-preparation.md) | Selected version, release-gate ledger, and future tag/push commands awaiting acceptance and authorization. |
-| [GitHub release notes draft](release-notes-draft.md) | Reviewable release text with source evidence, known limitations, and explicit pending status. |
-| [Community submission audit](community-submission-audit.md) | Current/legacy Vector 35 requirements, metadata and layout checks, compatibility gates, and catalog route. |
-| [Community submission draft](community-submission-draft.md) | Unsent issue text with release and observed-compatibility placeholders. |
-| [Walkthrough candidates](walkthrough-candidates.md) | Three public target options, proposed demonstrations, selection boundary, and unfilled post structure. |
+| [Sidekick capability inventory](references/sidekick-capability-inventory.md) | Dated, source-backed inventory of the Sidekick reference product, including analysis, UI, storage, permissions, automation, privacy, and implications for Axio. |
+| [Development and release guide](development/development.md) | Repository workflow, tests, extension points, manual GUI checks, and release procedure. |
+| [Release preparation](releases/release-preparation.md) | Selected version, release-gate ledger, and future tag/push commands awaiting acceptance and authorization. |
+| [GitHub release notes draft](releases/release-notes-draft.md) | Reviewable release text with source evidence, known limitations, and explicit pending status. |
+| [Community submission audit](../plans/community-submission-audit.md) | Current/legacy Vector 35 requirements, metadata and layout checks, compatibility gates, and catalog route. |
+| [Community submission draft](../plans/community-submission-draft.md) | Unsent issue text with release and observed-compatibility placeholders. |
+| [Walkthrough candidates](../plans/walkthrough-candidates.md) | Three public target options, proposed demonstrations, selection boundary, and unfilled post structure. |
 | [GUI verification](gui-verification.md) | Dated real-host evidence, deferred interaction checks, fixture launch safety, and the current application-updater observation. |
-| [Manual verification plan](manual-verification.md) | Candidate installation, precise deferred-case steps, expected results, and evidence to record in Binary Ninja Personal. |
-| [Verification results template](manual-verification-results-template.md) | Unfilled run identity, per-provider case ledger, observed receipts, and untested gates. |
-| [README capture plan](capture-plan.md) | Pending real screenshot/GIF slots, exact capture sizes, shot steps, honest captions, and evidence requirements. |
-| [Troubleshooting](troubleshooting.md) | Startup, sidebar, Binary Ninja updater, provider, model discovery, timeout, rendering, and recovery diagnostics. |
-| [Current handoff](handoff.md) | Dated implementation, live-install state, verification evidence, protected boundaries, and next work. |
+| [Manual verification plan](development/manual-verification.md) | Candidate installation, precise deferred-case steps, expected results, and evidence to record in Binary Ninja Personal. |
+| [Verification results template](development/manual-verification-results-template.md) | Unfilled run identity, per-provider case ledger, observed receipts, and untested gates. |
+| [README capture plan](../plans/capture-plan.md) | Pending real screenshot/GIF slots, exact capture sizes, shot steps, honest captions, and evidence requirements. |
+| [Troubleshooting](development/troubleshooting.md) | Startup, sidebar, Binary Ninja updater, provider, model discovery, timeout, rendering, and recovery diagnostics. |
+| [Current handoff](../plans/handoff.md) | Dated implementation, live-install state, verification evidence, protected boundaries, and next work. |
 | [October 9 change set](change-set-2026-10-09.md) | Release-readiness source fixes, regression evidence, unchanged version, and open acceptance/security gates. |
-| [September 5 change set](change-set-2026-09-05.md) | Historical structured-findings/schema-2 implementation and dated native cancellation/persistence receipts. |
-| [Extraction history](history.md) | Provenance of the standalone repository, naming transition, and package migration. |
+| [September 5 change set](receipts/2026-09/change-set-2026-09-05.md) | Historical structured-findings/schema-2 implementation and dated native cancellation/persistence receipts. |
+| [Extraction history](references/history.md) | Provenance of the standalone repository, naming transition, and package migration. |
 
 Repository-level policy documents remain at the root:
 

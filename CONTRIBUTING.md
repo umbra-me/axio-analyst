@@ -11,7 +11,7 @@ outside Binary Ninja, and the current read-only security boundary.
 - Read `AGENTS.md` for exact commands and repository constraints.
 - Read `docs/architecture.md` for module ownership and `docs/roadmap.md` for
   future delivery boundaries.
-- Check `CHANGELOG.md` and `docs/handoff.md` for current state and blockers.
+- Check `CHANGELOG.md` and `plans/handoff.md` for current state and blockers.
 - Discuss runtime, native, privileged, paid, or credential-management
   dependencies before implementing them.
 - Use only binaries and provider output that you are authorized to share.
@@ -57,9 +57,9 @@ python -c "import json,pathlib; json.loads(pathlib.Path('plugin.json').read_text
 ```
 
 The optional native Qt transcript checks and their macOS command are in
-[the development guide](docs/development.md#local-verification). They use the
+[the development guide](docs/development/development.md#local-verification). They use the
 existing Binary Ninja PySide6 bundle and require no new dependency installation.
-UI changes also require the manual checklist in `docs/development.md`. If a real
+UI changes also require the manual checklist in `docs/development/development.md`. If a real
 Binary Ninja launch is unavailable, state that clearly; host fakes and native
 Qt tests are not a substitute for host validation. Process-tree changes require
 platform-specific validation; the Windows Job Object path remains unverified.

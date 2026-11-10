@@ -5,21 +5,21 @@ receipts apply to their recorded source, not automatically to later changes.
 
 ## Latest result
 
-The [October 16 isolated macOS receipt](gui-shell-2026-10-16.md) records that
+The [October 16 isolated macOS receipt](receipts/2026-10/gui-shell-2026-10-16.md) records that
 source revision `86985c3` loaded as Axio Analyst `0.9.1` in Binary Ninja
 Personal `6.1.10922-dev` and opened its sidebar on the public Mach-O fixture.
 A second isolated run on `6.1.10939-dev` records primary and bounded opt-in
 context previews. These are partial G00/G02/G03 observations, not a completed
 manual-plan run. Provider, persistence and restart cases remain open.
 
-The [October 18 documentation checks](gui-shell-2026-10-16.md#documentation-publication-checks-2026-10-18)
+The [October 18 documentation checks](receipts/2026-10/gui-shell-2026-10-16.md#documentation-publication-checks-2026-10-18)
 confirm unchanged runtime/tool/metadata inputs since that GUI revision, the
 matching fixture hash and passing source checks. They did not launch Binary
 Ninja or refresh the historical GUI receipt.
 
 The earlier detailed real-host checks are from **2026-09-05**, using Binary Ninja
 Personal `6.1.10608-dev` on macOS and the bundled Mach-O demo. The
-[September 5 receipt](change-set-2026-09-05.md) records an Ollama response with
+[September 5 receipt](receipts/2026-09/change-set-2026-09-05.md) records an Ollama response with
 unverified findings, evidence navigation, settings surviving restart, and
 absence of conversation restore while history was Off. Its follow-up records
 cancellation **before output** and restoration of that cancelled conversation
@@ -34,11 +34,11 @@ unit tests are separate from host acceptance.
 
 ## Candidate manual plan — October 9
 
-The [manual verification plan](manual-verification.md) gives steps, expected
+The [manual verification plan](development/manual-verification.md) gives steps, expected
 results, and evidence to record for the deferred cases. Its runtime baseline is
 `259b81fb9549f2f0767be97b6499b1443386128b`; the October 10 update expects the
 prepared `0.9.1` metadata and requires a fresh candidate identity in G00. Use the
-[unfilled results template](manual-verification-results-template.md) for separate
+[unfilled results template](development/manual-verification-results-template.md) for separate
 provider, cancellation, and restart observations. Preparation of this plan is
 not a live test result; the isolated checks above are the only new GUI receipt
 for this candidate.
@@ -135,5 +135,5 @@ states that Windows updates are applied by a separate launcher and recommends
 requesting fresh download links if the self-updater fails. The
 [Binary Ninja FAQ](https://binary.ninja/faq/) recommends the customer portal or
 license-recovery path for current or eligible historical installers. See
-[`troubleshooting.md`](troubleshooting.md#binary-ninja-reports-updater-is-not-valid)
+[`troubleshooting.md`](development/troubleshooting.md#binary-ninja-reports-updater-is-not-valid)
 for the safe recovery sequence.

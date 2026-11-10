@@ -96,7 +96,7 @@ is prepared; no new user observations have been reported.
 - Python cannot interrupt a blocked OS process-creation call or an individual
   Binary Ninja analysis/property call. Context limits cover item text, not
   prompt instructions, metadata or the question.
-- The [community submission audit](community-submission-audit.md) passes metadata
+- The [community submission audit](../../plans/community-submission-audit.md) passes metadata
   validation and an isolated copier layout; minimum-build, platform and actual
   manager acceptance remain open. Screenshots/GIF remain pending captures.
 

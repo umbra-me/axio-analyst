@@ -7,19 +7,19 @@ changes metadata to `0.9.1`, Kian (Zenco) and a shorter description; it does not
 change runtime Python.
 Record the actual candidate commit and installed hashes in G00 before testing.
 
-This is a test plan. The [October 16 isolated receipt](gui-shell-2026-10-16.md#manual-plan-coverage)
+This is a test plan. The [October 16 isolated receipt](../receipts/2026-10/gui-shell-2026-10-16.md#manual-plan-coverage)
 records plugin load/sidebar open within G00, a narrow context-cap Apply check
 within G02, and bounded preview paths within G03. It does not complete any
 full case below. The October 18 documentation checks do not refresh those
 live observations. Record new observations in
 [the results template](manual-verification-results-template.md); only dated,
-reported observations will be added to [GUI verification](gui-verification.md).
+reported observations will be added to [GUI verification](../gui-verification.md).
 The September receipts and October unit tests do not count as passes here.
 
 ## Preparation — G00
 
 1. Finish or save unrelated Binary Ninja work before a full application restart.
-   Use only the harmless [demo fixture](../samples/demo/README.md) for provider
+   Use only the harmless [demo fixture](../../samples/demo/README.md) for provider
    requests. Keep its build unchanged throughout persistence tests.
 2. From the repository root, record `git rev-parse HEAD`, `git status --short`,
    and the version in `plugin.json`. Later documentation-only commits are valid
@@ -115,7 +115,7 @@ before you can press Stop does not pass cancellation. No deltas from Codex is
 expected for this adapter. Record actual times and amounts; there are no assumed
 latency, answer-quality, token, or cost targets.
 
-Codex's [snapshot-only confinement gate](providers.md#codex) is still open.
+Codex's [snapshot-only confinement gate](../providers.md#codex) is still open.
 Use the public fixture only; a successful response does not close that gate.
 Keep receipts free of credentials, unrelated binaries, account identifiers, and
 private paths. Screenshot/export only the public demo conversation you created.

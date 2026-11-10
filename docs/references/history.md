@@ -45,9 +45,9 @@ Version `0.9.0` added bounded opt-in context packs, evidence navigation,
 off-by-default local transcripts, provider comparison, and usage accounting.
 The unreleased September 5 change added explicit unverified findings and
 schema-2 transcript/export provenance while retaining schema-1 read support;
-its [dated change set](change-set-2026-09-05.md) preserves the live receipts.
+its [dated change set](../receipts/2026-09/change-set-2026-09-05.md) preserves the live receipts.
 
-The [October 9 change set](change-set-2026-10-09.md) records source fixes for
+The [October 9 change set](../change-set-2026-10-09.md) records source fixes for
 provider lifecycle, binary-bound callbacks, streaming, context extraction,
 model discovery, and comparison cancellation. Version remained `0.9.0` at that
 checkpoint.
@@ -56,8 +56,8 @@ inference result, tagged release, or publication.
 
 On October 10, the maintainer selected `0.9.1` for the accumulated changes.
 Metadata and current-version guidance were aligned, with a pending-release
-changelog entry, [draft notes](release-notes-draft.md), and
-[future tag/push commands](release-preparation.md). No tag or publication was
+changelog entry, [draft notes](../releases/release-notes-draft.md), and
+[future tag/push commands](../releases/release-preparation.md). No tag or publication was
 performed; historical live receipts still describe their earlier revisions.
 
 No proprietary implementation, prompt, or data from Binary Ninja Sidekick was

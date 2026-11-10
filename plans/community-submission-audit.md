@@ -49,7 +49,7 @@ and no generation/release workflow ran.
 | Platforms | Darwin/Linux/Windows are valid identifiers. **Structural pass; fresh platform acceptance remains open.** |
 | Type | UI/helper categories match sidebar/assistance behavior. **Pass.** |
 | Long description | Present, over 100 characters; modern manager will use it rather than README. **Pass.** Real media is still pending. |
-| Installation instructions | Legacy INFO recommends a per-platform field; current validator says it is not displayed by modern hosts. Existing [setup instructions](setup.md) cover all three platforms. No ineffective metadata field was added. |
+| Installation instructions | Legacy INFO recommends a per-platform field; current validator says it is not displayed by modern hosts. Existing [setup instructions](../docs/development/setup.md) cover all three platforms. No ineffective metadata field was added. |
 | Dependencies | Runtime uses standard library plus host-supplied Binary Ninja/PySide6. No pip requirements need installation; legacy `dependencies: {}` is not a CLI installer. Provider CLIs/authentication remain explicit external prerequisites. **Pass for source inventory.** |
 | Install layout | Root `__init__.py`, metadata, and first-level runtime packages are present. A temporary `axio_analyst` copy reported current and all 36 manifest files matched source bytes. **Pass for isolated copier layout; actual manager loading is unverified.** |
 | UI import order | Production entry reaches `ui/sidebar.py`, which imports `binaryninjaui` before PySide6 and before other Qt modules. **Pass by source inspection.** |
@@ -77,7 +77,7 @@ secret-content scan. No native Qt or live GUI run was added in this phase.
 1. Verify the actual minimum supported Binary Ninja build. The existing floor
    was retained because this audit has no evidence for a replacement; do not
    describe `4911` as tested. In an isolated user profile on that build, follow
-   G00/G01/G03/G04/G08/G18 in [the manual plan](manual-verification.md) and record
+   G00/G01/G03/G04/G08/G18 in [the manual plan](../docs/development/manual-verification.md) and record
    host Python/Qt versions and registration failures. If unavailable or
    incompatible, choose a defensible tested floor and rerun its checks before
    submitting. Do not weaken compatibility rules to force installation.
@@ -85,7 +85,7 @@ secret-content scan. No native Qt or live GUI run was added in this phase.
    and a Linux host. Older Windows/macOS receipts do not accept the October
    patch. Record untested platforms honestly and decide the advertised support
    from evidence before publishing.
-3. Complete the [release gates](release-preparation.md), then review the final
+3. Complete the [release gates](../docs/releases/release-preparation.md), then review the final
    diff/release notes and obtain explicit publication authorization. A metadata
    pass leaves the Codex, Markdown-resource and live-acceptance gates open.
 4. After an approved release exists, test installation in a separate Binary
